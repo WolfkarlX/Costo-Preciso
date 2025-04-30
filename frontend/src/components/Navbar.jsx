@@ -38,10 +38,19 @@ const Navbar = () => {
                                         <span className="hidden sm:inline">Profile</span>
                                     </Link>
 
+                                    <Link to="/recipes/add"className="btn btn-sm gap-2 bg-green-600 text-white hover:bg-green-700 transition-colors">
+                                    <span className="hidden sm:inline">Agregar Receta</span>
+                                    </Link>
+
+                                    <Link to="/recipes" className="btn btn-sm gap-2 bg-blue-600 text-white hober:bg-blue-700 transition-colors">
+                                        <span className="hidden sm:inline"> Ver Recetas </span>
+                                    </Link>
+
                                     <button className="flex gap-2 items-center" onClick={logout}>
                                         <LogOut className="size-5" />
                                         <span className="hidden sm:inline">Logout</span>
                                     </button>
+
                                 </>
                             )}
                         </div>
