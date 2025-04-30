@@ -5,7 +5,6 @@ const ingredientSchema = new mongoose.Schema(
         name: {
             type: String,
             required: true,
-            unique: true,
         },
         pricePerunit: {
             type: String,
@@ -19,6 +18,10 @@ const ingredientSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref:"User",
             required: true,
+        },
+        image: {
+            type: String,
+            default: ""
         },
     },
     { timestamps: true }

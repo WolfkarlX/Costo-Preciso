@@ -10,17 +10,38 @@ export const createIngredient = async (req, res) => {
 
     //gets id from middleware auth
     const userId = req.user._id
-    const { name, pricePerunit, unitOfmeasurement} = req.body;
+    const imageUrl = ""
+    const { name, pricePerunit, unitOfmeasurement, image} = req.body;
     try {
         if(!name || !pricePerunit || !unitOfmeasurement) {
             return res.status(400).json({ message: "All fields are required"});
+        }
+
+        //Verify if the image was sent and validate the image
+        if(image){
+            try {
+                const uploadResponse = await cloudinary.uploader.upload(image, {
+                  folder: 'ingredients',
+                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif'], // Reject non-images
+                  max_file_size: 5 * 1024 * 1024, // 5MB limit (in bytes)
+                  invalidate: true // Force Cloudinary to revalidate
+                });
+                
+                imageUrl = uploadResponse.secure_url;
+            } catch (error) {
+                console.error('Cloudinary upload error:', error.message);
+                return res.status(400).json({ 
+                    message: 'Invalid image. Must be JPG/PNG/GIF under 5MB.' 
+                });
+            }
         }
         
         const newIngredient = await new Ingredient({
             name,
             pricePerunit,
             unitOfmeasurement,
-            userId
+            userId,
+            imageUrl
         });
 
         if(newIngredient) {
@@ -33,7 +54,8 @@ export const createIngredient = async (req, res) => {
                 name: newIngredient.name,
                 pricePerunit: newIngredient.pricePerunit,
                 unitOfmeasurement: newIngredient.unitOfmeasurement,
-                userId: newIngredient.userId
+                userId: newIngredient.userId,
+                image: newIngredient.image,
             });
         } else {
             res.status(400).json({ message: "Invalid Ingredient data" });
