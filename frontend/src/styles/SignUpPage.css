@@ -1,0 +1,25 @@
+:root {
+    --color-primary: #4F959D;       /* Azul verdoso */
+    --color-primary-light: #F6F4EB; /* Amarillo claro */
+    --color-secondary: #205781;    /* Azul oscuro */
+}
+
+.signup-title{
+    color: var(--color-primary);
+}
+
+.label-text, .link-text{
+    color: var(--color-secondary);
+}
+
+.input, .btn{
+    border-radius: 15px;
+}
+
+.btn {
+    color: white;
+}
+
+.icon {
+    color: var(--color-secondary);
+}
