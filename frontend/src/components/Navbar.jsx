@@ -7,7 +7,7 @@ import { LogOut, Egg, Settings, Soup, Percent, BadgeDollarSign } from "lucide-re
 
 const Navbar = () => {
     const { logout, authUser } = useAuthStore();
-    const [activeLink, setActiveLink] = useState(null); // Track active link
+    const [activeLink, setActiveLink] = useState("recipes"); // Track active link
     const [confirmingLogout, setConfirmingLogout] = useState(false); // Track if confirmation is in progress
 
     //checks if the link was aready clicked
@@ -61,17 +61,17 @@ const Navbar = () => {
     };
 
     return (
-        <header className="bg-[#F6F4EB] border-b border-base-300 w-[100%] top-0 z-40 p-4 ">
+        <header className="bg-[#F6F4EB] border-b border-base-300 w-[100%] top-0 z-40 p-3 m-0">
             <div>
                 <img src="img/logo.png" title="Costo-Preciso" alt="Logo de Costo preciso" />
             </div>
-            <div id="container" className="justify-end space-x-4">
+            <div id="container" className="justify-end space-x-4 mr-[1%]">
                 {authUser && (
                 <>
                     <Link
                         to="/" class="link"    
-                        className={`flex items-center hover:pt-2 hover:pb-3 hover:border-b-[%10] ${
-                            activeLink === "recipes" ? "pt-2 pb-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                        className={`flex items-center hover:-mt-3 hover:border-b-[%10] ${
+                            activeLink === "recipes" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
                         } hover:border-[#4F959D] rounded-sm`}
                         onClick={() => handleClick("recipes")}
                     >
@@ -80,8 +80,8 @@ const Navbar = () => {
                     </Link>
                     <Link
                         to="/ingredients" class="link"
-                        className={`flex items-center hover:pt-2 hover:pb-3 hover:border-b-4 ${
-                            activeLink === "ingredients" ? "pt-2 pb-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                        className={`flex items-center hover:-mt-3 hover:border-b-4 ${
+                            activeLink === "ingredients" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
                         } hover:border-[#4F959D] rounded-sm`}
                         onClick={() => handleClick("ingredients")}
                     >
@@ -90,8 +90,8 @@ const Navbar = () => {
                     </Link>
                     <Link
                         to="/percentages" class="link"
-                        className={`flex items-center hover:pt-2 hover:pb-3 hover:border-b-4 ${
-                            activeLink === "percentages" ? "pt-2 pb-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                        className={`flex items-center hover:-mt-3 hover:border-b-4 ${
+                            activeLink === "percentages" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
                         } hover:border-[#4F959D] rounded-sm`}
                         onClick={() => handleClick("percentages")}
                     >
@@ -100,8 +100,8 @@ const Navbar = () => {
                     </Link>
                     <Link
                         to="/sales" class="link"
-                        className={`flex items-center hover:pt-2 hover:pb-3 hover:border-b-4 ${
-                            activeLink === "sales" ? "pt-2 pb-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                        className={`flex items-center hover:-mt-3 hover:border-b-4 ${
+                            activeLink === "sales" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
                         } hover:border-[#4F959D] rounded-sm`}
                         onClick={() => handleClick("sales")}
                     >
@@ -112,8 +112,8 @@ const Navbar = () => {
                 )}
                 <Link
                     to="/settings" class="link"
-                    className={`flex items-center hover:pt-2 hover:pb-3 hover:border-b-4 ${
-                        activeLink === "settings" ? "pt-2 pb-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                    className={`flex items-center hover:-mt-3 hover:border-b-4 ${
+                        activeLink === "settings" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
                     } hover:border-[#4F959D] rounded-sm`}
                     onClick={() => handleClick("settings")}
                 >
@@ -126,7 +126,7 @@ const Navbar = () => {
                         <button
                             onClick={confirmLogout} // Use this function to show confirmation toast
                             class="link"
-                            className="flex items-center hover:pt-2 hover:pb-2 hover:border-b-4 hover:border-red-700 rounded-sm"
+                            className="flex items-center hover:-mt-3 hover:border-b-4 hover:border-red-700 rounded-sm"
                         >
                             <LogOut size={24} color="black" />
                             <span className="text-black">Cerrar sesión</span>
