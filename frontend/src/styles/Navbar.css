@@ -1,0 +1,32 @@
+* {
+    box-sizing: border-box;
+}
+
+.header {
+    margin: 0;
+
+}
+
+#container{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: end;
+}
+
+#container .link {
+    width: 100px;
+    height: 100px;
+    transition: transform 0.3s;
+}
+
+#container .link:hover {
+    transform: scale(1.1);
+  }
+  
+  @media (max-width: 600px) {
+    #container .link {
+        width: 80px;
+        height: 80px;
+    }
+  }
