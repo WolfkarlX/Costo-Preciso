@@ -42,7 +42,7 @@ const App = () => {
         <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
         <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
         <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
         <Route path="/ingredients" element={authUser ? <IngredientsPage /> : <Navigate to="/login" />} />
         <Route path="/percentages" element={authUser ? <PercentagesPage /> : <Navigate to="/login" />} />
         <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} />
