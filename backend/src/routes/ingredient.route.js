@@ -4,7 +4,7 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 import { validateAndFilterUpdates } from "../middleware/util.middleware.js";
 
 const router = express.Router();
-const allowedxUpdates = ['name', 'pricePerunit', 'unitOfmeasurement', 'image'];
+const allowedxUpdates = ['name', 'Units', 'unityOfmeasurement', 'totalPrice', 'image'];
 
 router.post("/create", protectRoute, createIngredient);
 router.get("/ingredients", protectRoute, getIngredients);
