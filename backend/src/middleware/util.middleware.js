@@ -5,7 +5,7 @@ export const validateAndFilterUpdates = (allowedUpdates) => {
     const updates = req.body;
     const { id } = req.params;
 
-    // 1. Check for empty request body
+    // 1. Checks for empty request body
     if (!updates || Object.keys(updates).length === 0) {
       return res.status(400).json({ message: "Request body is empty" });
     }

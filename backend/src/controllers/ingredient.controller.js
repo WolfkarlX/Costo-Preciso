@@ -11,11 +11,15 @@ export const createIngredient = async (req, res) => {
     //gets id from middleware auth
     const userId = req.user._id
     const imageUrl = ""
-    const { name, pricePerunit, unitOfmeasurement, image} = req.body;
+
+    const { name, Units, unityOfmeasurement, totalPrice, image} = req.body;
     try {
-        if(!name || !pricePerunit || !unitOfmeasurement) {
+        if(!name || !Units || !unityOfmeasurement || !totalPrice) {
             return res.status(400).json({ message: "All fields are required"});
         }
+
+        //Gets the unitPrice for this material or ingredient
+        const unityPrice = parseFloat(totalPrice) / parseFloat(Units)
 
         //Verify if the image was sent and validate the image
         if(image){
@@ -35,11 +39,25 @@ export const createIngredient = async (req, res) => {
                 });
             }
         }
+
+        //checks if there is an ingredient with the same name
+        const ingredient = await Ingredient.findOne({ 
+            name: name,
+            userId: userId
+        });
+
+        if(ingredient){
+            return res.status(409).json({ 
+                message: "Ingredient already exists" 
+            });
+        }
         
         const newIngredient = await new Ingredient({
-            name,
-            pricePerunit,
-            unitOfmeasurement,
+            name, 
+            Units, 
+            unityOfmeasurement, 
+            totalPrice, 
+            unityPrice, 
             userId,
             imageUrl
         });
@@ -52,10 +70,11 @@ export const createIngredient = async (req, res) => {
             res.status(201).json({
                 _id: newIngredient._id,
                 name: newIngredient.name,
-                pricePerunit: newIngredient.pricePerunit,
-                unitOfmeasurement: newIngredient.unitOfmeasurement,
-                userId: newIngredient.userId,
-                image: newIngredient.image,
+                Units: newIngredient.Units, 
+                unityOfmeasurement: newIngredient.unityOfmeasurement, 
+                totalPrice: newIngredient.totalPrice, 
+                unityPrice: newIngredient.unityPrice, 
+                imageUrl: newIngredient.image
             });
         } else {
             res.status(400).json({ message: "Invalid Ingredient data" });
@@ -118,31 +137,48 @@ export const deleteIngredient = async (req, res) => {
 //Logic for updating ingredients using filter
 export const updateIngredient = async (req, res) => {
     try {
-      const { id:ingredientId } = req.params;
-      const userId = req.user._id;
-      const { filteredUpdates } = req; // Already validated/filtered by middleware
+        const { id:ingredientId } = req.params;
+        const userId = req.user._id;
+        const { filteredUpdates } = req; // Already validated/filtered by middleware
     
-      //in here is not neccesary to check if there's no data coming from the user because
-      //the middleware does that
+        //in here is not neccesary to check if there's no data coming from the user because
+        //the middleware does that
 
-      const ingredient = await Ingredient.findOne({ _id: ingredientId, userId });
-      if (!ingredient) {
-        return res.status(404).json({ message: "Ingredient not found or unauthorized" });
-      }
-  
-      //Apply updates (fields are pre-filtered)
-      const updatedIngredient = await Ingredient.findByIdAndUpdate(
-        ingredientId,
-        { $set: filteredUpdates },
-        { new: true, runValidators: true }
-      );
-  
-      res.status(200).json(updatedIngredient);
+        const ingredient = await Ingredient.findOne({ _id: ingredientId, userId: userId });
+        if (!ingredient) {
+            return res.status(404).json({ message: "Ingredient not found or unauthorized" });
+        }
+
+        //checks if the user updates to a name occupied
+        const SameName = await Ingredient.findOne({ name: filteredUpdates.name, userId: userId });
+        if (SameName) {
+            return res.status(409).json({ message: "Ingredient already exists" });
+        }
+        
+        //logic for restricting the unit price and updating it
+        if(!filteredUpdates.totalPrice){
+            filteredUpdates.totalPrice = ingredient.totalPrice
+        }
+
+        if(!filteredUpdates.Units){
+            filteredUpdates.Units = ingredient.Units
+        }
+
+        filteredUpdates.unityPrice = filteredUpdates.totalPrice / filteredUpdates.Units;
+
+        //Apply updates (fields are pre-filtered)
+        const updatedIngredient = await Ingredient.findByIdAndUpdate(
+            ingredientId,
+            { $set: filteredUpdates },
+            { new: true, runValidators: true }
+        );        
+    
+        res.status(200).json(updatedIngredient);
     } catch (error) {
-      // Handle validation errors (e.g., "quantity must be a number")
-      if (error.name === 'ValidationError') {
-        return res.status(400).json({ message: "Validation failed" });
-      }
-      res.status(500).json({ message: "Internal Server Error" });
+        // Handle validation errors (e.g., "quantity must be a number")
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: "Validation failed" });
+        }
+        res.status(500).json({ message: "Internal Server Error" });
     }
   };
