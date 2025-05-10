@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast"; // Import react-hot-toast
@@ -10,12 +10,21 @@ const Navbar = () => {
     const [activeLink, setActiveLink] = useState("recipes"); // Track active link
     const [confirmingLogout, setConfirmingLogout] = useState(false); // Track if confirmation is in progress
 
-    //checks if the link was aready clicked
+    //Load the active link from localStorage when the component mounts
+    useEffect(() => {
+        const savedLink = localStorage.getItem('activeLink');
+        if (savedLink) {
+            setActiveLink(savedLink);
+        }
+    }, []);
+
+    //Handle click and save the active link to localStorage
     const handleClick = (link) => {
         setActiveLink(link);
+        localStorage.setItem('activeLink', link);  // Persist active link in localStorage
     };
 
-    // Handle the confirmation and logout
+    //Handle the confirmation and logout
     const confirmLogout = () => {
         if (confirmingLogout) return; // Don't show the confirmation if it's already active
 
@@ -59,7 +68,8 @@ const Navbar = () => {
             }
         );
     };
-
+    
+    //Navbar
     return (
         <header className="bg-[#F6F4EB] border-b border-base-300 w-[100%] top-0 z-40 p-3 m-0">
             <div>
@@ -67,51 +77,51 @@ const Navbar = () => {
             </div>
             <div id="container" className="justify-end space-x-4 mr-[1%]">
                 {authUser && (
-                <>
-                    <Link
-                        to="/" class="link"    
-                        className={`flex items-center hover:-mt-3 hover:border-b-[%10] ${
-                            activeLink === "recipes" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
-                        } hover:border-[#4F959D] rounded-sm`}
-                        onClick={() => handleClick("recipes")}
-                    >
-                        <Soup size={24} color="black" />
-                        <span className={`text-black ${activeLink === "recipes" ? "font-bold" : "font-normal"}`}>Recetas</span>
-                    </Link>
-                    <Link
-                        to="/ingredients" class="link"
-                        className={`flex items-center hover:-mt-3 hover:border-b-4 ${
-                            activeLink === "ingredients" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
-                        } hover:border-[#4F959D] rounded-sm`}
-                        onClick={() => handleClick("ingredients")}
-                    >
-                        <Egg size={24} color="black" />
-                        <span className={`text-black ${activeLink === "ingredients" ? "font-bold" : "font-normal"}`}>Ingredientes</span>
-                    </Link>
-                    <Link
-                        to="/percentages" class="link"
-                        className={`flex items-center hover:-mt-3 hover:border-b-4 ${
-                            activeLink === "percentages" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
-                        } hover:border-[#4F959D] rounded-sm`}
-                        onClick={() => handleClick("percentages")}
-                    >
-                        <Percent size={24} color="black" />
-                        <span className={`text-black ${activeLink === "percentages" ? "font-bold" : "font-normal"}`}>Porcentajes</span>
-                    </Link>
-                    <Link
-                        to="/sales" class="link"
-                        className={`flex items-center hover:-mt-3 hover:border-b-4 ${
-                            activeLink === "sales" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
-                        } hover:border-[#4F959D] rounded-sm`}
-                        onClick={() => handleClick("sales")}
-                    >
-                        <BadgeDollarSign size={24} color="black" />
-                        <span className={`text-black ${activeLink === "sales" ? "font-bold" : "font-normal"}`}>Ventas</span>
-                    </Link>
-                </>
+                    <>
+                        <Link
+                            to="/" 
+                            className={`flex items-center hover:-mt-3 hover:border-b-[%10] ${
+                                activeLink === "recipes" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                            } hover:border-[#4F959D] rounded-sm`}
+                            onClick={() => handleClick("recipes")}
+                        >
+                            <Soup size={24} color="black" />
+                            <span className={`text-black ${activeLink === "recipes" ? "font-bold" : "font-normal"}`}>Recetas</span>
+                        </Link>
+                        <Link
+                            to="/ingredients" 
+                            className={`flex items-center hover:-mt-3 hover:border-b-4 ${
+                                activeLink === "ingredients" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                            } hover:border-[#4F959D] rounded-sm`}
+                            onClick={() => handleClick("ingredients")}
+                        >
+                            <Egg size={24} color="black" />
+                            <span className={`text-black ${activeLink === "ingredients" ? "font-bold" : "font-normal"}`}>Ingredientes</span>
+                        </Link>
+                        <Link
+                            to="/percentages" 
+                            className={`flex items-center hover:-mt-3 hover:border-b-4 ${
+                                activeLink === "percentages" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                            } hover:border-[#4F959D] rounded-sm`}
+                            onClick={() => handleClick("percentages")}
+                        >
+                            <Percent size={24} color="black" />
+                            <span className={`text-black ${activeLink === "percentages" ? "font-bold" : "font-normal"}`}>Porcentajes</span>
+                        </Link>
+                        <Link
+                            to="/sales" 
+                            className={`flex items-center hover:-mt-3 hover:border-b-4 ${
+                                activeLink === "sales" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
+                            } hover:border-[#4F959D] rounded-sm`}
+                            onClick={() => handleClick("sales")}
+                        >
+                            <BadgeDollarSign size={24} color="black" />
+                            <span className={`text-black ${activeLink === "sales" ? "font-bold" : "font-normal"}`}>Ventas</span>
+                        </Link>
+                    </>
                 )}
                 <Link
-                    to="/settings" class="link"
+                    to="/settings" 
                     className={`flex items-center hover:-mt-3 hover:border-b-4 ${
                         activeLink === "settings" ? " -mt-3 border-b-4 border-[#4F959D] rounded-sm" : "border-b-4 border-transparent"
                     } hover:border-[#4F959D] rounded-sm`}
@@ -125,7 +135,6 @@ const Navbar = () => {
                     <>
                         <button
                             onClick={confirmLogout} // Use this function to show confirmation toast
-                            class="link"
                             className="flex items-center hover:-mt-3 hover:border-b-4 hover:border-red-700 rounded-sm"
                         >
                             <LogOut size={24} color="black" />
