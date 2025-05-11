@@ -1,73 +1,52 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { useRecipeStore } from "../store/useRecipeStore"; // Importamos la lógica del store para actualizar la receta
 
-const EditRecipe = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
+const EditRecipe = ({ formData, onSuccess, ingredients }) => {
+    const { updateRecipe } = useRecipeStore(); // Usamos la función updateRecipe del store
 
-    const [formData, setFormData] = useState({
-        title: "",
-        ingredients: "",
-        steps: "",
-        cost: ""
+    // Convertir los ingredientes (IDs) a sus nombres
+    const ingredientNames = formData.ingredients.map(
+        (ingredientId) => ingredients.find((i) => i._id === ingredientId)?.name || ""
+    );
+
+    const [form, setForm] = useState({
+        title: formData.title || "",
+        ingredients: ingredientNames.join(", ") || "",
+        steps: formData.steps.join(", ") || "",
+        cost: formData.cost || "",
     });
-
-    useEffect(() => {
-        const fetchRecipe = async () => {
-            try {
-                const { data } = await axios.get("http://localhost:5001/api/recipes");
-                const recipe = data.find(r => r._id === id);
-
-                if (!recipe) {
-                    toast.error("Receta no encontrada");
-                    return;
-                }
-
-                setFormData({
-                    title: recipe.title,
-                    ingredients: recipe.ingredients.join(", "),
-                    steps: recipe.steps.join(", "),
-                    cost: recipe.cost.toString(),
-                });
-            } catch (error) {
-                console.error("Error al cargar receta:", error);
-                toast.error("No se pudo cargar la receta");
-            }
-        };
-
-        fetchRecipe();
-    }, [id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setForm((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const { title, ingredients, steps, cost } = formData;
+        const { title, ingredients, steps, cost } = form;
 
+        // Validación de los campos
         if (!title.trim() || !ingredients.trim() || !steps.trim() || !cost.trim()) {
             return toast.error("Todos los campos son obligatorios");
         }
 
+        // Convertir los nombres de ingredientes de vuelta a sus IDs
+        const updatedIngredients = ingredients.split(",").map((i) => i.trim()).map(
+            (name) => ingredients.find((ingredient) => ingredient.name === name)?._id
+        );
+
         const updatedRecipe = {
             title: title.trim(),
-            ingredients: ingredients.split(",").map(i => i.trim()),
-            steps: steps.split(",").map(s => s.trim()),
+            ingredients: updatedIngredients,
+            steps: steps.split(",").map((s) => s.trim()),
             cost: parseFloat(cost),
         };
 
         try {
-            await axios.put(`http://localhost:5001/api/recipes/${id}`, updatedRecipe, {
-                withCredentials: true,
-            });
-
-            toast.success("Receta actualizada correctamente");
-            navigate("/recipes");
+            // Llamamos a la función updateRecipe desde el store
+            await updateRecipe(formData._id, updatedRecipe, onSuccess);
         } catch (error) {
             console.error("Error al actualizar receta:", error);
             toast.error("No se pudo actualizar la receta");
@@ -75,12 +54,12 @@ const EditRecipe = () => {
     };
 
     return (
-        <div className="max-w-xl mx-auto mt-24 px-4">
+        <div>
             <h2 className="text-2xl font-bold mb-6 text-center">Editar Receta</h2>
             <form onSubmit={handleSubmit} className="grid gap-4">
                 <input
                     name="title"
-                    value={formData.title}
+                    value={form.title}
                     onChange={handleChange}
                     placeholder="Título"
                     className="input input-bordered"
@@ -88,7 +67,7 @@ const EditRecipe = () => {
                 />
                 <input
                     name="ingredients"
-                    value={formData.ingredients}
+                    value={form.ingredients}
                     onChange={handleChange}
                     placeholder="Ingredientes (separados por coma)"
                     className="input input-bordered"
@@ -96,7 +75,7 @@ const EditRecipe = () => {
                 />
                 <input
                     name="steps"
-                    value={formData.steps}
+                    value={form.steps}
                     onChange={handleChange}
                     placeholder="Pasos (separados por coma)"
                     className="input input-bordered"
@@ -105,7 +84,7 @@ const EditRecipe = () => {
                 <input
                     name="cost"
                     type="number"
-                    value={formData.cost}
+                    value={form.cost}
                     onChange={handleChange}
                     placeholder="Costo"
                     className="input input-bordered"
