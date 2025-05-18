@@ -89,11 +89,42 @@ export const createIngredient = async (req, res) => {
 export const getIngredients = async (req, res) => {
     try {
         const userId = req.user._id;
-        const userIngredients = await Ingredient.find({userId: userId}).select("-userId");
 
+        const userIngredients = await Ingredient.find({userId: userId}).select("-userId");      
+          
         return res.status(200).json(userIngredients);
     } catch (error) {
-        console.log("Error in login controller", error.message);
+        console.log("Error in getIngredients controller", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+//Get Just one Ingredient logic
+export const getSpecificingredient = async (req, res) => {
+    try {
+        if(!req.params){
+            return res.status(404).json({ message: "Not Found" });
+        }
+
+        const userId = req.user._id;
+        const {id:ingredientId} = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(ingredientId)) {
+            return res.status(400).json({ message: "Invalid ID" });
+        }
+
+        const userIngredient = await Ingredient.findOne({userId: userId, _id: ingredientId}).select("-userId");
+        
+        if (!userIngredient) {
+            return res.status(404).json({ 
+                message: "Ingredient not found or unauthorized" 
+            });
+        }
+
+        return res.status(200).json(userIngredient);
+
+    } catch (error) {
+        console.log("Error in getSpecificingredient Controller", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -129,7 +160,7 @@ export const deleteIngredient = async (req, res) => {
         return res.status(200).json({ message: "Ingredient deleted Succesfully" });
 
     } catch (error) {
-        console.error("Error in deleteIngredient:", error.message);
+        console.error("Error in deleteIngredient Controller:", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -175,6 +206,8 @@ export const updateIngredient = async (req, res) => {
     
         res.status(200).json(updatedIngredient);
     } catch (error) {
+        
+        console.error("Error in deleteIngredient Controller:", error.message);
         // Handle validation errors (e.g., "quantity must be a number")
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: "Validation failed" });
