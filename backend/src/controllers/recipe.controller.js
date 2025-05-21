@@ -141,16 +141,15 @@ export const createRecipe = async (req, res) => {
     }
 };
 
-
-//Get Ingredients of an loged in user Logic
-export const getIngredients = async (req, res) => {
+//Get Recipes of an loged in user Logic
+export const getRecipes = async (req, res) => {
     try {
         const userId = req.user._id;
-        const userIngredients = await Ingredient.find({userId: userId}).select("-userId");
+        const userRecipes = await Recipe.find({userId: userId}).select("-userId");
 
-        return res.status(200).json(userIngredients);
+        return res.status(200).json(userRecipes);
     } catch (error) {
-        console.log("Error in login controller", error.message);
+        console.log("Error in recipe controller", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
