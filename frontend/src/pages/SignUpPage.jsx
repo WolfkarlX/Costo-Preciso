@@ -143,7 +143,6 @@ const SignUpPage = () => {
                         {isSigningUp ? (
                             <>
                                 <Loader2 className="size-5 animate-spin" />
-                                Loading...
                             </>
                         ) : (
                             "Comenzar"

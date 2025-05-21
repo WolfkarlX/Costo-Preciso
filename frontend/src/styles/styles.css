@@ -1,0 +1,10 @@
+.bg-image {
+    height: auto;
+    width: 100%;
+    margin: auto;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: top center;
+    display: flex;
+    overflow: hidden;
+}
