@@ -155,37 +155,37 @@ export const getRecipes = async (req, res) => {
 };
 
 //Logic for deleting ingredients
-export const deleteIngredient = async (req, res) => {
+export const deleteRecipe = async (req, res) => {
     try {
         if(!req.params){
             return res.status(404).json({ message: "Not Found" });
         }
-        const {id:ingredientId} = req.params;
+        const {id:recipeId} = req.params;
         const userId = req.user._id;
         
         //checks if id is in the correct structure
-        if (!mongoose.Types.ObjectId.isValid(ingredientId)) {
+        if (!mongoose.Types.ObjectId.isValid(recipeId)) {
             return res.status(400).json({ message: "Invalid ID" });
         }
 
         // Checks if the ingredient exists AND belongs to the user
-        const ingredient = await Ingredient.findOne({ 
-            _id: ingredientId, 
+        const ingredient = await Recipe.findOne({ 
+            _id: recipeId, 
             userId: userId 
         });
 
         if (!ingredient) {
             return res.status(404).json({ 
-                message: "Ingredient not found or unauthorized" 
+                message: "Recipe not found or unauthorized" 
             });
         }
 
-        await Ingredient.deleteOne({ _id: ingredientId });
+        await Recipe.deleteOne({ _id: recipeId });
 
-        return res.status(200).json({ message: "Ingredient deleted Succesfully" });
+        return res.status(200).json({ message: "Recipe deleted Succesfully" });
 
     } catch (error) {
-        console.error("Error in deleteIngredient:", error.message);
+        console.error("Error in deleteRecipe controller:", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
