@@ -83,7 +83,6 @@ const LoginPage = () => {
                         {isLoggingIn ? (
                             <>
                                 <Loader2 className="size-5 animate-spin" />
-                                Loading...
                             </>
                         ) : (
                             "Comenzar"

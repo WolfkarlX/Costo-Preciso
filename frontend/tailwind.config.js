@@ -13,8 +13,17 @@ export default {
       },
       backgroundImage: {
         'background-pattern': "url('../public/login-02.jpg')",
-      }
+        'background-home': "url('../public/image-12.png')",
+      },
+      colors: {
+        'color-primary': "#4F959D",
+        'color-primary-light': " #F6F4EB",
+        'color-secondary': "#205781",
+      },
     },
   },
-  plugins: [daisyui],
+  plugins: [
+    daisyui,
+    require('tailwind-scrollbar'),
+  ],
 }
