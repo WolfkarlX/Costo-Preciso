@@ -1,5 +1,6 @@
 import cloudinary from "../lib/cloudinary.js";
 import Ingredient from "../models/ingredient.models.js";
+import Recipe from "../models/recipe.model.js"
 import mongoose from "mongoose";
 
 //logic of creating an ingredient
@@ -155,6 +156,15 @@ export const deleteIngredient = async (req, res) => {
             });
         }
 
+        const withinRecipe = await Recipe.findOne({
+            "ingredients.materialId": ingredientId,
+            userId: userId
+        }); 
+        
+        if (withinRecipe) {
+            return res.status(400).json({ message: "There is a recipe requiring this material" });
+        }
+          
         await Ingredient.deleteOne({ _id: ingredientId });
 
         return res.status(200).json({ message: "Ingredient deleted Succesfully" });

@@ -7,6 +7,7 @@ import { connectDB } from "./lib/db.js";
 
 import authRoutes from "./routes/auth.route.js";
 import ingredientRoutes from "./routes/ingredient.route.js";
+import recipeRoutes from "./routes/recipe.route.js";
 
 dotenv.config();
 
@@ -23,8 +24,10 @@ app.use(
     })
 );
 
+//In here are all the routes from the app
 app.use("/api/auth", authRoutes);
 app.use("/api/ingredient", ingredientRoutes);
+app.use("/api/recipe", recipeRoutes);
 
 app.listen(PORT, () => {
     console.log("Server is running on PORT:" + PORT);
