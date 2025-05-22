@@ -4,7 +4,7 @@ export function calculateRecipeCost({ ingredientsData, recipeIngredients, additi
   let materialCostTotal = 0;
 
   const ingredientCosts = recipeIngredients.map(ingredient => {
-    const dbMaterial = ingredientsData.find(mat => mat._id.toString() === ingredient.materialId);
+    const dbMaterial = ingredientsData.find(mat => mat._id.toString() == String(ingredient.materialId));
 
     if (!dbMaterial) throw new Error(`Material with ID ${ingredient.materialId} not found.`);
 

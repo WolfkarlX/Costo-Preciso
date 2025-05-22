@@ -191,50 +191,133 @@ export const deleteRecipe = async (req, res) => {
 };
 
 //Logic for updating ingredients using filter
-export const updateIngredient = async (req, res) => {
+export const updateRecipe = async (req, res) => {
     try {
-        const { id:ingredientId } = req.params;
+        const { id:recipeId } = req.params;
         const userId = req.user._id;
         const { filteredUpdates } = req; // Already validated/filtered by middleware
     
         //in here is not neccesary to check if there's no data coming from the user because
         //the middleware does that
 
-        const ingredient = await Ingredient.findOne({ _id: ingredientId, userId: userId });
-        if (!ingredient) {
-            return res.status(404).json({ message: "Ingredient not found or unauthorized" });
+        const recipe = await Recipe.findOne({ _id: recipeId, userId: userId });
+        if (!recipe) {
+            return res.status(404).json({ message: "Recipe not found or unauthorized" });
+        }
+        
+        // if there is no ingredients to update it crashes, i am sending the ingredients but it has an _id field which i think could break it
+        if(!filteredUpdates.ingredients){
+            filteredUpdates.ingredients = recipe.ingredients
+        }
+
+        if (!Array.isArray(filteredUpdates.ingredients) || filteredUpdates.ingredients.length === 0) {
+            return res.status(400).json({ message: "Ingredients list is empty or invalid." });
+        }
+          
+        // 2. Validates if all the ingredinet ids are correct 
+        const allIdsPresent = filteredUpdates.ingredients.every(ing => ing.materialId);
+        if (!allIdsPresent) {
+            return res.status(400).json({ message: "Ingredient does not exist or not authorized." });
+        }
+          
+        const allIdsValid = filteredUpdates.ingredients.every(ing => mongoose.Types.ObjectId.isValid(ing.materialId));
+        if (!allIdsValid) {
+            return res.status(400).json({ message: "Ingredient does not exist or not authorized." });
+        }
+          
+        // 3. Validate Quantity > 0 before going to the DB
+        const invalidQuantity = filteredUpdates.ingredients.find(ing => !ing.units || Number(ing.units) <= 0);
+        if (invalidQuantity) {
+            return res.status(400).json({ message: "Invalid quantity in one or more ingredients." });
+        }
+
+        const invalidUnitOfmeasure = filteredUpdates.ingredients.find(ing => !ing.UnitOfmeasure || Number(ing.UnitOfmeasure) <= 0);
+        if (invalidUnitOfmeasure) {
+            return res.status(400).json({ message: "Invalid unit of measure in one or more ingredients." });
+        }
+
+        const materialIds = filteredUpdates.ingredients.map(i => i.materialId);
+        const dbMaterials = await Ingredient.find({ _id: { $in: materialIds } });
+
+        if (!dbMaterials || dbMaterials.length !== materialIds.length) {
+            return res.status(400).json({ message: "One or more ingredients do not exist or not authorized" });
         }
 
         //checks if the user updates to a name occupied
-        const SameName = await Ingredient.findOne({ name: filteredUpdates.name, userId: userId });
+        /*const SameName = await Recipe.findOne({ name: filteredUpdates.name, userId: userId });
         if (SameName) {
             return res.status(409).json({ message: "Ingredient already exists" });
-        }
+        }*/
         
         //logic for restricting the unit price and updating it
-        if(!filteredUpdates.totalPrice){
-            filteredUpdates.totalPrice = ingredient.totalPrice
+        /*if(!filteredUpdates.ingredients){
+            filteredUpdates.ingredients = recipe.ingredients
+        }*/
+
+        if(!filteredUpdates.aditionalCostpercentages){
+            filteredUpdates.aditionalCostpercentages = recipe.aditionalCostpercentages
         }
 
-        if(!filteredUpdates.Units){
-            filteredUpdates.Units = ingredient.Units
+        if(!filteredUpdates.profitPercentage){
+            filteredUpdates.profitPercentage = recipe.profitPercentage
         }
 
-        filteredUpdates.unityPrice = filteredUpdates.totalPrice / filteredUpdates.Units;
+        if(!filteredUpdates.portionsPerrecipe){
+            filteredUpdates.portionsPerrecipe = recipe.portionsPerrecipe
+        }
+
+        const costData = calculateRecipeCost({
+            ingredientsData: dbMaterials,
+            recipeIngredients: filteredUpdates.ingredients,
+            additionalCostPercentage: filteredUpdates.aditionalCostpercentages,
+            profitPercentage: filteredUpdates.profitPercentage,
+            portions: filteredUpdates.portionsPerrecipe
+        });
+
+        filteredUpdates.netProfit = costData.netProfit.toFixed(2);
+        filteredUpdates.totalCost = costData.totalCost.toFixed(2);
+        filteredUpdates.costPerunity = costData.unitCost.toFixed(2);
+        filteredUpdates.additionalCost = costData.additionalCost.toFixed(2);
+        filteredUpdates.materialCostTotal = costData.materialCostTotal.toFixed(2);
+        filteredUpdates.grossProfit = costData.grossProfit.toFixed(2);
+        filteredUpdates.unitSalePrice = costData.unitSalePrice.toFixed(2);
 
         //Apply updates (fields are pre-filtered)
-        const updatedIngredient = await Ingredient.findByIdAndUpdate(
-            ingredientId,
+        const updatedIngredient = await Recipe.findByIdAndUpdate(
+            recipeId,
             { $set: filteredUpdates },
             { new: true, runValidators: true }
         );        
-    
-        res.status(200).json(updatedIngredient);
+        
+        if(updatedIngredient){
+            res.status(201).json({
+                name: filteredUpdates.name,
+                profitPercentage: filteredUpdates.profitPercentage,
+                aditionalCostpercentages: filteredUpdates.aditionalCostpercentages,
+                netProfit: filteredUpdates.netProfit,
+                totalCost: filteredUpdates.totalCost,
+                costPerunity: filteredUpdates.costPerunity,
+                additionalCost: filteredUpdates.additionalCost,
+                materialCostTotal: filteredUpdates.materialCostTotal,
+                grossProfit: filteredUpdates.grossProfit,
+                unitSalePrice: filteredUpdates.unitSalePrice,
+                portionsPerrecipe: filteredUpdates.portionsPerrecipe,
+                quantityPermeasure: filteredUpdates.quantityPermeasure,
+                recipeunitOfmeasure: filteredUpdates.recipeunitOfmeasure,
+                ingredients: filteredUpdates.ingredients,
+                image: filteredUpdates.image
+            });
+        }else{
+            res.status(400).json({ message: "Invalid Recipe data" });
+        }
     } catch (error) {
         // Handle validation errors (e.g., "quantity must be a number")
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: "Validation failed" });
         }
+
+        console.error("Error in createRecipe controller", error.message);
+
         res.status(500).json({ message: "Internal Server Error" });
     }
   };
