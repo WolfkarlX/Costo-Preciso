@@ -108,7 +108,7 @@ const Navbar = () => {
                         onClick={() => handleClick("recipes")}
                     >
                         <Soup size={20} color={activeLink === "recipes" ? "var(--color-secondary)" : "var(--color-primary)"} />
-                        <span className={`${activeLink === "recipes" ? "font-bold text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetas</span>
+                        <span className={`${activeLink === "recipes" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetas</span>
                     </Link>
                     <Link
                         to="/ingredients" 
@@ -118,7 +118,7 @@ const Navbar = () => {
                         onClick={() => handleClick("ingredients")}
                     >
                         <Egg size={20} color={activeLink === "ingredients" ? "var(--color-secondary)" : "var(--color-primary)"} />
-                        <span className={`${activeLink === "ingredients" ? "font-bold text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ingredientes</span>
+                        <span className={`${activeLink === "ingredients" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ingredientes</span>
                     </Link>
                     <Link
                         to="/percentages" 
@@ -128,7 +128,7 @@ const Navbar = () => {
                         onClick={() => handleClick("percentages")}
                     >
                         <Percent size={20} color={activeLink === "percentages" ? "var(--color-secondary)" : "var(--color-primary)"} />
-                        <span className={`nav-link ${activeLink === "percentages" ? "font-bold text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Porcentajes</span>
+                        <span className={`nav-link ${activeLink === "percentages" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Porcentajes</span>
                     </Link> 
                     <Link
                         to="/sales" 
@@ -138,7 +138,7 @@ const Navbar = () => {
                         onClick={() => handleClick("sales")}
                     >
                         <BadgeDollarSign size={20} color={activeLink === "sales" ? "var(--color-secondary)" : "var(--color-primary)"} />
-                        <span className={`${activeLink === "sales" ? "font-bold text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ventas</span>
+                        <span className={`${activeLink === "sales" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ventas</span>
                     </Link>                     
                     <li class="text-gray-600 md:mr-12 hover:text-blue-600">
                         {authUser && (
