@@ -311,12 +311,26 @@ export const updateRecipe = async (req, res) => {
             res.status(400).json({ message: "Invalid Recipe data" });
         }
     } catch (error) {
+        
+        // Handles errors from services and server errors
+        if (error.message.startsWith("it is not possible to convert Volume, Weight and pieces:")) {
+            return res.status(400).json({ message: error.message });
+        }
+        
+        if (error.message.startsWith("Material with ID")) {
+            return res.status(400).json({ message: error.message });
+        }
+       
+        if (error.message.startsWith("Unity Unknown")) {
+            return res.status(400).json({ message: error.message });
+        }
+        
         // Handle validation errors (e.g., "quantity must be a number")
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: "Validation failed" });
         }
 
-        console.error("Error in createRecipe controller", error.message);
+        console.error("Error in updateRecipe controller", error.message);
 
         res.status(500).json({ message: "Internal Server Error" });
     }
