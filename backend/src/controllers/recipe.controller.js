@@ -154,7 +154,53 @@ export const getRecipes = async (req, res) => {
     }
 };
 
-//Logic for deleting ingredients
+export const getSpecificrecipe = async (req, res) => {
+    try {
+        if(!req.params){
+            return res.status(404).json({ message: "Recipe Not Found" });
+        }
+
+        const userId = req.user._id;
+        const {id:recipeId} = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(recipeId)) {
+            return res.status(400).json({ message: "Invalid ID" });
+        }
+
+        const userRecipe = await Recipe.findOne({userId: userId, _id: recipeId}).select("-userId");
+        
+        if (!userRecipe) {
+            return res.status(404).json({ 
+                message: "Recipe not found or unauthorized" 
+            });
+        }
+
+        res.status(201).json({
+            _id: userRecipe._id,
+            name: userRecipe.name,
+            profitPercentage: userRecipe.profitPercentage,
+            aditionalCostpercentages: userRecipe.aditionalCostpercentages,
+            netProfit: userRecipe.netProfit,
+            totalCost: userRecipe.totalCost,
+            costPerunity: userRecipe.costPerunity,
+            additionalCost: userRecipe.additionalCost,
+            materialCostTotal: userRecipe.materialCostTotal,
+            grossProfit: userRecipe.grossProfit,
+            unitSalePrice: userRecipe.unitSalePrice,
+            portionsPerrecipe: userRecipe.portionsPerrecipe,
+            quantityPermeasure: userRecipe.quantityPermeasure,
+            recipeunitOfmeasure: userRecipe.recipeunitOfmeasure,
+            ingredients: userRecipe.ingredients,
+            image: userRecipe.image
+        });
+
+    } catch (error) {
+        console.log("Error in getSpecificingredient Controller", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+//Logic for deleting Recipes
 export const deleteRecipe = async (req, res) => {
     try {
         if(!req.params){
@@ -190,7 +236,7 @@ export const deleteRecipe = async (req, res) => {
     }
 };
 
-//Logic for updating ingredients using filter
+//Logic for updating recipes using filter
 export const updateRecipe = async (req, res) => {
     try {
         const { id:recipeId } = req.params;
