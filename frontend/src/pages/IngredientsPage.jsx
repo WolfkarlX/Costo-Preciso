@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { Plus, Trash, Egg } from "lucide-react"; // íconos
+import SearchBar from "../components/SearchBar";
+import SearchResult from "../components/SearchResult";
+import "../styles/styles.css";
+import Modal from "../components/Modal";
 import "../styles/IngredientsPage.css";
 
 const IngredientsPage = () => {
@@ -19,83 +23,84 @@ const IngredientsPage = () => {
         setIngredients(updatedIngredients);
     };
 
+    const [result, setResult] = useState([])
+
+    const [open, setOpen] = useState(false)
+
     return (
-        <div className="bg-white w-full h-screen">
-            {/* Imagen de fondo */}
-            <div className="relative h-64 bg-cover bg-center" style={{ backgroundImage: "url('/src/img/wallpaper_ingredients.png')" }}>
-                <div className="absolute inset-0 bg-black opacity-20"></div>
-            </div>
-
-            {/* Contenedor principal */}
-            <div className="flex justify-center items-center p-6 sm:p-12">
-                <div className="w-full max-w-md space-y-8">
-
-                    {/* Barra de búsqueda */}
-                    <div className="relative mb-6">
-                        <input
-                            type="text"
-                            className="input w-full p-4 pl-12 border-2 rounded-xl shadow-lg"
-                            placeholder="Buscar ingrediente..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">🔍</span>
-                    </div>
-
-                    {/* Lista de ingredientes */}
-                    <div className="space-y-4" class="list-ingred">
-                        {ingredients.length > 0 ? (
-                            ingredients
-                                .filter((ingredient) => ingredient.toLowerCase().includes(searchTerm.toLowerCase()))
-                                .map((ingredient, index) => (
-                                    <div key={index} className="flex justify-between items-center bg-white p-4 rounded-xl shadow-md">
-                                        <div className="flex items-center space-x-3  text-black">
-                                            <Egg size={24} color="black" />
-                                            <span>{ingredient}</span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="btn btn-danger"
-                                            onClick={() => handleRemoveIngredient(index)}
-                                        >
-                                            <Trash className="text-white" />
-                                        </button>
-                                    </div>
-                                ))
-                        ) : (
-                            <div className="text-center text-gray-500">
-                                No hay ingredientes agregados
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Botón de agregar ingrediente */}
-                    <div className="relative">
-                        <div className="flex justify-between items-center p-4 bg-gray-100 rounded-xl shadow-md">
-                            <input
-                                type="text"
-                                className="input w-full p-4 border-2 rounded-xl"
-                                placeholder="Nombre del ingrediente"
-                                value={newIngredient}
-                                onChange={(e) => setNewIngredient(e.target.value)}
-                            />
-                            <button
-                                type="button"
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                onClick={handleAddIngredient}
-                            >
-                                <Plus className="text-primary" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Botón de guardar */}
-                    <div className="text-center mt-6">
-                        <button className="btn btn-primary w-full font-bold mt-6 rounded-xl py-4">Guardar Ingredientes</button>
-                    </div>
+        <section className="bg-color-primary-light w-full h-screen">
+            <div className="mx-4 sm:mx-10 lg:mx-16">
+                {/* image */}
+                <div className="w-full flex justify-center">
+                    <img src="/image-13.png" alt="Imagen decorativa" className="w-full max-w-full h-auto object-contain"
+                    />
                 </div>
-            </div>
-        </div>
+
+                {/* search bar */}
+                <div className="flex flex-row w-full mt-4">
+                    <div className="w-full mr-4 sm:mr-10">
+                        <SearchBar setResult = {setResult} />
+                    </div>
+                    <button className="p-2 sm:p-4 shadow-md rounded-[50%] bg-color-primary text-white"
+                    onClick={() => setOpen(true)}>
+                        <Plus size={28}/>
+                    </button>
+                    <Modal open={open} onClose={() => setOpen(false)}>
+                        <div className="text-center w-80"></div>
+                            <h3 className="text-xl font-black text-color-secondary text-center">Nuevo ingrediente</h3>
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text font-medium mt-4 my-2">Nombre</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        className={`input w-full pl-10 shadow-md border-none`}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text font-medium mt-4 my-2">Cantidad</span>
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={"text"}
+                                            className="input w-full pl-10 shadow-md border-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={"text"}
+                                            className="input w-full pl-10 shadow-md border-none"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text font-medium mt-4 my-2">Precio total</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        className={`input w-full pl-10 shadow-md border-none`}
+                                    />
+                                </div>
+                            </div>
+                    </Modal>
+                </div>
+                <SearchResult result = {result} />
+            </div> 
+        </section>
     );
 };
 
