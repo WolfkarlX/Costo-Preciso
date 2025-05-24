@@ -2,7 +2,7 @@ import cloudinary from "../lib/cloudinary.js";
 import Ingredient from "../models/ingredient.models.js";
 import mongoose from "mongoose";
 import Recipe from "../models/recipe.model.js";
-import { calculateRecipeCost } from "../services /recipeCalculator.service.js";
+import { calculateRecipeCost } from "../services/recipeCalculator.service.js";
 
 //logic of creating a recipe
 export const createRecipe = async (req, res) => {
