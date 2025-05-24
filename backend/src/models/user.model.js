@@ -16,6 +16,11 @@ const userSchema = new mongoose.Schema(
             required: true,
             minlength: 6,
         },
+        isAuth: {
+            type: Boolean,
+            required: true,
+            default: false
+        },
         profilePic: {
             type: String,
             default: "",
