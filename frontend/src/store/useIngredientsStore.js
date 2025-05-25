@@ -4,44 +4,14 @@ import { data } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export const useIngredientsStore = create((set) => ({
-    authUser: null,
-    isSigningUp: false,
     isCreating: false,
-    isUpdatingProfile:false,
-
-    isCheckingAuth: true,
-
-    checkAuth: async() => {
-        try {
-            const res = await axiosInstance.get("/auth/check");
-
-            set({authUser: res.data});
-        } catch (error) {
-            console.log("Error in checkAuth:", error);
-            set({ authUser: null });
-        } finally {
-            set ({ isCheckingAuth: false });
-        }
-    },
-
-    signup: async (data) => {
-        set({ isSigningUp: true });
-        try {
-            const res = await axiosInstance.post("/auth/signup", data);
-            set({ authUser: res.data });
-            toast.success("Account created succesfully");
-        } catch (error) {
-            toast.error(error.response.data.message);
-        } finally {
-            set({ isSigningUp: false });
-        }
-    },
+    isGetting: false,
+    ingredients: [],
 
     create: async (data) => {
         set({ isCreating: true });
         try {
             const res = await axiosInstance.post("http://localhost:5001/api/ingredient/create", data);
-            set({ authUser: res.data });
             toast.success("Ingredient Added");
         } catch (error) {
             toast.error(error.response.data.message);
@@ -50,14 +20,16 @@ export const useIngredientsStore = create((set) => ({
         }
     },
 
-    logout: async () => {
+    fetchIngredients: async () => {
+        set({ isGetting: true });
         try {
-            await axiosInstance.post("/auth/logout");
-            set({ authUser: null });
-            localStorage.clear();
-            toast.success("Logged out successfully");
+            const res = await axiosInstance.get("http://localhost:5001/api/ingredient/ingredients");
+            set({ ingredients: res.data }); // Guarda la lista en el estado
         } catch (error) {
-            toast.error(error.response.data.message);
+            toast.error(error.response?.data?.message || "Error al obtener ingredientes.");
+        } finally {
+            set({ isGetting: false });
         }
     },
+
 }));

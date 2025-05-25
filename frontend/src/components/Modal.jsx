@@ -1,5 +1,3 @@
-import { X } from 'lucide-react';
-
 const Modal = ({open, onClose, children}) => {
 
     return (
