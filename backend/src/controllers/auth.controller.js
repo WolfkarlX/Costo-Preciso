@@ -43,7 +43,7 @@ export const signup = async (req, res) => {
                 profilePic: newUser.profilePic,
             });*/
 
-            res.status(201).json({ data: null });
+            res.status(201).json(null);
         } else {
             res.status(400).json({ message: "Invalid user data" });
         }
@@ -120,58 +120,63 @@ export const checkAuth = (req, res) => {
 }
 
 export const checkEmail = async (req, res) => {
-  try {
-    const { token } = req.params;
+    try {
 
-    if (!token || typeof token !== "string") {
-      return res.redirect('/not-found');
-    }
+        if(!req.params){
+            return res.redirect('http://localhost:5173/login');
+        }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_EMAIL);
+        const { token } = req.params;
 
-    const { userInfo } = decoded || {};
-    const { fullName, email, password } = userInfo || {};
+        if (!token || typeof token !== "string") {
+            return res.redirect('http://localhost:5173/login');
+        }
 
-    if (!email) {
-      return res.redirect('/not-found');
-    }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_EMAIL);
 
-    // Check if user already exists (someone could try to reuse token)
-    
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      // If user already exists and is authenticated, just redirect to login
-      if (existingUser.isAuth) return res.redirect('http://localhost:5173/login');
+        const { userInfo } = decoded || {};
+        const { fullName, email, password } = userInfo || {};
 
-      // else update isAuth to true
-      existingUser.isAuth = true;
-      await existingUser.save();
-      return res.redirect('http://localhost:5173/login');
-    }
+        if (!email) {
+            return res.redirect('http://localhost:5173/login');
+        }
 
-    // Create new user now, setting isAuth:true
-    const user = new User({
-      fullName,
-      email,
-      password,      // hashed password from token
-      isAuth: true,
-    });
+        // Check if user already exists (someone could try to reuse token)
+        
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            // If user already exists and is authenticated, just redirect to login
+            if (existingUser.isAuth) return res.redirect('http://localhost:5173/login');
 
-    if(user){
-        await user.save();
+            // else update isAuth to true
+            existingUser.isAuth = true;
+            await existingUser.save();
+            return res.redirect('http://localhost:5173/login');
+        }
+
+        // Create new user now, setting isAuth:true
+        const user = new User({
+            fullName,
+            email,
+            password,      // hashed password from token
+            isAuth: true,
+        });
+
+        if(user){
+            await user.save();
+            return res.redirect('http://localhost:5173/login');
+        }
+
+    } catch (error) {
+        if (error.name === 'JsonWebTokenError') {
+            return res.redirect('http://localhost:5173/login');
+        }
+
+        if (error.name === 'TokenExpiredError') {
+            return res.redirect('http://localhost:5173/login');
+        }
+
+        console.log("Error in checkEmail Controller", error.message);
         return res.redirect('http://localhost:5173/login');
     }
-
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(400).send("Invalid token.");
-    }
-
-    if (error.name === 'TokenExpiredError') {
-      return res.status(400).send("Token expired.");
-    }
-
-    console.log("Error in checkEmail Controller", error.message);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
 };
