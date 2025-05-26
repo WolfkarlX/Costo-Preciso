@@ -8,16 +8,36 @@ export const signup = async (req, res) => {
     const { fullName, email, password } = req.body;
     try {
         if(!fullName || !email || !password) {
-            return res.status(400).json({ message: "All fields are required"});
+            return res.status(400).json({ message: "Todos los datos son obligatorios"});
         }
         // hash password
-        if (password.length < 6) {
-            return res.status(400).json({ message: "Password must be at least 6 characters"});
+        if (password.length < 8) {
+            return res.status(400).json({ message: "La contraseña debe contener al menos 8 caracteres"});
+        }
+
+        if (!isPasswordSecureHasNumber(password)) {
+            return res.status(400).json({ message: "La contraseña debe incluir al menos un número"});
+        }
+
+        if (!isPasswordSecureHasLetter(password)) {
+            return res.status(400).json({ message: "La contraseña debe incluir al menos una letra mayúscula y una minúscula"});
+        }
+
+        if (!isPasswordSecureHasSpecial(password)) {
+            return res.status(400).json({ message: "La contraseña debe incluir al menos un caracter especial"});
+        }
+
+        if (!isPasswordSecureNoSpaces(password)) {
+            return res.status(400).json({ message: "La contraseña NO debe tener espacios"});
+        }
+
+        if (!isPasswordSecureNoRepeatCharts(password)) {
+            return res.status(400).json({ message: "La contraseña NO debe repetir caracteres (ej. 1111111)"});
         }
 
         const user = await User.findOne({email});
 
-        if (user) return res.status(400).json({ message: "Email already exists" });
+        if (user) return res.status(400).json({ message: "El correo ya existe" });
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -53,18 +73,57 @@ export const signup = async (req, res) => {
     }
 };
 
+// Reforzamiento de la contraseña
+
+// Debe incluir al menos un número
+const isPasswordSecureHasNumber = (password) => {
+    const hasNumber = /\d/.test(password);
+
+    return hasNumber;
+}
+
+// Debe incluir al menos una letra mayúscula y una minúscula
+const isPasswordSecureHasLetter = (password) => {
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    
+    return hasUpper && hasLower;
+}
+
+
+// Debe incluir al menos un caracter especial
+const isPasswordSecureHasSpecial = (password) => {
+    const hasSpecial = /[-*?!@#$\/()\{\}=.,;:]/.test(password);
+    
+    return hasSpecial;
+}
+
+// No debe tener espacios
+const isPasswordSecureNoSpaces = (password) => {
+    const noSpaces = !/\s/.test(password);
+    
+    return noSpaces;
+}
+
+// No repetir caracteres (ej. 1111111)
+const isPasswordSecureNoRepeatCharts = (password) => {
+    const noRepeatChars = !/(.)\1{2,}/.test(password); // detecta 3 o más repeticiones consecutivas
+    
+    return noRepeatChars;
+}
+
 export const login = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await User.findOne({email});
 
         if (!user) {
-            return res.status(400).json({message:"Los datos ingresados son incorrectos o el correo no ha sido confirmado (El correo puede estar en Spam)"});
+            return res.status(400).json({message:"Datos incorrectos o correo no confirmado (revisar Spam)"});
         }
 
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
         if (!isPasswordCorrect) {
-            return res.status(400).json({message:"Los datos ingresados son incorrectos o el correo no ha sido confirmado (En correo puede estar en Spam)"});
+            return res.status(400).json({message:"Datos incorrectos o correo no confirmado (revisar Spam)"});
         }
 
         generateToken(user._id, res);

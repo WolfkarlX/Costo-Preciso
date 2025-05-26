@@ -15,13 +15,55 @@ const SignUpPage = () => {
     });
 
     const { signup, isSigningUp } = useAuthStore();
+    const [passwordFocused, setPasswordFocused] = useState(false); // mostrar como debe ir la contra
+
+
+    const isPasswordSecureHasNumber = (password) => {
+        const hasNumber = /\d/.test(password);
+
+        return hasNumber;
+    };
+
+    const isPasswordSecureHasLetter = (password) => {
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
+
+        return hasUpper && hasLower;
+    };
+
+    const isPasswordSecureHasSpecial = (password) => {
+        const hasSpecial = /[-*?!@#$\/()\{\}=.,;:]/.test(password);
+
+        return hasSpecial;
+    };
+
+    const isPasswordSecureNoSpaces = (password) => {
+        const noSpaces = !/\s/.test(password);
+
+        return noSpaces;
+    };
+
+    const isPasswordSecureNoRepeatCharts = (password) => {
+        const noRepeatChars = !/(.)\1{2,}/.test(password);
+
+        return noRepeatChars;
+    };
 
     const validateForm = () => {
-        if (!formData.fullName.trim()) return toast.error("Full name is required");
-        if (!formData.email.trim()) return toast.error("Email is required");
-        if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
-        if (!formData.password) return toast.error("Password is required");
-        if (formData.password.length < 6) return toast.error("Password must be at least 6 characters");
+        if (!formData.fullName.trim()) return toast.error("Ingrese su nombre");
+        if (!formData.email.trim()) return toast.error("Ingrese su correo");
+        if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Formato de email inválido");
+        if (!formData.password) return toast.error("Ingrese una contraseña");
+        if (formData.password.length < 8) return toast.error("La contraseña debe contener al menos 8 caracteres");
+        
+        if (!isPasswordSecureHasNumber(formData.password)) return toast.error("La contraseña debe incluir al menos un número");
+        if (!isPasswordSecureHasLetter(formData.password)) return toast.error("La contraseña debe incluir al menos una letra mayúscula y una minúscula");
+        if (!isPasswordSecureHasSpecial(formData.password)) return toast.error("La contraseña debe incluir al menos un caracter especial");
+        if (!isPasswordSecureNoSpaces(formData.password)) return toast.error("La contraseña NO debe tener espacios");
+        if (!isPasswordSecureNoRepeatCharts(formData.password)) return toast.error("La contraseña NO debe repetir caracteres (ej. 1111111)");
+
+        if (!formData.confirmPassword.trim()) return toast.error("Confirme la contraseña");
+        if (formData.password !== formData.confirmPassword) return toast.error("Las contraseñas no coinciden");
 
         return true;
     };
@@ -38,9 +80,10 @@ const SignUpPage = () => {
 
         const success = validateForm()
 
-        if (success === true) signup(formData);
-        
-        setFormData(initialFormState)
+        if (success === true) {
+            signup(formData);
+            setFormData(initialFormState); // limpia SOLO si es válido
+        }
     };
 
     return <div className="lg:bg-background-pattern bg-no-repeat bg-cover bg-center w-full h-screen grid lg:grid-cols-2 font-title">
@@ -95,6 +138,7 @@ const SignUpPage = () => {
                                 <span className="label-text font-medium mb-2">Contraseña</span>
                             </label>
                             <div className="relative">
+                                
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <Lock className="size-5 text-base-content/40" />
                                 </div>
@@ -103,7 +147,24 @@ const SignUpPage = () => {
                                     className="input w-full pl-10 shadow-md border-none"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    onFocus={() => setPasswordFocused(true)}        // <--- Aquí
+                                    onBlur={() => setPasswordFocused(false)}        // <--- Aquí
                                 />
+
+                                {passwordFocused && (
+                                    <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-300 rounded-md p-3 shadow-md text-sm text-gray-700 z-10">
+                                        <p className="font-semibold mb-1">Tu contraseña debe incluir:</p>
+                                        <ul className="list-disc list-inside space-y-0.5">
+                                            <li>Al menos 8 caracteres</li>
+                                            <li>Una letra mayúscula y una minúscula</li>
+                                            <li>Un número</li>
+                                            <li>Un carácter especial (- * ? ! @ # $ / () {} = . , ; :)</li>
+                                            <li>Sin espacios en blanco</li>
+                                            <li>No repetir caracteres seguidos (ej. 111)</li>
+                                        </ul>
+                                    </div>
+                                )}
+
                                 <button
                                     type="button"
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
