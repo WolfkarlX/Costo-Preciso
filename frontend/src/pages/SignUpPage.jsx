@@ -26,12 +26,21 @@ const SignUpPage = () => {
         return true;
     };
 
+    const initialFormState = {
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
         const success = validateForm()
 
         if (success === true) signup(formData);
+        
+        setFormData(initialFormState)
     };
 
     return <div className="lg:bg-background-pattern bg-no-repeat bg-cover bg-center w-full h-screen grid lg:grid-cols-2 font-title">

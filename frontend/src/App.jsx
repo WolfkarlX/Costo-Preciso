@@ -10,7 +10,7 @@ import PercentagesPage from "./pages/PercentagesPage";
 import IngredientsPage from "./pages/IngredientsPage";
 
 
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 import { Routes, Route } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
@@ -20,10 +20,12 @@ import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth} = useAuthStore();
+  const location = useLocation();
   
   useEffect(() => {
-    checkAuth()
-  }, [checkAuth]);
+    checkAuth();
+  }, [location.pathname, checkAuth]);
+
 
   console.log({ authUser });
 
@@ -36,7 +38,7 @@ const App = () => {
   
   return (
     <div>
-      {authUser?<Navbar />: ""}
+      {authUser ? <Navbar onNavClick={checkAuth} /> : ""}
       
       <Routes>
         <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
