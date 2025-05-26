@@ -59,12 +59,12 @@ export const login = async (req, res) => {
         const user = await User.findOne({email});
 
         if (!user) {
-            return res.status(400).json({message:"Invalid credentials"});
+            return res.status(400).json({message:"Los datos ingresados son incorrectos o el correo no ha sido confirmado (El correo puede estar en Spam)"});
         }
 
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
         if (!isPasswordCorrect) {
-            return res.status(400).json({message:"Invalid credentials"});
+            return res.status(400).json({message:"Los datos ingresados son incorrectos o el correo no ha sido confirmado (En correo puede estar en Spam)"});
         }
 
         generateToken(user._id, res);
