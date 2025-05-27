@@ -9,7 +9,7 @@ import SalesPage from "./pages/SalesPage";
 import PercentagesPage from "./pages/PercentagesPage";
 import IngredientsPage from "./pages/IngredientsPage";
 
-import { Navigate, Routes, Route } from "react-router-dom";
+import { Navigate, useLocation, Routes, Route } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
@@ -20,11 +20,13 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 const GOOGLE_CLIENT_ID = "489214754720-hrn227tne35st7tetb4mbpn3f90t3c7g.apps.googleusercontent.com";
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
 
+  const { authUser, checkAuth, isCheckingAuth} = useAuthStore();
+  const location = useLocation();
+  
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, [location.pathname, checkAuth]);
 
   console.log({ authUser });
 
@@ -36,44 +38,24 @@ const App = () => {
     );
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div>
-        {authUser ? <Navbar /> : ""}
 
-        <Routes>
-          <Route
-            path="/"
-            element={authUser ? <HomePage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/signup"
-            element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/login"
-            element={!authUser ? <LoginPage /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/settings"
-            element={authUser ? <SettingsPage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/ingredients"
-            element={authUser ? <IngredientsPage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/percentages"
-            element={authUser ? <PercentagesPage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/sales"
-            element={authUser ? <SalesPage /> : <Navigate to="/login" />}
-          />
-        </Routes>
+    <div>
+      {authUser ? <Navbar onNavClick={checkAuth} /> : ""}
+      
+      <Routes>
+        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
+        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+        <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
+        <Route path="/ingredients" element={authUser ? <IngredientsPage /> : <Navigate to="/login" />} />
+        <Route path="/percentages" element={authUser ? <PercentagesPage /> : <Navigate to="/login" />} />
+        <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} />
 
-        <Toaster />
-      </div>
-    </GoogleOAuthProvider>
+      </Routes>
+
+      <Toaster />
+    </div>
+  </GoogleOAuthProvider>
   );
 };
 export default App;
