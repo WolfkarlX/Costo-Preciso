@@ -9,16 +9,18 @@ import SalesPage from "./pages/SalesPage";
 import PercentagesPage from "./pages/PercentagesPage";
 import IngredientsPage from "./pages/IngredientsPage";
 
-
-import { Navigate, useLocation } from "react-router-dom";
-
-import { Routes, Route } from "react-router-dom";
+import { Navigate, useLocation, Routes, Route } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+const GOOGLE_CLIENT_ID = "489214754720-hrn227tne35st7tetb4mbpn3f90t3c7g.apps.googleusercontent.com";
+
 const App = () => {
+
   const { authUser, checkAuth, isCheckingAuth} = useAuthStore();
   const location = useLocation();
   
@@ -26,17 +28,17 @@ const App = () => {
     checkAuth();
   }, [location.pathname, checkAuth]);
 
-
   console.log({ authUser });
 
-  if(isCheckingAuth && !authUser) 
+  if (isCheckingAuth && !authUser)
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="size-10 animate-spin" />
       </div>
     );
-  
+
   return (
+
     <div>
       {authUser ? <Navbar onNavClick={checkAuth} /> : ""}
       
@@ -53,6 +55,7 @@ const App = () => {
 
       <Toaster />
     </div>
+  </GoogleOAuthProvider>
   );
 };
 export default App;
