@@ -2,6 +2,9 @@ import cloudinary from "../lib/cloudinary.js";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const signup = async (req, res) => {
     const { fullName, email, password } = req.body;
@@ -75,6 +78,53 @@ export const login = async (req, res) => {
     }
 };
 
+export const googleLogin = async (req, res) => {
+    const { tokenId } = req.body;
+
+    try {
+        // Verificar token con Google
+        const ticket = await client.verifyIdToken({
+            idToken: tokenId,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const { email, name, picture } = payload;
+
+        if (!email) {
+            return res.status(400).json({ message: "Google account email not found" });
+        }
+
+        // Buscar usuario en BD
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // Crear usuario nuevo sin password (porque es Google)
+            user = new User({
+                email,
+                fullName: name,
+                password: "",  // o puedes generar un hash random
+                profilePic: picture || "",
+                googleUser: true,
+            });
+            await user.save();
+        }
+
+        generateToken(user._id, res);
+
+        return res.status(200).json({
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            profilePic: user.profilePic,
+        });
+
+    } catch (error) {
+        console.log("Error in googleLogin controller", error);
+        return res.status(500).json({ message: "Google login failed" });
+    }
+};
+
 export const logout = (req, res) => {
     try {
         res.cookie("jwt", "", {maxAge:0});
@@ -111,4 +161,4 @@ export const checkAuth = (req, res) => {
         console.log("Error in checkAuth controller", error.message);
         res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
