@@ -6,7 +6,6 @@ import "../styles/styles.css";
 import Modal from "../components/Modal";
 import "../styles/IngredientsPage.css";
 import { useIngredientsStore } from "../store/useIngredientsStore";
-import Cards from "../components/cards";
 
 const IngredientsPage = () => {
     
@@ -24,6 +23,7 @@ const IngredientsPage = () => {
         Units: "",
         unityOfmeasurement: "",
         totalPrice: "",
+        image: "",
     });
 
     const { create, isCreating } = useIngredientsStore();
@@ -40,6 +40,7 @@ const IngredientsPage = () => {
             Units: "",
             unityOfmeasurement: "",
             totalPrice: "",
+            image: "",
         });
     };
 
@@ -192,6 +193,8 @@ const IngredientsPage = () => {
                     ) : (
                         ingredients.map((item, idx) => (
                         <div key={idx} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
+                            
+                            <img src={item.image} alt="imagen del ingrediente" />
                             <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
                             <p className="text-lg text-color-secondary my-2">
                             Cantidad: <span className="font-black text-color-secondary">{item.Units} {item.unityOfmeasurement}</span>

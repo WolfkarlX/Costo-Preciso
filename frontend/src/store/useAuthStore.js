@@ -37,10 +37,10 @@ export const useAuthStore = create((set) => ({
         }
     },
 
-    CreateIngredient: async (data) => {
+    login: async (data) => {
         set({ isLoggingIn: true });
         try {
-            const res = await axiosInstance.post("http://localhost:5001/api/ingredient/create", data);
+            const res = await axiosInstance.post("/auth/login", data);
             set({ authUser: res.data });
             toast.success("Logged in successfully");
         } catch (error) {

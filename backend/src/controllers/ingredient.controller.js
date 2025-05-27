@@ -26,7 +26,7 @@ export const createIngredient = async (req, res) => {
             try {
                 const uploadResponse = await cloudinary.uploader.upload(image, {
                   folder: 'ingredients',
-                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif'], // Reject non-images
+                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'mov', 'wav'], // Reject non-images
                   max_file_size: 5 * 1024 * 1024, // 5MB limit (in bytes)
                   invalidate: true // Force Cloudinary to revalidate
                 });
