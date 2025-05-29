@@ -2,6 +2,7 @@ import cloudinary from "../lib/cloudinary.js";
 import { generateEmailToken, generateToken, sendConfirmationEmail } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken"
 
 export const signup = async (req, res) => {
@@ -237,5 +238,57 @@ export const checkEmail = async (req, res) => {
 
         console.log("Error in checkEmail Controller", error.message);
         return res.redirect('http://localhost:5173/login');
+    }
+};
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export const googleLogin = async (req, res) => {
+    const { idToken } = req.body;
+
+    try {
+        console.log("GOOGLE_CLIENT_ID (env):", process.env.GOOGLE_CLIENT_ID);
+        // Verificar token con Google
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+
+        // Extraer info
+        const { email_verified, email, name, picture } = payload;
+
+        if (!email_verified) {
+            return res.status(400).json({ message: "Correo no verificado por Google" });
+        }
+
+        // Buscar usuario
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // Crear usuario nuevo (sin password)
+            user = new User({
+                fullName: name,
+                email,
+                password: "", // Sin contraseña porque es Google
+                profilePic: picture,
+                isAuth: true,
+                authType: "google",
+            });
+            await user.save();
+        }
+
+        // Generar JWT propio (igual que login normal)
+        generateToken(user._id, res);
+
+        res.status(200).json({
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            profilePic: user.profilePic,
+        });
+    } catch (error) {
+        console.error("Error en googleLogin:", error);
+        res.status(500).json({ message: "Error en autenticación con Google" });
     }
 };

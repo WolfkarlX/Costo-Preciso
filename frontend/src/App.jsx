@@ -18,10 +18,16 @@ import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+const GOOGLE_CLIENT_ID =
+  "489214754720-hrn227tne35st7tetb4mbpn3f90t3c7g.apps.googleusercontent.com";
+
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth} = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+
   const location = useLocation();
-  
+
   useEffect(() => {
     checkAuth();
   }, [location.pathname, checkAuth]);
@@ -37,22 +43,26 @@ const App = () => {
     );
   
   return (
-    <div>
-      {authUser ? <Navbar onNavClick={checkAuth} /> : ""}
-      
-      <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
-        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
-        <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
-        <Route path="/ingredients" element={authUser ? <IngredientsPage /> : <Navigate to="/login" />} />
-        <Route path="/percentages" element={authUser ? <PercentagesPage /> : <Navigate to="/login" />} />
-        <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} />
 
-      </Routes>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
 
-      <Toaster />
-    </div>
+      <div>
+        {authUser ? <Navbar onNavClick={checkAuth} /> : ""}
+        
+        <Routes>
+          <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+          <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
+          <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+          <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
+          <Route path="/ingredients" element={authUser ? <IngredientsPage /> : <Navigate to="/login" />} />
+          <Route path="/percentages" element={authUser ? <PercentagesPage /> : <Navigate to="/login" />} />
+          <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} />
+
+        </Routes>
+
+        <Toaster />
+      </div>
+    </GoogleOAuthProvider>
   );
 };
 export default App;
