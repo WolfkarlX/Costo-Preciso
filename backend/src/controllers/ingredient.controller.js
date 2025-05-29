@@ -27,7 +27,7 @@ export const createIngredient = async (req, res) => {
             try {
                 const uploadResponse = await cloudinary.uploader.upload(image, {
                   folder: 'ingredients',
-                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'mov', 'wav'], // Reject non-images
+                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif'], // Reject non-images
                   max_file_size: 5 * 1024 * 1024, // 5MB limit (in bytes)
                   invalidate: true // Force Cloudinary to revalidate
                 });
@@ -191,15 +191,9 @@ export const updateIngredient = async (req, res) => {
         }
 
         //checks if the user updates to a name occupied
-        if (filteredUpdates.name) {
-            const SameName = await Ingredient.findOne({ 
-                name: filteredUpdates.name, 
-                userId: userId, 
-                _id: { $ne: ingredientId } // excluye el actual ingrediente
-            });
-            if (SameName) {
-                return res.status(409).json({ message: "Ingredient already exists" });
-            }
+        const SameName = await Ingredient.findOne({ name: filteredUpdates.name, userId: userId });
+        if (SameName) {
+            return res.status(409).json({ message: "Ingredient already exists" });
         }
         
         //logic for restricting the unit price and updating it

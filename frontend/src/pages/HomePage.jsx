@@ -12,7 +12,7 @@ const HomePage = () => {
     const [open, setOpen] = useState(false)
 
     return (
-        <section className="bg-color-primary-light w-full h-screen">
+        <section className="bg-color-primary-light p-auto h-full">
             <div className="mx-4 sm:mx-10 lg:mx-16">
             {/* image */}
                 <div className="w-full flex justify-center">
@@ -32,6 +32,7 @@ const HomePage = () => {
                         <div className="text-center w-56"></div>
                             <h3 className="text-xl font-black text-color-secondary text-center">Nueva receta</h3>
                         <div className="mx-auto my-4 w-48">
+                            <h3 className="text-lg font-black text-gray-800">Confirm Delete</h3>
                         </div>
                     </Modal>
                 </div>
