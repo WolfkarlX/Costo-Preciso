@@ -11,6 +11,9 @@ const HomePage = () => {
 
     const [open, setOpen] = useState(false)
 
+    const [isEditMode, setIsEditMode] = useState(false);
+    
+
     return (
         <section className="bg-color-primary-light w-full h-screen">
             <div className="mx-4 sm:mx-10 lg:mx-16">
@@ -29,9 +32,34 @@ const HomePage = () => {
                         <Plus size={28}/>
                     </button>
                     <Modal open={open} onClose={() => setOpen(false)}>
-                        <div className="text-center w-56"></div>
-                            <h3 className="text-xl font-black text-color-secondary text-center">Nueva receta</h3>
-                        <div className="mx-auto my-4 w-48">
+                        <div className="text-center w-80"></div>
+                            <h3 className="text-xl font-black text-color-secondary text-center">
+                                {isEditMode ? "Editar receta" : "Nueva receta"}
+                            </h3>
+                        <div className="md:flex md:gap-6 md:items-start">
+                            {/* Sección de imagen */}
+                            <div className="form-control w-full md:w-1/3">
+                                <label className="label">
+                                    <span className="label-text font-medium mt-4 my-2">Imagen</span>
+                                </label>
+                            </div>
+
+                            {/* Sección de campos de texto */}
+                            <div className="w-full md:w-2/3 space-y-4">
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text font-medium mt-4 my-2">Nombre</span>
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                        type="text"
+                                        className="input w-full pl-10 shadow-md border-none"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </Modal>
                 </div>

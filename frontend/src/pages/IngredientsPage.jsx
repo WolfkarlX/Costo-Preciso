@@ -163,93 +163,92 @@ const IngredientsPage = () => {
                                     {isEditMode ? "Editar ingrediente" : "Nuevo ingrediente"}
                                 </h3>                                
                                 <div className="md:flex md:gap-6 md:items-start">
-                                {/* Sección de imagen */}
-                                <div className="form-control w-full md:w-1/3">
-                                    <label className="label">
-                                        <span className="label-text font-medium mt-4 my-2">Imagen</span>
-                                    </label>
-                                    
-                                </div>
-
-                                {/* Sección de campos de texto */}
-                                <div className="w-full md:w-2/3 space-y-4">
-                                    <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium mt-4 my-2">Nombre</span>
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                        type="text"
-                                        className="input w-full pl-10 shadow-md border-none"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        />
-                                    </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="form-control">
+                                    {/* Sección de imagen */}
+                                    <div className="form-control w-full md:w-1/3">
                                         <label className="label">
-                                        <span className="label-text font-medium mt-4 my-2">Cantidad</span>
+                                            <span className="label-text font-medium mt-4 my-2">Imagen</span>
                                         </label>
-                                        <input
-                                        type="number"
-                                        step="any"
-                                        className="input w-full px-10 shadow-md border-none"
-                                        value={formData.Units}
-                                        onChange={(e) => setFormData({ ...formData, Units: e.target.value })}
-                                        />
                                     </div>
 
-                                    <div className="form-control relative">
+                                    {/* Sección de campos de texto */}
+                                    <div className="w-full md:w-2/3 space-y-4">
+                                        <div className="form-control">
                                         <label className="label">
-                                        <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
+                                            <span className="label-text font-medium mt-4 my-2">Nombre</span>
                                         </label>
-                                        <button
-                                        type="button"
-                                        onClick={() => setIsOpen(!isOpen)}
-                                        className="input inline-flex justify-between items-center w-full min-h-[40px] px-4 border-none shadow-md text-left"
-                                        >
-                                        <span>{selected}</span>
-                                        <ChevronDown className="ml-2 text-color-secondary" />
-                                        </button>
-                                        {isOpen && (
-                                        <div className="origin-top-right absolute mt-4 w-48 rounded-[20px] shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                                            <div className="p-2">
-                                            {options.map((option, index) => (
-                                                <button
-                                                key={index}
-                                                onClick={() => {
-                                                    setSelected(option);
-                                                    setFormData({ ...formData, unityOfmeasurement: option });
-                                                    setIsOpen(false);
-                                                }}
-                                                className="w-full text-left p-2 text-sm text-color-primary cursor-pointer hover:bg-color-primary-light rounded-[10px]"
-                                                >
-                                                {option}
-                                                </button>
-                                            ))}
-                                            </div>
+                                        <div className="relative">
+                                            <input
+                                            type="text"
+                                            className="input w-full pl-10 shadow-md border-none"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            />
                                         </div>
-                                        )}
-                                    </div>
-                                    </div>
+                                        </div>
 
-                                    <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-medium mt-4 my-2">Precio total</span>
-                                    </label>
-                                    <div className="relative">
-                                        <input
-                                        type="number"
-                                        step="any"
-                                        className="input w-full px-10 shadow-md border-none"
-                                        value={formData.totalPrice}
-                                        onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
-                                        />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="form-control">
+                                            <label className="label">
+                                            <span className="label-text font-medium mt-4 my-2">Cantidad</span>
+                                            </label>
+                                            <input
+                                            type="number"
+                                            step="any"
+                                            className="input w-full px-10 shadow-md border-none"
+                                            value={formData.Units}
+                                            onChange={(e) => setFormData({ ...formData, Units: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="form-control relative">
+                                            <label className="label">
+                                            <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
+                                            </label>
+                                            <button
+                                            type="button"
+                                            onClick={() => setIsOpen(!isOpen)}
+                                            className="input inline-flex justify-between items-center w-full min-h-[40px] px-4 border-none shadow-md text-left"
+                                            >
+                                            <span>{selected}</span>
+                                            <ChevronDown className="ml-2 text-color-secondary" />
+                                            </button>
+                                            {isOpen && (
+                                            <div className="origin-top-right absolute mt-4 w-48 rounded-[20px] shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                                <div className="p-2">
+                                                {options.map((option, index) => (
+                                                    <button
+                                                    key={index}
+                                                    onClick={() => {
+                                                        setSelected(option);
+                                                        setFormData({ ...formData, unityOfmeasurement: option });
+                                                        setIsOpen(false);
+                                                    }}
+                                                    className="w-full text-left p-2 text-sm text-color-primary cursor-pointer hover:bg-color-primary-light rounded-[10px]"
+                                                    >
+                                                    {option}
+                                                    </button>
+                                                ))}
+                                                </div>
+                                            </div>
+                                            )}
+                                        </div>
+                                        </div>
+
+                                        <div className="form-control">
+                                        <label className="label">
+                                            <span className="label-text font-medium mt-4 my-2">Precio total</span>
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                            type="number"
+                                            step="any"
+                                            className="input w-full px-10 shadow-md border-none"
+                                            value={formData.totalPrice}
+                                            onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
+                                            />
+                                        </div>
+                                        </div>
                                     </div>
-                                    </div>
-                                </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 mb-2">
