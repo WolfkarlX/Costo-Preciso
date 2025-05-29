@@ -181,9 +181,15 @@ export const updateIngredient = async (req, res) => {
         }
 
         //checks if the user updates to a name occupied
-        const SameName = await Ingredient.findOne({ name: filteredUpdates.name, userId: userId });
-        if (SameName) {
-            return res.status(409).json({ message: "Ingredient already exists" });
+        if (filteredUpdates.name) {
+            const SameName = await Ingredient.findOne({ 
+                name: filteredUpdates.name, 
+                userId: userId, 
+                _id: { $ne: ingredientId } // excluye el actual ingrediente
+            });
+            if (SameName) {
+                return res.status(409).json({ message: "Ingredient already exists" });
+            }
         }
         
         //logic for restricting the unit price and updating it

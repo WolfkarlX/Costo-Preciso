@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import { data } from "react-router-dom";
 import toast from "react-hot-toast";
 
-export const useIngredientsStore = create((set) => ({
+export const useIngredientsStore = create((set, get) => ({
     isCreating: false,
     isGetting: false,
     ingredients: [],
@@ -32,4 +32,29 @@ export const useIngredientsStore = create((set) => ({
         }
     },
 
+    updateIngredient: async (id, updatedData) => {
+        try {
+            await axiosInstance.post(`http://localhost:5001/api/ingredient/updt/${id}`, updatedData);
+            toast.success("Ingredient updated");
+            const ingredients = get().ingredients.map((ing) =>
+                ing._id === id ? { ...ing, ...updatedData } : ing
+            );
+            set({ ingredients });
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error al actualizar ingrediente");
+        }
+    },
+
+    deleteIngredient: async (id) => {
+    try {
+        await axiosInstance.delete(`http://localhost:5001/api/ingredient/del/${id}`);
+        
+        const updatedIngredients = get().ingredients.filter((ing) => ing._id !== id);
+        set({ ingredients: updatedIngredients });
+
+        toast.success("Ingredient deleted");
+    } catch (error) {
+        toast.error(error.response?.data?.message || "Error al eliminar ingrediente");
+    }
+},
 }));
