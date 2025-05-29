@@ -45,23 +45,24 @@ const App = () => {
   return (
 
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-          <div>
-      {authUser ? <Navbar onNavClick={checkAuth} /> : ""}
-      
-      <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
-        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
-        <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
-        <Route path="/ingredients" element={authUser ? <IngredientsPage /> : <Navigate to="/login" />} />
-        <Route path="/percentages" element={authUser ? <PercentagesPage /> : <Navigate to="/login" />} />
-        <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} />
 
-      </Routes>
+      <div>
+        {authUser ? <Navbar onNavClick={checkAuth} /> : ""}
+        
+        <Routes>
+          <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+          <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
+          <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+          <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
+          <Route path="/ingredients" element={authUser ? <IngredientsPage /> : <Navigate to="/login" />} />
+          <Route path="/percentages" element={authUser ? <PercentagesPage /> : <Navigate to="/login" />} />
+          <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} />
 
-      <Toaster />
-    </div>
+        </Routes>
+
+        <Toaster />
+      </div>
+    </GoogleOAuthProvider>
   );
 };
 export default App;
-
