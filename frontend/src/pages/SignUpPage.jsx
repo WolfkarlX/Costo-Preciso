@@ -5,113 +5,98 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import "../styles/SignUpPage.css";
 
-import { GoogleLogin } from "@react-oauth/google";
-
 const SignUpPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const { signup, googleLogin, isSigningUp, isLoggingIn } = useAuthStore();
-  const [passwordFocused, setPasswordFocused] = useState(false);
 
-  const isPasswordSecureHasNumber = (password) => /\d/.test(password);
-  const isPasswordSecureHasLetter = (password) =>
-    /[A-Z]/.test(password) && /[a-z]/.test(password);
-  const isPasswordSecureHasSpecial = (password) =>
-    /[-*?!@#$\/()\{\}=.,;:]/.test(password);
-  const isPasswordSecureNoSpaces = (password) => !/\s/.test(password);
-  const isPasswordSecureNoRepeatCharts = (password) => !/(.)\1{2,}/.test(password);
+    const [showPassword, setShowPassword] = useState(false);
+    const [formData, setFormData] = useState({
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    });
 
-  const validateForm = () => {
-    if (!formData.fullName.trim()) return toast.error("Ingrese su nombre");
-    if (!formData.email.trim()) return toast.error("Ingrese su correo");
-    if (!/\S+@\S+\.\S+/.test(formData.email))
-      return toast.error("Formato de email inválido");
-    if (!formData.password) return toast.error("Ingrese una contraseña");
-    if (formData.password.length < 8)
-      return toast.error("La contraseña debe contener al menos 8 caracteres");
-    if (!isPasswordSecureHasNumber(formData.password))
-      return toast.error("La contraseña debe incluir al menos un número");
-    if (!isPasswordSecureHasLetter(formData.password))
-      return toast.error(
-        "La contraseña debe incluir al menos una letra mayúscula y una minúscula"
-      );
-    if (!isPasswordSecureHasSpecial(formData.password))
-      return toast.error("La contraseña debe incluir al menos un caracter especial");
-    if (!isPasswordSecureNoSpaces(formData.password))
-      return toast.error("La contraseña NO debe tener espacios");
-    if (!isPasswordSecureNoRepeatCharts(formData.password))
-      return toast.error("La contraseña NO debe repetir caracteres (ej. 111)");
-    if (!formData.confirmPassword.trim()) return toast.error("Confirme la contraseña");
-    if (formData.password !== formData.confirmPassword)
-      return toast.error("Las contraseñas no coinciden");
+    const { signup, isSigningUp } = useAuthStore();
+    const [passwordFocused, setPasswordFocused] = useState(false); // mostrar como debe ir la contra
 
-    return true;
-  };
 
-  const initialFormState = {
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  };
+    const isPasswordSecureHasNumber = (password) => {
+        const hasNumber = /\d/.test(password);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+        return hasNumber;
+    };
 
-    const success = validateForm();
+    const isPasswordSecureHasLetter = (password) => {
+        const hasUpper = /[A-Z]/.test(password);
+        const hasLower = /[a-z]/.test(password);
 
-    if (success === true) {
-      signup(formData);
-      setFormData(initialFormState); // limpia SOLO si es válido
-    }
-  };
+        return hasUpper && hasLower;
+    };
 
-  const handleGoogleLoginSuccess = (credentialResponse) => {
-    const tokenId = credentialResponse.credential;
-    googleLogin(tokenId);
-  };
+    const isPasswordSecureHasSpecial = (password) => {
+        const hasSpecial = /[-*?!@#$\/()\{\}=.,;:]/.test(password);
 
-  const handleGoogleLoginError = () => {
-    toast.error("Google sign up failed");
-  };
+        return hasSpecial;
+    };
 
-  return (
-    <div className="lg:bg-background-pattern bg-no-repeat bg-cover bg-center w-full h-screen grid lg:grid-cols-2 font-title">
-      {/* left side */}
-      <div className="flex flex-col justify-center items-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 group">
-              <h1 className="text-2xl font-bold signup-title">Crea una cuenta</h1>
-            </div>
-          </div>
+    const isPasswordSecureNoSpaces = (password) => {
+        const noSpaces = !/\s/.test(password);
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nombre de usuario */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium mb-2">Nombre de usuario</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="size-5 text-base-content/40" />
+        return noSpaces;
+    };
+
+    const isPasswordSecureNoRepeatCharts = (password) => {
+        const noRepeatChars = !/(.)\1{2,}/.test(password);
+
+        return noRepeatChars;
+    };
+
+    const validateForm = () => {
+        if (!formData.fullName.trim()) return toast.error("Ingrese su nombre");
+        if (!formData.email.trim()) return toast.error("Ingrese su correo");
+        if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Formato de email inválido");
+        if (!formData.password) return toast.error("Ingrese una contraseña");
+        if (formData.password.length < 8) return toast.error("La contraseña debe contener al menos 8 caracteres");
+        
+        if (!isPasswordSecureHasNumber(formData.password)) return toast.error("La contraseña debe incluir al menos un número");
+        if (!isPasswordSecureHasLetter(formData.password)) return toast.error("La contraseña debe incluir al menos una letra mayúscula y una minúscula");
+        if (!isPasswordSecureHasSpecial(formData.password)) return toast.error("La contraseña debe incluir al menos un caracter especial");
+        if (!isPasswordSecureNoSpaces(formData.password)) return toast.error("La contraseña NO debe tener espacios");
+        if (!isPasswordSecureNoRepeatCharts(formData.password)) return toast.error("La contraseña NO debe repetir caracteres (ej. 1111111)");
+
+        if (!formData.confirmPassword.trim()) return toast.error("Confirme la contraseña");
+        if (formData.password !== formData.confirmPassword) return toast.error("Las contraseñas no coinciden");
+
+        return true;
+    };
+
+    const initialFormState = {
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const success = validateForm()
+
+        if (success === true) {
+            signup(formData);
+            setFormData(initialFormState); // limpia SOLO si es válido
+        }
+    };
+
+    return <div className="lg:bg-background-pattern bg-no-repeat bg-cover bg-center w-full h-screen grid lg:grid-cols-2 font-title">
+        {/* left side */}
+        <div className="flex flex-col justify-center items-center p-6 sm:p-12">
+            <div className="w-full max-w-md space-y-8">
+                <div className="text-center mb-8">
+                    <div className="flex flex-col items-center gap-2 group">
+                        <h1 className="text-2xl font-bold signup-title">Crea una cuenta</h1>
+                    </div>
                 </div>
-                <input
-                  type="text"
-                  className="input w-full pl-10 shadow-md border-none"
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullName: e.target.value })
-                  }
-                  autoComplete="name"
-                />
-              </div>
-            </div>
+
 
             {/* Correo electrónico */}
             <div className="form-control">
@@ -122,6 +107,7 @@ const SignUpPage = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="size-5 text-base-content/40" />
                 </div>
+
                 <input
                   type="email"
                   className="input w-full pl-10 shadow-md border-none"
@@ -214,8 +200,15 @@ const SignUpPage = () => {
                       <Eye className="size-5 text-base-content/40 icon" />
                     )}
                   </button>
+
+                <div className="text-center">
+                    <p className="text-base-content/60 link-text">
+                    ¿Tienes una cuenta?{" "}
+                    <Link to="/login" className="link link-primary link-text font-bold">
+                        Inicia Sesión
+                    </Link>
+                    </p>
                 </div>
-              </div>
             </div>
 
             {/* Botón Comenzar */}
@@ -256,9 +249,6 @@ const SignUpPage = () => {
             </p>
           </div>
         </div>
-      </div>
-    </div>
-  );
+    </div>;
 };
-
 export default SignUpPage;
