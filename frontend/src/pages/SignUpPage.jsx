@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import "../styles/SignUpPage.css";
 import { GoogleLogin } from "@react-oauth/google"; // Importa GoogleLogin si usas este componente
 
+
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -15,7 +16,7 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
 
-  const { signup, isSigningUp } = useAuthStore();
+  const { signup, isSigningUp, googleLogin } = useAuthStore();
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   // Validaciones de contraseña (mismos que ya tenías)
@@ -60,7 +61,8 @@ const SignUpPage = () => {
   // Funciones para Google Login (debes adaptar según lógica)
   const handleGoogleLoginSuccess = (response) => {
     console.log("Google login success", response);
-    // Aquí tu lógica para login exitoso con Google
+    const tokenId = response.credential;  // aquí está el token real
+    googleLogin(tokenId);  // llama a la función del store
   };
 
   const handleGoogleLoginError = (error) => {

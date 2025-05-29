@@ -55,13 +55,13 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post(
         "/auth/google-login",
-        { tokenId },
+        { idToken: tokenId },  // aquí debe coincidir la propiedad que espera backend
         { withCredentials: true }
       );
       set({ authUser: res.data });
-      toast.success("Logged in with Google");
+      toast.success("Logueado correctamente con Google.");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Google login failed");
+      toast.error(error.response?.data?.message || "Inicio de sesion con Google fallido.");
     } finally {
       set({ isLoggingIn: false });
     }
