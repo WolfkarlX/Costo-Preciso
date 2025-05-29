@@ -187,51 +187,51 @@ const IngredientsPage = () => {
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="form-control">
-                                            <label className="label">
-                                            <span className="label-text font-medium mt-4 my-2">Cantidad</span>
-                                            </label>
-                                            <input
-                                            type="number"
-                                            step="any"
-                                            className="input w-full px-10 shadow-md border-none"
-                                            value={formData.Units}
-                                            onChange={(e) => setFormData({ ...formData, Units: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <div className="form-control relative">
-                                            <label className="label">
-                                            <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
-                                            </label>
-                                            <button
-                                            type="button"
-                                            onClick={() => setIsOpen(!isOpen)}
-                                            className="input inline-flex justify-between items-center w-full min-h-[40px] px-4 border-none shadow-md text-left"
-                                            >
-                                            <span>{selected}</span>
-                                            <ChevronDown className="ml-2 text-color-secondary" />
-                                            </button>
-                                            {isOpen && (
-                                            <div className="origin-top-right absolute mt-4 w-48 rounded-[20px] shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                                                <div className="p-2">
-                                                {options.map((option, index) => (
-                                                    <button
-                                                    key={index}
-                                                    onClick={() => {
-                                                        setSelected(option);
-                                                        setFormData({ ...formData, unityOfmeasurement: option });
-                                                        setIsOpen(false);
-                                                    }}
-                                                    className="w-full text-left p-2 text-sm text-color-primary cursor-pointer hover:bg-color-primary-light rounded-[10px]"
-                                                    >
-                                                    {option}
-                                                    </button>
-                                                ))}
-                                                </div>
+                                            <div className="form-control">
+                                                <label className="label">
+                                                <span className="label-text font-medium mt-4 my-2">Cantidad</span>
+                                                </label>
+                                                <input
+                                                type="number"
+                                                step="any"
+                                                className="input w-full px-10 shadow-md border-none"
+                                                value={formData.Units}
+                                                onChange={(e) => setFormData({ ...formData, Units: e.target.value })}
+                                                />
                                             </div>
-                                            )}
-                                        </div>
+
+                                            <div className="form-control relative">
+                                                <label className="label">
+                                                <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
+                                                </label>
+                                                <button
+                                                type="button"
+                                                onClick={() => setIsOpen(!isOpen)}
+                                                className="input inline-flex justify-between items-center w-full min-h-[40px] px-4 border-none shadow-md text-left"
+                                                >
+                                                <span>{selected}</span>
+                                                <ChevronDown className="ml-2 text-color-secondary" />
+                                                </button>
+                                                {isOpen && (
+                                                <div className="origin-top-right absolute mt-4 w-48 rounded-[20px] shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                                    <div className="p-2">
+                                                    {options.map((option, index) => (
+                                                        <button
+                                                        key={index}
+                                                        onClick={() => {
+                                                            setSelected(option);
+                                                            setFormData({ ...formData, unityOfmeasurement: option });
+                                                            setIsOpen(false);
+                                                        }}
+                                                        className="w-full text-left p-2 text-sm text-color-primary cursor-pointer hover:bg-color-primary-light rounded-[10px]"
+                                                        >
+                                                        {option}
+                                                        </button>
+                                                    ))}
+                                                    </div>
+                                                </div>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="form-control">
@@ -302,18 +302,18 @@ const IngredientsPage = () => {
                                 className="absolute mt-6 rounded-[20px] shadow-md bg-color-primary-light z-50"
                             >
                                 <div className="text-md text-color-primary font-black flex flex-col">
-                                <button
-                                    className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
-                                    onClick={() => handleEdit(item)}
-                                >
-                                    <Pencil size={20} /> Editar
-                                </button>
-                                <button
-                                    className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
-                                    onClick={() => handleDelete(item._id)}
-                                >
-                                    <Trash size={20} /> Eliminar
-                                </button>
+                                    <button
+                                        className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
+                                        onClick={() => handleEdit(item)}
+                                    >
+                                        <Pencil size={20} /> Editar
+                                    </button>
+                                    <button
+                                        className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
+                                        onClick={() => handleDelete(item._id)}
+                                    >
+                                        <Trash size={20} /> Eliminar
+                                    </button>
                                 </div>
                             </div>
                             )}
