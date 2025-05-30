@@ -56,8 +56,8 @@ const App = () => {
           <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
           <Route path="/ingredients" element={authUser ? <IngredientsPage /> : <Navigate to="/login" />} />
           <Route path="/percentages" element={authUser ? <PercentagesPage /> : <Navigate to="/login" />} />
-          <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} />
-
+      {/* <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} /> */}
+      
         </Routes>
 
         <Toaster />

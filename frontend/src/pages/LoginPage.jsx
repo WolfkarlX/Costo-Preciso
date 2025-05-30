@@ -88,12 +88,13 @@ const LoginPage = () => {
                 </button>
               </div>
             </div>
-
+            {/*
             <div className="text-right">
               <Link to="/" className="link link-primary">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
+            */}
 
             <button type="submit" className="btn btn-primary w-full font-bold" disabled={isLoggingIn}>
               {isLoggingIn ? <Loader2 className="size-5 animate-spin" /> : "Comenzar"}
