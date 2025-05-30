@@ -229,7 +229,7 @@ const SignUpPage = () => {
           {/* Link a iniciar sesión */}
           <div className="text-center mt-4">
             <p className="text-base-content/60 link-text">
-              ¿Tienes una cuenta?{" "}
+              ¿Ya tienes una cuenta?{" "}
               <Link to="/login" className="link link-primary link-text font-bold">
                 Inicia Sesión
               </Link>

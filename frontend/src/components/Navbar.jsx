@@ -83,7 +83,7 @@ const Navbar = () => {
     
     //Navbar
     return (
-        <header class="shadow bg-color-primary-light p-2">
+        <header class="sticky top-0 z-30 shadow bg-color-primary-light p-2">
             <div class="relative flex max-w-screen-xl flex-col overflow-hidden px-4 py-4 md:mx-auto md:flex-row md:items-center">
                 <a href="#" class="flex items-center whitespace-nowrap text-2xl font-black">
                 <span class="mr-2 text-4xl text-blue-600">
