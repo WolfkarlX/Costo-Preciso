@@ -301,7 +301,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                                 }}
                             />
 
-                            <div className="relative">
+                            <div id="unidad-medida" className="relative">
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -448,7 +448,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                 ) : (
                     recipes.map((item) => (
                     <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
-                        <div ref={dropdownRef} className="relative inline-block flex justify-end">
+                        <div ref={dropdownRef} className="relative flex justify-end">
                         <button
                             id={`button-${item._id}`}
                             className="bg-white text-color-secondary"
@@ -495,7 +495,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                             setSelectedRecipes(item);
                             setIsOpen2(true);
                             }}
-                            className="px-4 py-2 rounded-[15px] bg-color-primary text-white font-black"
+                            className="px-4 py-2 rounded-[15px] bg-color-primary text-black font-black"
                         >
                             Ver detalles
                         </button>
@@ -507,19 +507,20 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
 
         <Modal open={isOpen2} onClose={() => setIsOpen2(false)}>
         {selectedRecipe && (
-            <div>
+            <div id="datos-finales">
             <h2 className="text-xl font-black text-color-secondary mb-4">{selectedRecipe.name}</h2>
-            <p><strong>Porcentaje de ganancia:</strong> {selectedRecipe.profitPercentage}</p>
-            <p><strong>Costos adicionales:</strong> {selectedRecipe.aditionalCostpercentages}</p>
-            <p><strong>Unidades obtenidas:</strong> {selectedRecipe.portionsPerrecipe}</p>
-
-            <p><strong>Costo de los materiales:</strong> {selectedRecipe.materialCostTotal}</p>
-            <p><strong>Costos adicionales:</strong> {selectedRecipe.additionalCost}</p>
-            <p><strong>Costo total de la receta:</strong> {selectedRecipe.totalCost}</p>
-            <p><strong>Costo unitario:</strong> {selectedRecipe.costPerunity}</p>
-            <p><strong>Ganancia bruta:</strong> {selectedRecipe.grossProfit}</p>
-            <p><strong>Valor de venta unitario:</strong> {selectedRecipe.unitSalePrice}</p>
-            <p><strong>Ganancia neta:</strong> {selectedRecipe.netProfit}</p>
+            <p><strong>Porcentaje de ganancia.....</strong> {selectedRecipe.profitPercentage}</p>
+            <p><strong>Costos adicionales.............</strong> {selectedRecipe.aditionalCostpercentages}</p>
+            <p><strong>Unidades obtenidas...........</strong> {selectedRecipe.portionsPerrecipe}</p>
+            <h1>-----------------------------------------</h1>
+            
+            <p><strong>Costo de los materiales.....</strong> {selectedRecipe.materialCostTotal}</p>
+            <p><strong>Costos adicionales.............</strong> {selectedRecipe.additionalCost}</p>
+            <p><strong>Costo total de la receta.....</strong> {selectedRecipe.totalCost}</p>
+            <p><strong>Costo unitario....................</strong> {selectedRecipe.costPerunity}</p>
+            <p><strong>Ganancia bruta..................</strong> {selectedRecipe.grossProfit}</p>
+            <p><strong>Valor de venta unitario.....</strong> {selectedRecipe.unitSalePrice}</p>
+            <p><strong>Ganancia neta....................</strong> {selectedRecipe.netProfit}</p>
             </div>
         )}
         </Modal>
