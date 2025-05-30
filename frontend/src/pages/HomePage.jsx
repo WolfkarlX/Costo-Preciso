@@ -117,6 +117,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
     setOpen(false);  // Cierra el modal
     setIsEditMode(false);
     setEditingRecipe(null);
+    fetchRecipes(); //se atraen las recetas despues de crear receta
   } catch (error) {
     console.error("Error al guardar receta:", error);
   }
@@ -135,12 +136,10 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
 
     const [selectedRecipe, setSelectedRecipes] = useState(null);
 
-    const handleEdit = (recipe) => {
-    // Asegúrate de que la lista de ingredientes esté cargada
-    fetchIngredients().then(() => {
-        // Mapeamos los ingredientes de la receta y les añadimos el nombre
+    const handleEdit = (recipe) => { //se modifico funcio para tomar valor de save
+    fetchIngredients().then((loadedIngredients) => {
         const enrichedIngredients = recipe.ingredients.map((ingredient) => {
-        const fullIngredient = ingredients.find((ing) => ing._id === ingredient.materialId);
+        const fullIngredient = loadedIngredients.find(ing => ing._id === ingredient.materialId);
         return {
             ...ingredient,
             name: fullIngredient ? fullIngredient.name : "Desconocido",
@@ -160,7 +159,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
         setSelectedIngredients(enrichedIngredients);
         setSelected(recipe.recipeunitOfmeasure);
         setIsEditMode(true);
-        setOpen(true);
+        setOpen(true);  // Aquí se abre el modal
         setOpenDropdownId(null);
     });
     };

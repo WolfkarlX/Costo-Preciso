@@ -14,6 +14,7 @@ export const useRecipesStore = create((set, get) => ({
         try {
             const res = await axiosInstance.get("http://localhost:5001/api/ingredient/ingredients");
             set({ ingredients: res.data }); // Guarda la lista en el estado
+            return res.data //retorna el valor directo sin esperar async await
         } catch (error) {
             toast.error(error.response?.data?.message || "Error al obtener ingredientes.");
         } finally {
