@@ -4,10 +4,59 @@ import SearchBar from "../components/SearchBar";
 import SearchResult from "../components/SearchResult";
 import "../styles/styles.css";
 import Modal from "../components/Modal";
+import React, { useRef, useState, useEffect } from "react";
+import { Plus, Loader2, ChevronDown, ImageUp, FileInput, Camera, Ellipsis, Pencil, Trash } from "lucide-react"; // íconos
+import SearchBar from "../components/SearchBar";
+import SearchResult from "../components/SearchResult";
+import "../styles/styles.css";
+import Modal from "../components/Modal";
 import "../styles/IngredientsPage.css";
+import { useIngredientsStore } from "../store/useIngredientsStore";
 import { useIngredientsStore } from "../store/useIngredientsStore";
 
 const IngredientsPage = () => {
+    
+    // constantes para Search Bar
+    const [result, setResult] = useState([])
+
+    // constantes para Modales
+    const [open, setOpen] = useState(false)
+    const [openDropdownId, setOpenDropdownId] = useState(null);
+    const dropdownRef = useRef(null);
+
+    // funcion para cerrar modal cuando das clic fuera
+    useEffect(() => {
+    const handleClickOutside = (event) => {
+        const dropdown = document.getElementById(`dropdown-${openDropdownId}`);
+        const button = document.getElementById(`button-${openDropdownId}`);
+
+        if (
+        dropdown &&
+        !dropdown.contains(event.target) &&
+        button &&
+        !button.contains(event.target)
+        ) {
+        setOpenDropdownId(null);
+        }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [openDropdownId]);
+
+
+    // constantes para Menú desplegable dentro de Modal
+    const [isOpen, setIsOpen] = useState(false);
+    const [selected, setSelected] = useState();
+
+    // constante para campos de ingredientes
+    const [formData, setFormData] = useState({
+        name: "",
+        Units: "",
+        unityOfmeasurement: "",
+        totalPrice: "",
+        image: "",
+    });
     
     // constantes para Search Bar
     const [result, setResult] = useState([])
@@ -114,6 +163,69 @@ const IngredientsPage = () => {
     // eliminar ingrediente
     const handleDelete = async (id) => {
         await deleteIngredient(id);
+    const {
+        create,
+        updateIngredient,
+        deleteIngredient,
+        fetchIngredients,
+        ingredients,
+        isGetting,
+        isCreating
+    } = useIngredientsStore();
+
+    // Agregar un nuevo ingrediente
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (isEditMode && selectedIngredient) {
+            await updateIngredient(selectedIngredient._id, formData);
+        } else {
+            await create(formData);
+        }
+
+        await fetchIngredients();
+        setOpen(false);
+        setFormData({
+            name: "",
+            Units: "",
+            unityOfmeasurement: "",
+            totalPrice: "",
+            image: "",
+        });
+        setSelected(null);
+        setIsEditMode(false);
+        setSelectedIngredient(null);
+    };
+
+
+    // Visualizar ingredientes del usuario
+    useEffect(() => {
+        fetchIngredients(); // Obtener ingredientes al cargar el componente
+    }, []);
+
+    // editar ingrediente
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [selectedIngredient, setSelectedIngredient] = useState(null);
+
+    const handleEdit = (ingredient) => {
+        setFormData({
+            name: ingredient.name,
+            Units: ingredient.Units,
+            unityOfmeasurement: ingredient.unityOfmeasurement,
+            totalPrice: ingredient.totalPrice,
+            image: ingredient.image,
+        });
+        setSelected(ingredient.unityOfmeasurement);
+        setSelectedIngredient(ingredient);
+        setIsEditMode(true);
+        setOpen(true);
+        setOpenDropdownId(null); // Esto cierra el dropdown si estaba abierto
+    };
+
+
+    // eliminar ingrediente
+    const handleDelete = async (id) => {
+        await deleteIngredient(id);
     };
 
     
@@ -127,7 +239,25 @@ const IngredientsPage = () => {
                     "cup",
                 ];
 
+    
+    // Array de unidades de medida
+    const options = ["L",
+                    "ml",
+                    "kg",
+                    "g",
+                    "pz",
+                    "oz",
+                    "cup",
+                ];
+
     return (
+        <section className="bg-color-primary-light bg-screen">
+            <div className="mx-4 sm:mx-10 lg:mx-16">
+                {/* image */}
+                <div className="w-full flex justify-center">
+                    <img src="/image-13.png" alt="Imagen decorativa" className="w-full max-w-full h-auto object-contain"
+                    />
+                </div>
         <section className="bg-color-primary-light bg-screen">
             <div className="mx-4 sm:mx-10 lg:mx-16">
                 {/* image */}
@@ -331,10 +461,25 @@ const IngredientsPage = () => {
                         <p className="text-lg text-color-secondary my-2">
                         Precio unitario: <span className="font-black">${item.unityPrice}</span>
                         </p>
+                        <img src={item.image} alt="imagen del ingrediente" />
+                        <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
+                        <p className="text-lg text-color-secondary my-2">
+                        Cantidad: <span className="font-black">{item.Units} {item.unityOfmeasurement}</span>
+                        </p>
+                        <p className="text-lg text-color-secondary my-2">
+                        Precio total: <span className="font-black">${item.totalPrice}</span>
+                        </p>
+                        <p className="text-lg text-color-secondary my-2">
+                        Precio unitario: <span className="font-black">${item.unityPrice}</span>
+                        </p>
                     </div>
                     ))
                 )}
+                    ))
+                )}
                 </div>
+            </div> 
+        </section>
             </div> 
         </section>
     );

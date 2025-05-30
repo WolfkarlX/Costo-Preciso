@@ -8,3 +8,25 @@
     display: flex;
     overflow: hidden;
 }
+
+#datos-finales {
+    width: 100%;
+    height: 50%;
+    font-size: 2rem;
+}
+
+#datos-finales h2 {
+    font-size: 2rem;
+}
+
+#datos-finales p {
+    color: black;
+}
+
+#datos-finales h1 {
+    color: black;
+}
+
+#unidad-medida {
+    color: black;
+}
