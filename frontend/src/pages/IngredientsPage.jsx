@@ -416,7 +416,7 @@ const IngredientsPage = () => {
                 ) : (
                     ingredients.map((item) => (
                     <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
-                        <div ref={dropdownRef} className="relative inline-block flex justify-end">
+                        <div ref={dropdownRef} className="relative flex justify-end">
                         <button
                             id={`button-${item._id}`}
                             className="bg-white text-color-secondary"
