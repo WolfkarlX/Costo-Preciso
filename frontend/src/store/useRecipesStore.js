@@ -26,6 +26,7 @@ export const useRecipesStore = create((set, get) => ({
         try {
             const res = await axiosInstance.post("http://localhost:5001/api/recipe/create", data);
             toast.success("Recipe Added");
+            return res.data;
         } catch (error) {
             toast.error(error.response.data.message);
         } finally {
@@ -46,29 +47,28 @@ export const useRecipesStore = create((set, get) => ({
     },
 
     updateRecipe: async (id, updatedData) => {
-        try {
-            await axiosInstance.post(`http://localhost:5001/api/recipe/updt/${id}`, updatedData);
-            toast.success("Recipe updated");
-            const recipes = get().recipes.map((ing) =>
-                ing._id === id ? { ...ing, ...updatedData } : ing
-            );
-            set({ recipes });
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Error al actualizar receta");
-        }
+    try {
+        await axiosInstance.post(`http://localhost:5001/api/recipe/updt/${id}`, updatedData);
+        toast.success("Recipe updated");
+        
+        // Llama a fetchRecipes para actualizar la lista desde el servidor
+        await get().fetchRecipes();
+    } catch (error) {
+        toast.error(error.response?.data?.message || "Error al actualizar receta");
+    }
     },
 
     deleteRecipes: async (id) => {
-    try {
-        await axiosInstance.delete(`http://localhost:5001/api/recipe/del/${id}`);
-        
-        const updatedRecipe = get().recipes.filter((ing) => ing._id !== id);
-        set({ recipes: updatedRecipe });
+        try {
+            await axiosInstance.delete(`http://localhost:5001/api/recipe/del/${id}`);
+            toast.success("Recipe deleted");
 
-        toast.success("Recipe deleted");
-    } catch (error) {
-        toast.error(error.response?.data?.message || "Error al eliminar receta");
-    }
-},
+            // Llama a fetchRecipes para obtener la lista actualizada
+            await get().fetchRecipes();
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error al eliminar receta");
+        }
+    },
+
 
 }));

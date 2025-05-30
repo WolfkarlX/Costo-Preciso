@@ -11,6 +11,7 @@ const HomePage = () => {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpen2, setIsOpen2] = useState(false);
     const [selected, setSelected] = useState("");
     const [selectedIngredients, setSelectedIngredients] = useState([]); // Para ingredientes
 const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edición
@@ -363,7 +364,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                     onClick={() => setIsOpen(!isOpen)}
                     className="input flex justify-between items-center w-24 border-none shadow-md"
                 >
-                    <span>{formData.recipeunitOfmeasure || "Selecciona"}</span>
+                    <span>{formData.recipeunitOfmeasure}</span>
                     <ChevronDown className="ml-2 text-color-secondary" />
                 </button>
                 {isOpen && (
@@ -490,12 +491,40 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                         <p className="text-lg text-color-secondary my-2">
                         Costo total: <span className="font-black">{item.totalCost}</span>
                         </p>
+                        <button
+                            onClick={() => {
+                            setSelectedRecipes(item);
+                            setIsOpen2(true);
+                            }}
+                            className="px-4 py-2 rounded-[15px] bg-color-primary text-white font-black"
+                        >
+                            Ver detalles
+                        </button>
                     </div>
                     ))
                 )}
-                </div>
-        
-      </div>
+            </div>
+        </div>
+
+        <Modal open={isOpen2} onClose={() => setIsOpen2(false)}>
+        {selectedRecipe && (
+            <div>
+            <h2 className="text-xl font-black text-color-secondary mb-4">{selectedRecipe.name}</h2>
+            <p><strong>Porcentaje de ganancia:</strong> {selectedRecipe.profitPercentage}</p>
+            <p><strong>Costos adicionales:</strong> {selectedRecipe.aditionalCostpercentages}</p>
+            <p><strong>Unidades obtenidas:</strong> {selectedRecipe.portionsPerrecipe}</p>
+
+            <p><strong>Costo de los materiales:</strong> {selectedRecipe.materialCostTotal}</p>
+            <p><strong>Costos adicionales:</strong> {selectedRecipe.additionalCost}</p>
+            <p><strong>Costo total de la receta:</strong> {selectedRecipe.totalCost}</p>
+            <p><strong>Costo unitario:</strong> {selectedRecipe.costPerunity}</p>
+            <p><strong>Ganancia bruta:</strong> {selectedRecipe.grossProfit}</p>
+            <p><strong>Valor de venta unitario:</strong> {selectedRecipe.unitSalePrice}</p>
+            <p><strong>Ganancia neta:</strong> {selectedRecipe.netProfit}</p>
+            </div>
+        )}
+        </Modal>
+
     </section>
   );
 };
