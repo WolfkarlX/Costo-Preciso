@@ -1,22 +1,22 @@
 export const unitAliases = {
   // Volume
-  'milliliter': 'ml', 'milliliters': 'ml', 'mls': 'ml',
-  'liter': 'l', 'liters': 'l', 'litre': 'l', 'litres': 'l', 'litro':'l',
-  'cup': 'cup', 'cups': 'cup', 'c': 'cup',
+  'milliliter': 'ml', 'milliliters': 'ml', 'mls': 'ml', 'ml': 'ml',
+  'liter': 'l', 'liters': 'l', 'litre': 'l', 'litres': 'l', 'litro':'l', 'l': 'l',
+  'cup': 'cup', 'cups': 'cup', 'c': 'cup', 'cup': 'cup',
   'tablespoon': 'tbsp', 'tablespoons': 'tbsp', 'tbsp': 'tbsp', 'tbs': 'tbsp',
   'teaspoon': 'tsp', 'teaspoons': 'tsp', 'tsp': 'tsp',
   'fluid ounce': 'fl oz', 'fluid ounces': 'fl oz', 'fl oz': 'fl oz', 'floz': 'fl oz',
   'gallon': 'gal', 'gallons': 'gal', 'gal': 'gal',
 
   // Weight
-  'milligram': 'mg', 'milligrams': 'mg', 'mg': 'mg',
-  'gram': 'g', 'grams': 'g', 'gr': 'g', 'gms': 'g', 'gramo': 'g',
-  'kilogram': 'kg', 'kilograms': 'kg', 'kilo': 'kg', 'kilos': 'kg', 'kilogramo': 'kg',
+  'milligram': 'mg', 'milligrams': 'mg', 'mg': 'mg', 'mg': 'mg',
+  'gram': 'g', 'grams': 'g', 'gr': 'g', 'gms': 'g', 'gramo': 'g', 'g': 'g',
+  'kilogram': 'kg', 'kilograms': 'kg', 'kilo': 'kg', 'kilos': 'kg', 'kilogramo': 'kg', 'kg': 'kg',
   'pound': 'lb', 'pounds': 'lb', 'lbs': 'lb', '#': 'lb',
-  'ounce': 'oz', 'ounces': 'oz',
+  'ounce': 'oz', 'ounces': 'oz', 'oz': 'oz',
 
   // Pieces
-  'piece': 'pz', 'pieces': 'pz', 'pz': 'pz', 'pza': 'pz', 'pieza': 'pz', 'piezas': 'pz'
+  'piece': 'pz', 'pieces': 'pz', 'pz': 'pz', 'pza': 'pz', 'pieza': 'pz', 'piezas': 'pz', 'pz': 'pz',
 };
 
 export const conversionFactors = {
