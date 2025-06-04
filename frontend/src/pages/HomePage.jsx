@@ -185,6 +185,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
             <SearchBar setResult={setResult} />
           </div>
           <button
+            title="Agregar una nueva receta"
             className="p-2 sm:p-4 shadow-md rounded-full bg-color-primary text-white"
             onClick={() => setOpen(true)}
           >

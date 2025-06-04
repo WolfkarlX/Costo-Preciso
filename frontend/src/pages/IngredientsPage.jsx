@@ -141,7 +141,7 @@ const IngredientsPage = () => {
                     <div className="w-full mr-4 sm:mr-10">
                         <SearchBar setResult={setResult} ingredients={ingredients} />
                     </div>
-                    <button className="p-2 sm:p-4 shadow-md rounded-[50%] bg-color-primary text-white"
+                    <button title="Agregar un nuevo ingrediente" className="p-2 sm:p-4 shadow-md rounded-[50%] bg-color-primary text-white"
                     onClick={() => {
                         setOpen(true);
                         setIsEditMode(false);

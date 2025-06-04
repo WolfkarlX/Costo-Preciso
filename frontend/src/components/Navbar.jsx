@@ -100,10 +100,10 @@ const Navbar = () => {
     //Navbar
     return (
         <header className="sticky top-0 z-30 shadow bg-color-primary-light p-2">
-            <div className="relative flex max-w-screen-xl flex-col overflow-hidden px-4 py-4 md:mx-auto md:flex-row md:items-center">
+            <div className="relative flex max-w-screen-xl flex-col overflow-hidden px-4 py-0 md:mx-auto md:flex-row md:items-center">
                 <a href="#" className="flex items-center whitespace-nowrap text-2xl font-black justify-start">
                 <span className="mr-1 flex-shrink-0">
-                    <img src={logo} className="h-16 w-auto" alt="Logo" />
+                    <img src={logo} className="h-24 w-auto" alt="Logo" />
                 </span>
                 <span className="text-black">Costo Preciso</span>
                 </a>
