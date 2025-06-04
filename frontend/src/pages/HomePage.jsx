@@ -175,6 +175,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
           <img
             src="/image-12.png"
             alt="Imagen decorativa"
+            title="Imagen ilustrativa de recetas"
             className="w-full max-w-full h-auto object-contain"
           />
         </div>
@@ -482,7 +483,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                             )}
                         </div>
 
-                        <img src={item.image} alt="imagen de la receta" />
+                        <img id="img-recipe" src={item.image} alt="imagen de la receta" title="imagen de la receta" />
                         <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
                         <p className="text-lg text-color-secondary my-2">
                         Precio de venta: <span className="font-black">{item.unitSalePrice}</span>

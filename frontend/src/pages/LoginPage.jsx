@@ -76,6 +76,7 @@ const LoginPage = () => {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
                 <button
+                  title="Ver contraseña"
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}

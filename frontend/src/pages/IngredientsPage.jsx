@@ -132,7 +132,7 @@ const IngredientsPage = () => {
             <div className="mx-4 sm:mx-10 lg:mx-16">
                 {/* image */}
                 <div className="w-full flex justify-center">
-                    <img src="/image-13.png" alt="Imagen decorativa" className="w-full max-w-full h-auto object-contain"
+                    <img src="/image-13.png" alt="Imagen decorativa" title="Imagen ilustrativa de ingredientes" className="w-full max-w-full h-auto object-contain"
                     />
                 </div>
 
@@ -285,7 +285,7 @@ const IngredientsPage = () => {
                 ) : (
                     ingredients.map((item) => (
                     <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
-                        <div ref={dropdownRef} className="relative inline-block flex justify-end">
+                        <div ref={dropdownRef} className="relative flex justify-end">
                         <button
                             id={`button-${item._id}`}
                             className="bg-white text-color-secondary"
@@ -319,7 +319,7 @@ const IngredientsPage = () => {
                             )}
                         </div>
 
-                        <img src={item.image} alt="imagen del ingrediente" />
+                        <img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente"/>
                         <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
                         <p className="text-lg text-color-secondary my-2">
                         Cantidad: <span className="font-black">{item.Units} {item.unityOfmeasurement}</span>

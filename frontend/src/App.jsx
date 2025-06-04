@@ -5,7 +5,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
-import SalesPage from "./pages/SalesPage";
+import RecipebookPage from "./pages/RecipebookPage";
 import PercentagesPage from "./pages/PercentagesPage";
 import IngredientsPage from "./pages/IngredientsPage";
 
@@ -56,7 +56,7 @@ const App = () => {
           <Route path="/settings" element={authUser ? <SettingsPage /> : <Navigate to="/login" />} />
           <Route path="/ingredients" element={authUser ? <IngredientsPage /> : <Navigate to="/login" />} />
           <Route path="/percentages" element={authUser ? <PercentagesPage /> : <Navigate to="/login" />} />
-      {/* <Route path="/sales" element={authUser ? <SalesPage /> : <Navigate to="/login" />} /> */}
+          <Route path="/recipebook" element={authUser ? <RecipebookPage /> : <Navigate to="/login" />} />
       
         </Routes>
 
