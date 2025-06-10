@@ -22,16 +22,17 @@ img {
     object-fit: contain;  /* Escala la imagen para que se ajuste sin deformarse */
     display: block;       /* Evita espacio extra por ser inline */
     margin: 0 auto;       /* Centra la imagen horizontalmente */
+    border-radius: 5%;
 }
 
 #img-recipe {
     width: 100%;         
     max-width: 200px;     
-    height: auto;         
-         
+    height: auto;              
     object-fit: contain; 
     display: block;       
-    margin: 0 auto;       
+    margin: 0 auto;
+    border-radius: 5%;       
 }
 
 #datos-finales {
