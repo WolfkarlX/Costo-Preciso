@@ -137,6 +137,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
     const [selectedRecipe, setSelectedRecipes] = useState(null);
 
     const handleEdit = (recipe) => { //se modifico funcion para tomar valor de save
+
     fetchIngredients().then((loadedIngredients) => {
         const enrichedIngredients = recipe.ingredients.map((ingredient) => {
         const fullIngredient = loadedIngredients.find(ing => ing._id === ingredient.materialId);
@@ -365,6 +366,7 @@ const validatePositiveNumber = (e) => {
 
                             </div>
                         </div>
+                    
                     ))}
                 </div>
             </div>
@@ -548,6 +550,7 @@ const validatePositiveNumber = (e) => {
         {selectedRecipe && (
             <div id="datos-finales">
             <h2 className="text-xl font-black text-color-secondary mb-4">{selectedRecipe.name}</h2>
+
             <p><strong>Ganancia esperada............</strong> {selectedRecipe.profitPercentage}%</p>
             <p><strong>Costos adicionales.............</strong> {selectedRecipe.aditionalCostpercentages}%</p>
             <p><strong>Unidades obtenidas...........</strong> {selectedRecipe.portionsPerrecipe}</p>
@@ -560,6 +563,7 @@ const validatePositiveNumber = (e) => {
             <p><strong>Valor de venta unitario.....</strong> ${selectedRecipe.unitSalePrice}</p>
             <p><strong>Ganancia bruta..................</strong> ${selectedRecipe.grossProfit}</p>
             <p><strong>Ganancia neta....................</strong> ${selectedRecipe.netProfit}</p>
+
             </div>
         )}
         </Modal>
