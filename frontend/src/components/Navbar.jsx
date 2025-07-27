@@ -1,21 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast"; // Import react-hot-toast
-import { LogOut, Egg, Soup, Percent, BadgeDollarSign } from "lucide-react";
+import { LogOut, Egg, Soup, Percent, BookMarked, Settings } from "lucide-react";
+import logo from '../img/logo.png';
 
 const Navbar = () => {
     const { logout, authUser } = useAuthStore();
     const [activeLink, setActiveLink] = useState("recipes"); // Track active link
     const [confirmingLogout, setConfirmingLogout] = useState(false); // Track if confirmation is in progress
+    const [openAccessibility, setOpenAccessibility] = useState(false); // Accesibilidad
+
+    const accessibilityRef = useRef(null); // Accesibilidad
 
     //Load the active link from localStorage when the component mounts
     useEffect(() => {
-        const savedLink = localStorage.getItem('activeLink');
-        if (savedLink) {
-            setActiveLink(savedLink);
-        }
-    }, []);
+    const savedLink = localStorage.getItem("activeLink");
+    if (savedLink) {
+      setActiveLink(savedLink);
+    }
+
+    // Cerrar menú accesibilidad al hacer clic fuera
+    const handleClickOutside = (event) => {
+      if (
+        accessibilityRef.current &&
+        !accessibilityRef.current.contains(event.target)
+      ) {
+        setOpenAccessibility(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
     useEffect(() => {
         const currentPath = window.location.pathname;
@@ -83,23 +99,23 @@ const Navbar = () => {
     
     //Navbar
     return (
-        <header class="sticky top-0 z-30 shadow bg-color-primary-light p-2">
-            <div class="relative flex max-w-screen-xl flex-col overflow-hidden px-4 py-4 md:mx-auto md:flex-row md:items-center">
-                <a href="#" class="flex items-center whitespace-nowrap text-2xl font-black">
-                <span class="mr-2 text-4xl text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="currentColor" d="M6.925 16.875Q5.2 16.225 4.1 14.713Q3 13.2 3 11.25q0-1.975.938-3.513Q4.875 6.2 6 5.15q1.125-1.05 2.062-1.6L9 3v2.475q0 .625.45 1.062q.45.438 1.075.438q.35 0 .65-.15q.3-.15.5-.425L12 6q.95.55 1.625 1.35t1.025 1.8l-1.675 1.675q-.05-.6-.287-1.175q-.238-.575-.638-1.05q-.35.2-.738.287q-.387.088-.787.088q-1.1 0-1.987-.612Q7.65 7.75 7.25 6.725q-.95.925-1.6 2.062Q5 9.925 5 11.25q0 .775.275 1.462q.275.688.75 1.213q.05-.5.287-.938q.238-.437.588-.787L9 10.1l2.15 2.1q.05.05.1.125t.1.125l-1.425 1.425q-.05-.075-.087-.125q-.038-.05-.088-.1L9 12.925l-.7.7q-.125.125-.212.287q-.088.163-.088.363q0 .3.175.537q.175.238.45.363ZM9 10.1Zm0 0ZM7.4 22L6 20.6L19.6 7L21 8.4L17.4 12H21v2h-5.6l-.5.5l1.5 1.5H21v2h-2.6l2.1 2.1l-1.4 1.4l-2.1-2.1V22h-2v-4.6l-1.5-1.5l-.5.5V22h-2v-3.6Z" /></svg>
+        <header className="sticky top-0 z-30 shadow bg-color-primary-light p-2">
+            <div className="relative flex max-w-screen-xl flex-col overflow-hidden px-4 py-0 md:mx-auto md:flex-row md:items-center">
+                <a href="#" className="flex items-center whitespace-nowrap text-2xl font-black justify-start">
+                <span className="mr-1 flex-shrink-0">
+                    <img src={logo} className="h-24 w-auto" alt="Logo" />
                 </span>
-                <span class="text-black">the future</span>
+                <span className="text-black">Costo Preciso</span>
                 </a>
-                <input type="checkbox" class="peer hidden" id="navbar-open" />
-                <label class="absolute top-5 right-7 cursor-pointer md:hidden" for="navbar-open">
-                <span class="sr-only">Toggle Navigation</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                <input type="checkbox" className="peer hidden" id="navbar-open" />
+                <label className="absolute top-5 right-7 cursor-pointer md:hidden" htmlFor="navbar-open">
+                <span className="sr-only">Toggle Navigation</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
                 </label>
-                <nav aria-label="Header Navigation" class="peer-checked:mt-8 peer-checked:max-h-56 flex max-h-0 w-full flex-col items-center justify-between overflow-hidden transition-all md:ml-24 md:max-h-full md:flex-row md:items-start">
-                <ul class="flex flex-col items-center space-y-2 md:ml-auto md:flex-row md:space-y-0">
+                <nav aria-label="Header Navigation" className="peer-checked:mt-8 peer-checked:max-h-56 flex max-h-0 w-full flex-col items-center justify-between overflow-hidden transition-all md:ml-24 md:max-h-full md:flex-row md:items-start">
+                <ul className="flex flex-col items-center space-y-2 md:ml-auto md:flex-row md:space-y-0">
                     <Link
                         to="/" 
                         className={`flex items-center md:mr-12 ${
@@ -131,16 +147,103 @@ const Navbar = () => {
                         <span className={`nav-link ${activeLink === "percentages" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Porcentajes</span>
                     </Link> 
                     <Link
-                        to="/sales" 
+                        to="/recipebook" 
                         className={`flex items-center md:mr-12 ${
-                            activeLink === "sales" ? " -mt-3 border-b-4 border-[var(--color-secondary)] rounded-sm" : "border-b-4 border-transparent"
+                            activeLink === "recipebook" ? " -mt-3 border-b-4 border-[var(--color-secondary)] rounded-sm" : "border-b-4 border-transparent"
                         }`}
-                        onClick={() => handleClick("sales")}
+                        onClick={() => handleClick("recipebook")}
                     >
-                        <BadgeDollarSign size={20} color={activeLink === "sales" ? "var(--color-secondary)" : "var(--color-primary)"} />
-                        <span className={`${activeLink === "sales" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ventas</span>
-                    </Link>                     
-                    <li class="text-gray-600 md:mr-12 hover:text-blue-600">
+                        <BookMarked size={20} color={activeLink === "recipebook" ? "var(--color-secondary)" : "var(--color-primary)"} />
+                        <span className={`${activeLink === "recipebook" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetario</span>
+                    </Link>
+
+                    {/* Botón de accesibilidad */}
+                    {authUser && (
+                    <li className="relative" ref={accessibilityRef}>
+                        <button
+                        className="rounded-md border-2 border-[#4F959D] px-4 py-1 font-medium text-[#4F959D] hover:bg-[#4F959D] hover:text-white flex items-center gap-1"
+                        onClick={() => setOpenAccessibility(!openAccessibility)}
+                        aria-haspopup="true"
+                        aria-expanded={openAccessibility}
+                        aria-controls="accessibility-menu"
+                        title="Opciones de accesibilidad"
+                        >
+                        <Settings size={20} />
+                        Accesibilidad
+                        </button>
+
+                        {openAccessibility && (
+                        <div
+                            id="accessibility-menu"
+                            className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white border border-gray-300 z-50 p-4 text-gray-800"
+                            role="menu"
+                            aria-label="Opciones de accesibilidad"
+                        >
+                            {/* Sección Tamaño de texto */}
+                            <div className="mb-4">
+                            <h4 className="font-bold mb-2 text-color-primary">Tamaño de texto</h4>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Aumentar
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Disminuir
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Restablecer
+                            </button>
+                            </div>
+
+                            {/* Sección Tipo de fuente */}
+                            <div className="mb-4">
+                            <h4 className="font-bold mb-2 text-color-primary">Tipo de fuente</h4>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Arial
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Comic Sans
+                            </button>
+                            </div>
+
+                            {/* Sección Visualización */}
+                            <div className="mb-4">
+                            <h4 className="font-bold mb-2 text-color-primary">Visualización</h4>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Modo oscuro
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Alto contraste
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Filtro daltónico
+                            </button>
+                            </div>
+
+                            {/* Sección Opciones avanzadas */}
+                            <div className="mb-4">
+                            <h4 className="font-bold mb-2 text-color-primary">Opciones avanzadas</h4>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Cursor grande
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Ocultar imágenes
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Restablecer todo
+                            </button>
+                            </div>
+
+                            {/* Guardar configuración */}
+                            <div>
+                            <button className="w-full bg-color-secondary text-white font-bold py-2 rounded hover:bg-color-secondary-dark transition">
+                                Guardar configuración
+                            </button>
+                            </div>
+                        </div>
+                        )}
+                    </li>
+                    )}
+
+                    <li className="text-gray-600 md:mr-12 hover:text-blue-600">
                         {authUser && (
                         <>
                             <button

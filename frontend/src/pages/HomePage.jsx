@@ -54,7 +54,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
         create,
     } = useRecipesStore();
 
-    const options = ["l", "ml", "kg", "g", "pz", "oz", "cup"];
+    const options = ["L", "ml", "kg", "g", "pz", "oz", "cup"];
 
     const handleSubmit = async (e) => {
   e.preventDefault();
@@ -136,7 +136,8 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
 
     const [selectedRecipe, setSelectedRecipes] = useState(null);
 
-    const handleEdit = (recipe) => { //se modifico funcio para tomar valor de save
+    const handleEdit = (recipe) => { //se modifico funcion para tomar valor de save
+
     fetchIngredients().then((loadedIngredients) => {
         const enrichedIngredients = recipe.ingredients.map((ingredient) => {
         const fullIngredient = loadedIngredients.find(ing => ing._id === ingredient.materialId);
@@ -168,6 +169,30 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
         await deleteRecipes(id);
     };
 
+// Validar que en los campos numéricos ingresen números positivos aceptando decimales
+// No uso el atributo min="0" porque no acepta decimales
+const validatePositiveNumber = (e) => {
+  const { name, value } = e.target;
+  const numValue = parseFloat(value);
+  
+  // Si el campo está vacío, no hacer nada  de nada
+  if (value.trim() === '') return;
+  
+  if (isNaN(numValue)) {
+    // Usar toast en lugar de alert para no bloquear, porque el alert bloqueaba la navegación y se ve menos estético
+    toast.error("Por favor ingrese un número válido");
+    setFormData(prev => ({ ...prev, [name]: "" }));
+    return;
+  }
+
+  if (numValue < 0) {
+    // Usar toast sin bloquear la interfaz
+    toast.error("El número debe ser positivo");
+    // Resetear el valor sin forzar el foco
+    setFormData(prev => ({ ...prev, [name]: "" }));
+  }
+};
+
   return (
     <section className="bg-color-primary-light w-full min-h-screen">
       <div className="mx-4 sm:mx-10 lg:mx-16">
@@ -175,6 +200,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
           <img
             src="/image-12.png"
             alt="Imagen decorativa"
+            title="Imagen ilustrativa de recetas"
             className="w-full max-w-full h-auto object-contain"
           />
         </div>
@@ -184,6 +210,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
             <SearchBar setResult={setResult} />
           </div>
           <button
+            title="Agregar una nueva receta"
             className="p-2 sm:p-4 shadow-md rounded-full bg-color-primary text-white"
             onClick={() => setOpen(true)}
           >
@@ -292,6 +319,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                             <input
                                 type="number"
                                 placeholder="Unidades"
+                                onBlur={validatePositiveNumber} // Validar campo numérico
                                 className="input w-full px-10 shadow-md border-none bg-color-primary-light font-black text-color-secondary"
                                 value={ingredient.units}
                                 onChange={(e) => {
@@ -338,6 +366,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
 
                             </div>
                         </div>
+                    
                     ))}
                 </div>
             </div>
@@ -345,14 +374,20 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
             <div className="flex flex-wrap items-center gap-3 mt-4">
               <span className="label-text font-medium my-2">De esta receta se obtienen</span>
               <input
+                name="portionsPerrecipe" // Nombre del input
                 type="number"
+                onBlur={validatePositiveNumber} // Validar campo numérico
+                placeholder="Eje:10"
                 className="input w-24 px-5 shadow-md border-none"
                 value={formData.portionsPerrecipe}
                 onChange={(e) => setFormData({ ...formData, portionsPerrecipe: e.target.value })}
               />
               <span className="label-text font-medium my-2">unidades de</span>
               <input
+                name="quantityPermeasure" // Nombre del input
                 type="number"
+                onBlur={validatePositiveNumber} // Validar campo numérico
+                placeholder="Eje:100"
                 className="input w-24 px-5 shadow-md border-none"
                 value={formData.quantityPermeasure}
                 onChange={(e) => setFormData({ ...formData, quantityPermeasure: e.target.value })}
@@ -394,6 +429,8 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                     </label>
                     <input
                     type="number"
+                    onBlur={validatePositiveNumber} // Validar campo numérico
+                    placeholder="Ejemplo: 20"
                     className="input w-full shadow-md px-10 border-none"
                     value={formData.profitPercentage}
                     onChange={(e) => setFormData({ ...formData, profitPercentage: e.target.value })}
@@ -407,6 +444,8 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                     </label>
                     <input
                     type="number"
+                    onBlur={validatePositiveNumber} // Validar campo numérico
+                    placeholder="Agua, luz, mano de obra, etc."
                     className="input w-full shadow-md px-10 border-none"
                     value={formData.aditionalCostpercentages}
                     onChange={(e) => setFormData({ ...formData, aditionalCostpercentages: e.target.value })}
@@ -482,13 +521,15 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
                             )}
                         </div>
 
-                        <img src={item.image} alt="imagen de la receta" />
+                        <img id="img-recipe" src={item.image} alt="imagen de la receta" title="imagen de la receta" />
                         <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
                         <p className="text-lg text-color-secondary my-2">
-                        Precio de venta: <span className="font-black">{item.unitSalePrice}</span>
+                        Precio de venta: <span className="font-black">${item.unitSalePrice}</span>
                         </p>
+                        <p id="netProfit_item" className="text-lg text-color-secondary my-2">
+                        Ganancia neta: <span className="font-black">${item.netProfit}</span></p>
                         <p className="text-lg text-color-secondary my-2">
-                        Costo total: <span className="font-black">{item.totalCost}</span>
+                        En hacerla se gasta: <span className="font-black">${item.totalCost}</span>
                         </p>
                         <button
                             onClick={() => {
@@ -509,18 +550,20 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
         {selectedRecipe && (
             <div id="datos-finales">
             <h2 className="text-xl font-black text-color-secondary mb-4">{selectedRecipe.name}</h2>
-            <p><strong>Porcentaje de ganancia.....</strong> {selectedRecipe.profitPercentage}</p>
-            <p><strong>Costos adicionales.............</strong> {selectedRecipe.aditionalCostpercentages}</p>
+
+            <p><strong>Ganancia esperada............</strong> {selectedRecipe.profitPercentage}%</p>
+            <p><strong>Costos adicionales.............</strong> {selectedRecipe.aditionalCostpercentages}%</p>
             <p><strong>Unidades obtenidas...........</strong> {selectedRecipe.portionsPerrecipe}</p>
             <h1>-----------------------------------------</h1>
             
-            <p><strong>Costo de los materiales.....</strong> {selectedRecipe.materialCostTotal}</p>
-            <p><strong>Costos adicionales.............</strong> {selectedRecipe.additionalCost}</p>
-            <p><strong>Costo total de la receta.....</strong> {selectedRecipe.totalCost}</p>
-            <p><strong>Costo unitario....................</strong> {selectedRecipe.costPerunity}</p>
-            <p><strong>Ganancia bruta..................</strong> {selectedRecipe.grossProfit}</p>
-            <p><strong>Valor de venta unitario.....</strong> {selectedRecipe.unitSalePrice}</p>
-            <p><strong>Ganancia neta....................</strong> {selectedRecipe.netProfit}</p>
+            <p><strong>Costo de los materiales.....</strong> ${selectedRecipe.materialCostTotal}</p>
+            <p><strong>Costos adicionales.............</strong> ${selectedRecipe.additionalCost}</p>
+            <p><strong>Costo total de la receta.....</strong> ${selectedRecipe.totalCost}</p>
+            <p><strong>Costo unitario....................</strong> ${selectedRecipe.costPerunity}</p>
+            <p><strong>Valor de venta unitario.....</strong> ${selectedRecipe.unitSalePrice}</p>
+            <p><strong>Ganancia bruta..................</strong> ${selectedRecipe.grossProfit}</p>
+            <p><strong>Ganancia neta....................</strong> ${selectedRecipe.netProfit}</p>
+
             </div>
         )}
         </Modal>
