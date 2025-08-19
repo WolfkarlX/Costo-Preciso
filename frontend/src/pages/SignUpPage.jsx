@@ -221,7 +221,8 @@ const SignUpPage = () => {
             <GoogleLogin
               onSuccess={handleGoogleLoginSuccess}
               onError={handleGoogleLoginError}
-              useOneTap
+              // Habilita el inicio de sesión automático (One Tap) de Google si el usuario ya ha iniciado sesión anteriormente
+              // useOneTap
               text="continue_with"
             />
           </div>
