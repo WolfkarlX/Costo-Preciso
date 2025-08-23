@@ -1,3 +1,4 @@
+import { axiosInstance } from "../lib/axios.js"; // Ajusta la ruta según corresponda
 import TopRecipesChart from "../components/TopRecipesChart";
 
 export default function AnalyticsPage() {
@@ -9,7 +10,6 @@ export default function AnalyticsPage() {
       <section>
         <h2>Top Recetas por Ganancia</h2>
         <TopRecipesChart
-          apiBase="http://localhost:5001"
           metric="profit"
           limit={5}
           // periodDays={30} // si quieres filtrar últimos 30 días
@@ -20,7 +20,6 @@ export default function AnalyticsPage() {
       <section>
         <h2>Top Recetas por Margen (%)</h2>
         <TopRecipesChart
-          apiBase="http://localhost:5001"
           metric="margin"
           limit={5}
         />
