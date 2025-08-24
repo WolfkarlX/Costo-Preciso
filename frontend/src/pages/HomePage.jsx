@@ -14,7 +14,7 @@ const HomePage = () => {
     const [isOpen2, setIsOpen2] = useState(false);
     const [selected, setSelected] = useState("");
     const [selectedIngredients, setSelectedIngredients] = useState([]); // Para ingredientes
-const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edición
+    const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edición
     const [open, setOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
@@ -44,6 +44,9 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
 
     const {
         isCreating,
+        isUpdating,
+        isDeleting,
+        deletingId, // ID del elemento que se está eliminando    
         fetchIngredients,
         updateRecipe,
         fetchRecipes,
@@ -76,9 +79,9 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
     recipeunitOfmeasure: formData.recipeunitOfmeasure,
     aditionalCostpercentages: formData.aditionalCostpercentages,
     ingredients: selectedIngredients.map(({ materialId, units, UnitOfmeasure }) => ({
-      materialId,
-      units: units.toString(),
-      UnitOfmeasure
+    materialId,
+    units: units.toString(),
+    UnitOfmeasure
     })),
   };
 
@@ -136,34 +139,47 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
 
     const [selectedRecipe, setSelectedRecipes] = useState(null);
 
-    const handleEdit = (recipe) => { //se modifico funcion para tomar valor de save
+    // editar receta
+    const handleEdit = async (recipe) => {
+    setEditingRecipe(recipe);
 
-    fetchIngredients().then((loadedIngredients) => {
-        const enrichedIngredients = recipe.ingredients.map((ingredient) => {
-        const fullIngredient = loadedIngredients.find(ing => ing._id === ingredient.materialId);
-        return {
-            ...ingredient,
-            name: fullIngredient ? fullIngredient.name : "Desconocido",
-            dropdownOpen: false,
-        };
-        });
-
-        setEditingRecipe(recipe);
-        setFormData({
+    setFormData({
         name: recipe.name,
         portionsPerrecipe: recipe.portionsPerrecipe,
         quantityPermeasure: recipe.quantityPermeasure,
         aditionalCostpercentages: recipe.aditionalCostpercentages,
         profitPercentage: recipe.profitPercentage,
         recipeunitOfmeasure: recipe.recipeunitOfmeasure,
-        });
-        setSelectedIngredients(enrichedIngredients);
-        setSelected(recipe.recipeunitOfmeasure);
-        setIsEditMode(true);
-        setOpen(true);  // Aquí se abre el modal
-        setOpenDropdownId(null);
     });
+    setSelected(recipe.recipeunitOfmeasure);
+    setIsEditMode(true);
+    setOpen(true);
+    setOpenDropdownId(null);
+
+    try {
+        // Verificamos si ya hay ingredientes cargados
+        if (ingredients.length === 0) {
+        await fetchIngredients(); // Carga desde API si es necesario
+        }
+
+        // Mapear los ingredientes de la receta con los datos completos del store
+        const enrichedIngredients = recipe.ingredients.map((ingredient) => {
+        // CORRECCIÓN: Usar el estado 'ingredients' en lugar de get().ingredients
+        const fullIngredient = ingredients.find(ing => ing._id === ingredient.materialId) || {};
+        return {
+            ...ingredient,
+            name: fullIngredient.name || "Desconocido",
+            dropdownOpen: false,
+        };
+        });
+
+        setSelectedIngredients(enrichedIngredients);
+    } catch (error) {
+        console.error("Error al cargar ingredientes:", error);
+        toast.error("No se pudieron cargar los ingredientes de la receta");
+    }
     };
+
 
     const handleDelete = async (id) => {
         await deleteRecipes(id);
@@ -212,18 +228,21 @@ const validatePositiveNumber = (e) => {
           <button
             title="Agregar una nueva receta"
             className="p-2 sm:p-4 shadow-md rounded-full bg-color-primary text-white"
-            onClick={() => setOpen(true)}
-          >
+            onClick={() => {
+                setOpen(true);
+                setIsEditMode(false);}}
+            >
             <Plus size={28} />
           </button>
         </div>
 
+        {/* Modal para crear / editar */}
         <Modal open={open} onClose={() => setOpen(false)}>
           <form onSubmit={handleSubmit}>
             <h3 className="text-xl font-black text-color-secondary text-center mb-4">
               {isEditMode ? "Editar receta" : "Nueva receta"}
             </h3>
-
+            
             <div className="md:flex md:gap-6 md:items-start">
                 {/* Sección de imagen */}
                 <div className="form-control w-full md:w-1/3">
@@ -473,12 +492,19 @@ const validatePositiveNumber = (e) => {
                 >
                     Cancelar
                 </button>
-                <button type="submit" className="btn btn-primary font-bold" disabled={isCreating}>
-                    {isCreating ? <Loader2 className="size-5 animate-spin" /> : isEditMode ? "Actualizar" : "Guardar"}
+                <button 
+                    type="submit" 
+                    className="btn btn-primary font-bold" 
+                    disabled={isCreating || isUpdating}
+                    >
+                    {isCreating || isUpdating ? (
+                        <Loader2 className="size-5 animate-spin" />
+                    ) : isEditMode ? "Actualizar" : "Guardar"}
                 </button>
             </div>
             </form>
-        </Modal>
+            </Modal>
+
         <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
@@ -513,8 +539,15 @@ const validatePositiveNumber = (e) => {
                                     <button
                                         className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
                                         onClick={() => handleDelete(item._id)}
+                                        disabled={isDeleting} // Deshabilitar durante eliminación
                                     >
-                                        <Trash size={20} /> Eliminar
+                                        {/* Mostrar loader si este ingrediente se está eliminando */}
+                                        {isDeleting && deletingId === item._id ? (
+                                            <Loader2 size={20} className="animate-spin mr-2" />
+                                        ) : (
+                                            <Trash size={20} />
+                                        )}
+                                        {isDeleting && deletingId === item._id ? "" : "Eliminar"}
                                     </button>
                                 </div>
                             </div>

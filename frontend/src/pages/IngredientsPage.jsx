@@ -58,8 +58,11 @@ const IngredientsPage = () => {
         fetchIngredients,
         ingredients,
         isGetting,
-        isCreating
-    } = useIngredientsStore();
+        isCreating,
+        isUpdating,
+        isDeleting,
+        deletingId // ID del elemento que se está eliminando    
+        } = useIngredientsStore();
 
     // Agregar un nuevo ingrediente
     const handleSubmit = async (e) => {
@@ -161,7 +164,7 @@ const IngredientsPage = () => {
                             <div className="text-center w-80"></div>
                                 <h3 className="text-xl font-black text-color-secondary text-center">
                                     {isEditMode ? "Editar ingrediente" : "Nuevo ingrediente"}
-                                </h3>                                
+                                </h3>                       
                                 <div className="md:flex md:gap-6 md:items-start">
                                     {/* Sección de imagen */}
                                     <div className="form-control w-full md:w-1/3">
@@ -252,27 +255,33 @@ const IngredientsPage = () => {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 mb-2">
-                                <button
-                                    type="button"
-                                    className="border sm:p-2 border-color-secondary rounded-[15px] font-bold text-color-secondary shadow-md"
-                                    onClick={() => {
-                                        setOpen(false);
-                                        setFormData({
-                                            name: "",
-                                            Units: "",
-                                            unityOfmeasurement: "",
-                                            totalPrice: "",
-                                            image: null,
-                                        });
-                                        setSelected(null);
-                                        setIsEditMode(false);
-                                    }}
-                                >
-                                    Cancelar
-                                </button>
-                                <button type="submit" className="btn btn-primary font-bold" disabled={isCreating}>
-                                    {isCreating ? <Loader2 className="size-5 animate-spin" /> : isEditMode ? "Actualizar" : "Guardar"}
-                                </button>
+                                    <button
+                                        type="button"
+                                        className="border sm:p-2 border-color-secondary rounded-[15px] font-bold text-color-secondary shadow-md"
+                                        onClick={() => {
+                                            setOpen(false);
+                                            setFormData({
+                                                name: "",
+                                                Units: "",
+                                                unityOfmeasurement: "",
+                                                totalPrice: "",
+                                                image: null,
+                                            });
+                                            setSelected(null);
+                                            setIsEditMode(false);
+                                        }}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button 
+                                        type="submit" 
+                                        className="btn btn-primary font-bold" 
+                                        disabled={isCreating || isUpdating}
+                                        >
+                                        {isCreating || isUpdating ? (
+                                            <Loader2 className="size-5 animate-spin" />
+                                        ) : isEditMode ? "Actualizar" : "Guardar"}
+                                    </button>
                                 </div>
                             </form>
                         </Modal>
@@ -309,11 +318,18 @@ const IngredientsPage = () => {
                                         <Pencil size={20} /> Editar
                                     </button>
                                     <button
-                                        className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
-                                        onClick={() => handleDelete(item._id)}
-                                    >
-                                        <Trash size={20} /> Eliminar
-                                    </button>
+                                    className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
+                                    onClick={() => handleDelete(item._id)}
+                                    disabled={isDeleting} // Deshabilitar durante eliminación
+                                >
+                                    {/* Mostrar loader si este ingrediente se está eliminando */}
+                                    {isDeleting && deletingId === item._id ? (
+                                        <Loader2 size={20} className="animate-spin mr-2" />
+                                    ) : (
+                                        <Trash size={20} />
+                                    )}
+                                    {isDeleting && deletingId === item._id ? "" : "Eliminar"}
+                                </button>
                                 </div>
                             </div>
                             )}
