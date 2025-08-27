@@ -29,7 +29,7 @@ export const useAuthStore = create((set) => ({
         try {
             const res = await axiosInstance.post("/auth/signup", data);
             set({ authUser: res.data });
-            toast.success("Se envio correo de confirmacion exitosamente");
+            toast.success("Se envió correo de confirmación exitosamente (revisar spam)");
         } catch (error) {
             toast.error(error.response.data.message);
         } finally {
@@ -42,7 +42,7 @@ export const useAuthStore = create((set) => ({
         try {
             const res = await axiosInstance.post("/auth/login", data);
             set({ authUser: res.data });
-            toast.success("Logged in successfully");
+            toast.success("Inicio de sesión exitoso");
         } catch (error) {
             toast.error(error.response.data.message);
         } finally {
@@ -61,7 +61,7 @@ export const useAuthStore = create((set) => ({
       set({ authUser: res.data });
       toast.success("Logueado correctamente con Google.");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Inicio de sesion con Google fallido.");
+      toast.error(error.response?.data?.message || "Inicio de sesión con Google fallido.");
     } finally {
       set({ isLoggingIn: false });
     }
@@ -72,7 +72,7 @@ export const useAuthStore = create((set) => ({
             await axiosInstance.post("/auth/logout");
             set({ authUser: null });
             localStorage.clear();
-            toast.success("Logged out successfully");
+            toast.success("sesión cerrada correctamente");
         } catch (error) {
             toast.error(error.response.data.message);
         }

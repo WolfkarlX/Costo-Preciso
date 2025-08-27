@@ -137,16 +137,6 @@ const Navbar = () => {
                         <span className={`${activeLink === "ingredients" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ingredientes</span>
                     </Link>
                     <Link
-                        to="/percentages" 
-                        className={`flex items-center md:mr-12 ${
-                            activeLink === "percentages" ? " -mt-3 border-b-4 border-[var(--color-secondary)] rounded-sm" : "border-b-4 border-transparent"
-                        }`}
-                        onClick={() => handleClick("percentages")}
-                    >
-                        <Percent size={20} color={activeLink === "percentages" ? "var(--color-secondary)" : "var(--color-primary)"} />
-                        <span className={`nav-link ${activeLink === "percentages" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Porcentajes</span>
-                    </Link> 
-                    <Link
                         to="/recipebook" 
                         className={`flex items-center md:mr-12 ${
                             activeLink === "recipebook" ? " -mt-3 border-b-4 border-[var(--color-secondary)] rounded-sm" : "border-b-4 border-transparent"
@@ -156,6 +146,16 @@ const Navbar = () => {
                         <BookMarked size={20} color={activeLink === "recipebook" ? "var(--color-secondary)" : "var(--color-primary)"} />
                         <span className={`${activeLink === "recipebook" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetario</span>
                     </Link>
+                    <Link
+                        to="/percentages" 
+                        className={`flex items-center md:mr-12 ${
+                            activeLink === "percentages" ? " -mt-3 border-b-4 border-[var(--color-secondary)] rounded-sm" : "border-b-4 border-transparent"
+                        }`}
+                        onClick={() => handleClick("percentages")}
+                    >
+                        <Percent size={20} color={activeLink === "percentages" ? "var(--color-secondary)" : "var(--color-primary)"} />
+                        <span className={`nav-link ${activeLink === "percentages" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Porcentajes</span>
+                    </Link> 
 
                     {/* Botón de accesibilidad */}
                     {authUser && (

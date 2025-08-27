@@ -319,7 +319,7 @@ const IngredientsPage = () => {
                             )}
                         </div>
 
-                        <img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente"/>
+                        <div className="img-container"><img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente"/></div>
                         <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
                         <p className="text-lg text-color-secondary my-2">
                         Cantidad: <span className="font-black">{item.Units} {item.unityOfmeasurement}</span>
