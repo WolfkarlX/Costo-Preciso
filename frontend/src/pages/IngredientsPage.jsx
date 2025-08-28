@@ -16,6 +16,7 @@ const IngredientsPage = () => {
     const [open, setOpen] = useState(false)
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
+    const [inputValue, setInputValue] = useState('');
 
     // funcion para cerrar modal cuando das clic fuera
     useEffect(() => {
@@ -139,7 +140,7 @@ const IngredientsPage = () => {
                 {/* search bar */}
                 <div className="flex flex-row w-full mt-4">
                     <div className="w-full mr-4 sm:mr-10">
-                        <SearchBar setResult={setResult} ingredients={ingredients} />
+                        <SearchBar setResult={setResult} ingredients={ingredients} setInputValue={setInputValue} />
                     </div>
                     <button title="Agregar un nuevo ingrediente" className="p-2 sm:p-4 shadow-md rounded-[50%] bg-color-primary text-white"
                     onClick={() => {
@@ -277,63 +278,67 @@ const IngredientsPage = () => {
                             </form>
                         </Modal>
                 </div>
-                <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div>
+                {/* <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div> */}
+
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                {isGetting ? (
-                    <p className="col-span-full text-center"><Loader2 /></p>
-                ) : (
-                    ingredients.map((item) => (
-                    <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
-                        <div ref={dropdownRef} className="relative flex justify-end">
-                        <button
-                            id={`button-${item._id}`}
-                            className="bg-white text-color-secondary"
-                            onClick={() =>
-                                setOpenDropdownId((prev) => (prev === item._id ? null : item._id))
-                            }
-                            >
-                            <Ellipsis />
-                            </button>
+    {isGetting ? (
+        <p className="col-span-full text-center"><Loader2 /></p>
+    ) : (
+        // Check if there are search results (result) or fallback to all ingredients
+        (result.length > 0 ? result : ingredients).map((item) => (
+            <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
+                <div ref={dropdownRef} className="relative flex justify-end">
+                    <button
+                        id={`button-${item._id}`}
+                        className="bg-white text-color-secondary"
+                        onClick={() =>
+                            setOpenDropdownId((prev) => (prev === item._id ? null : item._id))
+                        }
+                    >
+                        <Ellipsis />
+                    </button>
 
-                            {openDropdownId === item._id && (
-                            <div
-                                id={`dropdown-${item._id}`}
-                                className="absolute mt-6 rounded-[20px] shadow-md bg-color-primary-light z-50"
-                            >
-                                <div className="text-md text-color-primary font-black flex flex-col">
-                                    <button
-                                        className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
-                                        onClick={() => handleEdit(item)}
-                                    >
-                                        <Pencil size={20} /> Editar
-                                    </button>
-                                    <button
-                                        className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
-                                        onClick={() => handleDelete(item._id)}
-                                    >
-                                        <Trash size={20} /> Eliminar
-                                    </button>
-                                </div>
+                    {openDropdownId === item._id && (
+                        <div
+                            id={`dropdown-${item._id}`}
+                            className="absolute mt-6 rounded-[20px] shadow-md bg-color-primary-light z-50"
+                        >
+                            <div className="text-md text-color-primary font-black flex flex-col">
+                                <button
+                                    className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
+                                    onClick={() => handleEdit(item)}
+                                >
+                                    <Pencil size={20} /> Editar
+                                </button>
+                                <button
+                                    className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
+                                    onClick={() => handleDelete(item._id)}
+                                >
+                                    <Trash size={20} /> Eliminar
+                                </button>
                             </div>
-                            )}
                         </div>
-
-                        <img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente"/>
-                        <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
-                        <p className="text-lg text-color-secondary my-2">
-                        Cantidad: <span className="font-black">{item.Units} {item.unityOfmeasurement}</span>
-                        </p>
-                        <p className="text-lg text-color-secondary my-2">
-                        Precio total: <span className="font-black">${item.totalPrice}</span>
-                        </p>
-                        <p className="text-lg text-color-secondary my-2">
-                        Precio unitario: <span className="font-black">${item.unityPrice}</span>
-                        </p>
-                    </div>
-                    ))
-                )}
+                    )}
                 </div>
+
+                <div className="img-container">
+                    <img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente" />
+                </div>
+                <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
+                <p className="text-lg text-color-secondary my-2">
+                    Cantidad: <span className="font-black">{item.Units} {item.unityOfmeasurement}</span>
+                </p>
+                <p className="text-lg text-color-secondary my-2">
+                    Precio total: <span className="font-black">${item.totalPrice}</span>
+                </p>
+                <p className="text-lg text-color-secondary my-2">
+                    Precio unitario: <span className="font-black">${item.unityPrice}</span>
+                </p>
+            </div>
+        ))
+    )}
+</div>
             </div> 
         </section>
     );

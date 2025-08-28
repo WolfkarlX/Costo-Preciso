@@ -18,6 +18,7 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
     const [open, setOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
+    const [inputValue, setInputValue] = useState('');
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -207,7 +208,7 @@ const validatePositiveNumber = (e) => {
 
         <div className="flex flex-row w-full mt-4">
           <div className="w-full mr-4 sm:mr-10">
-            <SearchBar setResult={setResult} />
+            <SearchBar setResult={setResult} ingredients={recipes}/>
           </div>
           <button
             title="Agregar una nueva receta"
@@ -479,13 +480,13 @@ const validatePositiveNumber = (e) => {
             </div>
             </form>
         </Modal>
-        <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div>
+            {/* <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div> */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {isGetting ? (
                     <p className="col-span-full text-center"><Loader2 /></p>
                 ) : (
-                    recipes.map((item) => (
+                    (result.length > 0 ? result : recipes).map((item) => (
                     <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
                         <div ref={dropdownRef} className="relative flex justify-end">
                         <button

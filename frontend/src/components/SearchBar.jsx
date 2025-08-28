@@ -14,7 +14,7 @@ const SearchBar = ({ setResult, ingredients }) => {
         }
 
         const filtered = ingredients.filter(item =>
-            item.name.toLowerCase().startsWith(value.toLowerCase())
+            item.name.toLowerCase().includes(value.toLowerCase())
         );
 
         setResult(filtered);
