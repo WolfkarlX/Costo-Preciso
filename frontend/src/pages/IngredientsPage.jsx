@@ -37,10 +37,24 @@ const IngredientsPage = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [openDropdownId]);
 
-
     // constantes para Menú desplegable dentro de Modal
     const [isOpen, setIsOpen] = useState(false);
-    const [selected, setSelected] = useState();
+    const [selectedOption, setSelectedOption] = useState(null);
+    const toggling = () => setIsOpen(!isOpen);
+
+    // Efecto para cerrar el dropdown al hacer clic fuera
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setIsOpen(false);
+        }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     // constante para campos de ingredientes
     const [formData, setFormData] = useState({
@@ -83,7 +97,7 @@ const IngredientsPage = () => {
             totalPrice: "",
             image: "",
         });
-        setSelected(null);
+        setSelectedOption(null);
         setIsEditMode(false);
         setSelectedIngredient(null);
     };
@@ -106,7 +120,7 @@ const IngredientsPage = () => {
             totalPrice: ingredient.totalPrice,
             image: ingredient.image,
         });
-        setSelected(ingredient.unityOfmeasurement);
+        setSelectedOption(ingredient.unityOfmeasurement);
         setSelectedIngredient(ingredient);
         setIsEditMode(true);
         setOpen(true);
@@ -124,7 +138,7 @@ const IngredientsPage = () => {
     const options = ["L",
                     "ml",
                     "kg",
-                    "g",
+                    "gr",
                     "pz",
                     "oz",
                     "cup",
@@ -155,7 +169,7 @@ const IngredientsPage = () => {
                         totalPrice: "",
                         image: "",
                         });
-                        setSelected(null);
+                        setSelectedOption(null);
                     }}>
                         <Plus size={28}/>
                     </button>
@@ -195,7 +209,7 @@ const IngredientsPage = () => {
                                                 <span className="label-text font-medium mt-4 my-2">Cantidad</span>
                                                 </label>
                                                 <input
-                                                type="number"
+                                                type="select"
                                                 step="any"
                                                 className="input w-full px-10 shadow-md border-none"
                                                 value={formData.Units}
@@ -205,35 +219,46 @@ const IngredientsPage = () => {
 
                                             <div className="form-control relative">
                                                 <label className="label">
-                                                <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
+                                                    <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
                                                 </label>
-                                                <button
-                                                type="button"
-                                                onClick={() => setIsOpen(!isOpen)}
-                                                className="input inline-flex justify-between items-center w-full min-h-[40px] px-4 border-none shadow-md text-left"
-                                                >
-                                                <span>{selected}</span>
-                                                <ChevronDown className="ml-2 text-color-secondary" />
-                                                </button>
-                                                {isOpen && (
-                                                <div className="origin-top-right absolute mt-4 w-48 rounded-[20px] shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                                                    <div className="p-2">
-                                                    {options.map((option, index) => (
+                                                <div className="w-[100%] relative inline-flex rounded-[20px] bg-white shadow-md input border-none" ref={dropdownRef}>
+                                                    <div className="w-[100%]">
                                                         <button
-                                                        key={index}
-                                                        onClick={() => {
-                                                            setSelected(option);
-                                                            setFormData({ ...formData, unityOfmeasurement: option });
-                                                            setIsOpen(false);
-                                                        }}
-                                                        className="w-full text-left p-2 text-sm text-color-primary cursor-pointer hover:bg-color-primary-light rounded-[10px]"
-                                                        >
-                                                        {option}
+                                                        type="button"
+                                                        onClick={toggling}
+                                                        className="w-[100%]">
+                                                            {selectedOption}
                                                         </button>
-                                                    ))}
                                                     </div>
+                                                    <div className="relative">
+                                                        <button
+                                                            type="button"
+                                                            onClick={toggling}
+                                                            className="flex items-center justify-center px-3 self-stretch">
+                                                                <ChevronDown className="text-color-secondary" />
+                                                        </button>
+                                                    </div>
+                                                    {isOpen && (
+                                                        <div className="absolute top-[100%] left-0 right-0 z-50 mt-2 w-full px-4 py-2
+                                                        origin-top-right rounded-[20px] border border-none bg-white shadow-md">
+                                                            <div className="max-h-40 overflow-y-auto"> {/* Contenedor con scroll */}
+                                                            {options.map((option) => (
+                                                                    <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setSelectedOption(option);
+                                                                        setFormData({ ...formData, unityOfmeasurement: option });
+                                                                        setIsOpen(false);
+                                                                    }}
+                                                                    className="block w-full px-4 py-2 cursor-pointer font-black text-color-secondary no-underline rounded-[10px] hover:bg-color-primary-light"                                                                   
+                                                                    key={option} >
+                                                                        {option}
+                                                                    </button>
+                                                            ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                )}
                                             </div>
                                         </div>
 
@@ -267,7 +292,7 @@ const IngredientsPage = () => {
                                                 totalPrice: "",
                                                 image: null,
                                             });
-                                            setSelected(null);
+                                            setSelectedOption(null);
                                             setIsEditMode(false);
                                         }}
                                     >
@@ -288,68 +313,67 @@ const IngredientsPage = () => {
                 </div>
                 <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-                {isGetting ? (
-                    <p className="col-span-full text-center"><Loader2 /></p>
-                ) : (
-                    ingredients.map((item) => (
-                    <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
-                        <div ref={dropdownRef} className="relative flex justify-end">
-                        <button
-                            id={`button-${item._id}`}
-                            className="bg-white text-color-secondary"
-                            onClick={() =>
-                                setOpenDropdownId((prev) => (prev === item._id ? null : item._id))
-                            }
-                            >
-                            <Ellipsis />
-                            </button>
+                {/*Visualización de ingredientes*/}
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+  {isGetting ? (
+    <p className="col-span-full text-center"><Loader2 /></p>
+  ) : (
+    ingredients.map((item) => (
+      <div key={item._id} className="bg-white rounded-[20px] shadow-md p-4 flex flex-col">
+        <div className="relative flex justify-end mb-2">
+            <button 
+                id={`button-${item._id}`}
+                className="text-color-secondary hover:bg-color-primary-light rounded-full p-2"
+                onClick={() => setOpenDropdownId((prev) => (prev === item._id ? null : item._id))}
+            >
+                <Ellipsis />
+            </button>
 
-                            {openDropdownId === item._id && (
-                            <div
-                                id={`dropdown-${item._id}`}
-                                className="absolute mt-6 rounded-[20px] shadow-md bg-color-primary-light z-50"
-                            >
-                                <div className="text-md text-color-primary font-black flex flex-col">
-                                    <button
-                                        className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
-                                        onClick={() => handleEdit(item)}
-                                    >
-                                        <Pencil size={20} /> Editar
-                                    </button>
-                                    <button
-                                    className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
-                                    onClick={() => handleDelete(item._id)}
-                                    disabled={isDeleting} // Deshabilitar durante eliminación
-                                >
-                                    {/* Mostrar loader si este ingrediente se está eliminando */}
-                                    {isDeleting && deletingId === item._id ? (
-                                        <Loader2 size={20} className="animate-spin mr-2" />
-                                    ) : (
-                                        <Trash size={20} />
-                                    )}
-                                    {isDeleting && deletingId === item._id ? "" : "Eliminar"}
-                                </button>
-                                </div>
-                            </div>
-                            )}
-                        </div>
-
-                        <img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente"/>
-                        <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
-                        <p className="text-lg text-color-secondary my-2">
-                        Cantidad: <span className="font-black">{item.Units} {item.unityOfmeasurement}</span>
-                        </p>
-                        <p className="text-lg text-color-secondary my-2">
-                        Precio total: <span className="font-black">${item.totalPrice}</span>
-                        </p>
-                        <p className="text-lg text-color-secondary my-2">
-                        Precio unitario: <span className="font-black">${item.unityPrice}</span>
-                        </p>
-                    </div>
-                    ))
-                )}
+            {openDropdownId === item._id && (
+                <div
+                id={`dropdown-${item._id}`}
+                className="absolute mt-12 rounded-[20px] shadow-md bg-color-primary-light z-50"
+                >
+                <div className="text-md text-color-primary font-black flex flex-col">
+                    <button
+                    className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
+                    onClick={() => handleEdit(item)}
+                    >
+                    <Pencil size={20} /> Editar
+                    </button>
+                    <button
+                    className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
+                    onClick={() => handleDelete(item._id)}
+                    disabled={isDeleting}
+                    >
+                    {isDeleting && deletingId === item._id ? (
+                        <Loader2 size={20} className="animate-spin mr-2" />
+                    ) : (
+                        <Trash size={20} />
+                    )}
+                    {isDeleting && deletingId === item._id ? "" : "Eliminar"}
+                    </button>
                 </div>
+                </div>
+            )}
+        </div>
+
+        <div className="flex flex-col items-center flex-grow">
+            <img 
+                id="img-ingredient" 
+                src={item.image} 
+                alt="imagen del ingrediente" 
+                title="Imagen del ingrediente"
+                className="w-20 h-20 object-cover rounded-full border"
+            />
+             <p className="text-lg font-black text-color-primary mb-2 text-center line-clamp-2">
+            {item.name}
+          </p>
+          </div>
+        </div>
+    ))
+  )}
+</div>
             </div> 
         </section>
     );
