@@ -26,7 +26,7 @@ const ingredientSchema = new mongoose.Schema(
             ref:"User",
             required: true,
         },
-        image: {
+        imageUrl: {
             type: String,
             default: ""
         },

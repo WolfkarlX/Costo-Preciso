@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Plus, Loader2, ChevronDown, ImageUp, FileInput, Camera, Ellipsis, Pencil, Trash } from "lucide-react"; // íconos
+import { Plus, Loader2, ChevronDown, Upload, Camera, ImageIcon, Ellipsis, X, Pencil, Trash } from "lucide-react"; // íconos
 import SearchBar from "../components/SearchBar";
 import SearchResult from "../components/SearchResult";
 import "../styles/styles.css";
@@ -144,8 +144,60 @@ const IngredientsPage = () => {
                     "cup",
                 ];
 
+
+    const [imagePreview, setImagePreview] = useState("");
+        const [isUploading, setIsUploading] = useState(false);
+
+    const fileInputRef = useRef(null);
+
+  // Función para manejar la selección de archivos
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validar tipo de archivo
+      if (!file.type.match('image.*')) {
+        alert('Por favor, selecciona solo archivos de imagen');
+        return;
+      }
+      
+      // Validar tamaño (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen no debe exceder los 5MB');
+        return;
+      }
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+        setFormData({
+          ...formData,
+          image: file // Guardamos el archivo para enviarlo al backend
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Función para eliminar la imagen seleccionada
+  const removeImage = () => {
+    setImagePreview("");
+    setFormData({
+      ...formData,
+      image: ""
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Función para simular clic en el input file
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
     return (
-        <section className="bg-color-primary-light bg-screen">
+        <section className="bg-color-primary-light w-full min-h-screen">
             <div className="mx-4 sm:mx-10 lg:mx-16">
                 {/* image */}
                 <div className="w-full flex justify-center">
@@ -185,6 +237,27 @@ const IngredientsPage = () => {
                                         <label className="label">
                                             <span className="label-text font-medium mt-4 my-2">Imagen</span>
                                         </label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => {
+                                                setFormData({ ...formData, image: reader.result }); // Base64
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                            }}
+                                        />
+                                        {formData.image && (
+                                            <img
+                                            src={formData.image}
+                                            alt="preview"
+                                            className="w-20 h-20 object-cover mt-2 rounded-full border"
+                                            />
+                                        )}
                                     </div>
 
                                     {/* Sección de campos de texto */}
@@ -314,66 +387,85 @@ const IngredientsPage = () => {
                 <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div>
 
                 {/*Visualización de ingredientes*/}
-<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-  {isGetting ? (
-    <p className="col-span-full text-center"><Loader2 /></p>
-  ) : (
-    ingredients.map((item) => (
-      <div key={item._id} className="bg-white rounded-[20px] shadow-md p-4 flex flex-col">
-        <div className="relative flex justify-end mb-2">
-            <button 
-                id={`button-${item._id}`}
-                className="text-color-secondary hover:bg-color-primary-light rounded-full p-2"
-                onClick={() => setOpenDropdownId((prev) => (prev === item._id ? null : item._id))}
-            >
-                <Ellipsis />
-            </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+                {isGetting ? (
+                    <p className="col-span-full text-center"><Loader2 /></p>
+                ) : (
+                    ingredients.map((item) => (
+                    <div key={item._id} className="relative bg-white rounded-[20px] shadow-md p-4 flex flex-col min-h-[400px]">
+                        <div className="absolute top-3 right-3">
+                            <button 
+                                id={`button-${item._id}`}
+                                className="text-color-secondary hover:bg-color-primary-light rounded-full p-2"
+                                onClick={() => setOpenDropdownId((prev) => (prev === item._id ? null : item._id))}
+                            >
+                                <Ellipsis />
+                            </button>
 
-            {openDropdownId === item._id && (
-                <div
-                id={`dropdown-${item._id}`}
-                className="absolute mt-12 rounded-[20px] shadow-md bg-color-primary-light z-50"
-                >
-                <div className="text-md text-color-primary font-black flex flex-col">
-                    <button
-                    className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
-                    onClick={() => handleEdit(item)}
-                    >
-                    <Pencil size={20} /> Editar
-                    </button>
-                    <button
-                    className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
-                    onClick={() => handleDelete(item._id)}
-                    disabled={isDeleting}
-                    >
-                    {isDeleting && deletingId === item._id ? (
-                        <Loader2 size={20} className="animate-spin mr-2" />
-                    ) : (
-                        <Trash size={20} />
-                    )}
-                    {isDeleting && deletingId === item._id ? "" : "Eliminar"}
-                    </button>
-                </div>
-                </div>
-            )}
-        </div>
+                            {openDropdownId === item._id && (
+                                <div
+                                id={`dropdown-${item._id}`}
+                                className="absolute right-0 mt-2 rounded-[20px] shadow-md bg-color-primary-light z-50"
+                                role="menu"
+                                >
+                                <div className="text-md text-color-primary font-black flex flex-col">
+                                    <button
+                                        className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
+                                        onClick={() => handleEdit(item)}
+                                        role="menuitem"
+                                    >
+                                        <Pencil size={20} /> Editar
+                                    </button>
+                                    <button
+                                        className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
+                                        onClick={() => handleDelete(item._id)}
+                                        disabled={isDeleting}
+                                        role="menuitem"
+                                    >
+                                    {isDeleting && deletingId === item._id ? (
+                                        <Loader2 size={20} className="animate-spin mr-2" />
+                                    ) : (
+                                        <Trash size={20} />
+                                    )}
+                                    {isDeleting && deletingId === item._id ? "" : "Eliminar"}
+                                    </button>
+                                </div>
+                                </div>
+                            )}
+                        </div>
 
-        <div className="flex flex-col items-center flex-grow">
-            <img 
-                id="img-ingredient" 
-                src={item.image} 
-                alt="imagen del ingrediente" 
-                title="Imagen del ingrediente"
-                className="w-20 h-20 object-cover rounded-full border"
-            />
-             <p className="text-lg font-black text-color-primary mb-2 text-center line-clamp-2">
-            {item.name}
-          </p>
-          </div>
-        </div>
-    ))
-  )}
-</div>
+                        <div className="flex-grow flex flex-col pt-6 px-4">
+                            <img 
+                                id="img-ingredient" 
+                                src={item.imageUrl || item.image}
+                                alt="imagen del ingrediente" 
+                                title="Imagen del ingrediente"
+                                className="w-24 h-24 object-cover rounded-full border border-none"
+                            />
+                            <p
+                                className="text-xl font-black text-color-primary my-2 break-words"
+                                title={item.name}
+                            >
+                                {item.name}
+                            </p>
+                            <p className="text-lg text-color-secondary my-1">
+                                Cantidad:{" "}
+                                <span className="font-black">
+                                {item.Units} {item.unityOfmeasurement}
+                                </span>
+                            </p>
+                            <p className="text-lg text-color-secondary my-1">
+                                Precio total: <span className="font-black">${item.totalPrice}</span>
+                            </p>
+                            <p className="text-lg text-color-secondary my-1 break-words">
+                                Precio unitario:{" "}
+                                <span className="font-black">${item.unityPrice}</span>
+                            </p>
+                        </div>
+                    </div>
+                    ))
+                )}
+                </div>
             </div> 
         </section>
     );

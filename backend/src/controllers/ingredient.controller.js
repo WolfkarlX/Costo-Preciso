@@ -11,7 +11,7 @@ export const createIngredient = async (req, res) => {
 
     //gets id from middleware auth
     const userId = req.user._id
-    const imageUrl = ""
+    let imageUrl = ""
 
     const { name, Units, unityOfmeasurement, totalPrice, image} = req.body;
     try {
