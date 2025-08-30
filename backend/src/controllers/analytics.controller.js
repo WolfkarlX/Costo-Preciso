@@ -4,13 +4,17 @@ import { toNum, sortData } from "../services/analytics.service.js"; // Importamo
 
 export async function topRecipes(req, res, next) {
   try {
-    const { metric = "profit", limit = 5, periodDays, userId } = req.query;
+    const { metric = "profit", limit = 5, periodDays } = req.query;
 
-    const match = {};
-    if (userId) match.userId = new mongoose.Types.ObjectId(userId);
+    // Acceder al userId del usuario autenticado
+    const userId = req.user._id;  // Aquí obtenemos el userId del usuario autenticado
+
+    // Creamos el filtro para la consulta (filtramos por userId)
+    const match = { userId: new mongoose.Types.ObjectId(userId) }; 
+
     if (periodDays) {
       const from = new Date();
-      from.setDate(from.getDate() - Number(periodDays));
+      from.setDate(from.getDate() - Number(periodDays)); // Filtramos por los últimos N días
       match.createdAt = { $gte: from };
     }
 
@@ -36,7 +40,7 @@ export async function topRecipes(req, res, next) {
     // Limita la cantidad de resultados
     const top = sortedRows.slice(0, Number(limit));
 
-    // Devuelve los datos procesados
+    // Devuelve los datos procesados para la gráfica
     return res.json({
       labels: top.map(r => r.name),
       datasets: [{
