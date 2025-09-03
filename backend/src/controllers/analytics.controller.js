@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Recipe from '../models/recipe.model.js';
+import Ingredient from '../models/ingredient.models.js'; // Asegúrate de que este sea el modelo correcto
 import { toNum, sortData } from "../services/analytics.service.js"; // Importamos las funciones del servicio
 
 export async function topRecipes(req, res, next) {
@@ -8,9 +9,10 @@ export async function topRecipes(req, res, next) {
 
     // Acceder al userId del usuario autenticado
     const userId = req.user._id;  // Aquí obtenemos el userId del usuario autenticado
+    console.log("User ID:", userId);  // Verifica que el userId sea correcto
 
     // Creamos el filtro para la consulta (filtramos por userId)
-    const match = { userId: new mongoose.Types.ObjectId(userId) }; 
+    const match = { userId: new mongoose.Types.ObjectId(userId) };
 
     if (periodDays) {
       const from = new Date();
@@ -18,38 +20,64 @@ export async function topRecipes(req, res, next) {
       match.createdAt = { $gte: from };
     }
 
-    // Realiza la consulta a la base de datos
+    // Realiza la consulta a la base de datos para obtener las recetas
     const rows = await Recipe.find(match, {
       name: 1,
-      netProfit: 1,
-      profitPercentage: 1,
       totalCost: 1,
-      unitSalePrice: 1
+      ingredients: 1,  // Obtenemos los ingredientes
     }).lean();
+    
+    console.log("Rows from Recipe:", rows);  // Verifica los datos que vienen de las recetas
 
-    // Procesa los números usando la función toNum del servicio
-    const withNums = rows.map(r => ({
-      ...r,
-      netProfitNum: toNum(r.netProfit),
-      profitPercentageNum: toNum(r.profitPercentage)
-    }));
+    // Preparamos los datos para el gráfico de ingredientes
+    const dataForPieChart = rows.map(async (recipe) => {
+      const totalCost = toNum(recipe.totalCost); // Asegurándonos de que sea un número
+      console.log("Total Cost for recipe", recipe.name, ":", totalCost);
 
-    // Ordena los resultados usando la función sortData del servicio
-    const sortedRows = sortData(withNums, metric);
+      const ingredientsCost = await Promise.all(recipe.ingredients.map(async (ingredient) => {
+        // Buscamos el precio por unidad del ingrediente
+        const ingredientData = await Ingredient.findById(ingredient.materialId); // Aquí obtenemos la información del ingrediente desde la base de datos
 
-    // Limita la cantidad de resultados
-    const top = sortedRows.slice(0, Number(limit));
+        if (!ingredientData) {
+          console.error(`Ingrediente con ID ${ingredient.materialId} no encontrado.`);
+          return {
+            ingredient: 'Desconocido', 
+            cost: 0,
+            percentage: 0
+          };
+        }
 
-    // Devuelve los datos procesados para la gráfica
+        const ingredientCost = toNum(ingredientData.unityPrice) * toNum(ingredient.units); // Calcular el costo de este ingrediente
+        const percentage = (ingredientCost / totalCost) * 100; // Porcentaje de costo de este ingrediente
+
+        return {
+          ingredient: ingredientData.name,  // Nombre del ingrediente
+          cost: ingredientCost,
+          percentage: percentage,
+        };
+      }));
+
+      // Filtrar ingredientes con porcentaje 0 si no fueron encontrados
+      const validIngredients = ingredientsCost.filter(item => item.percentage > 0);
+
+      return {
+        recipeName: recipe.name,
+        ingredientsCost: validIngredients,
+      };
+    });
+
+    // Esperamos a que todas las promesas se resuelvan
+    const finalData = await Promise.all(dataForPieChart);
+
+    // Verifica los datos antes de enviarlos
+    console.log("Final data for Pie Chart:", finalData);
+
+    // Devuelve los datos procesados para el gráfico
     return res.json({
-      labels: top.map(r => r.name),
-      datasets: [{
-        label: metric === "margin" ? "Margen (%)" : "Ganancia neta",
-        data: top.map(r => metric === "margin" ? r.profitPercentageNum : r.netProfitNum)
-      }],
-      raw: top
+      dataForPieChart: finalData,
     });
   } catch (err) {
+    console.error("Error en el controlador:", err);  // Verifica el error en el servidor
     next(err); // Manejo de errores
   }
 }
