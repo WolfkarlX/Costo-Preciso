@@ -6,17 +6,22 @@ import toast from "react-hot-toast";
 export const useIngredientsStore = create((set, get) => ({
     isCreating: false,
     isGetting: false,
+    openModal: false,
     ingredients: [],
 
     create: async (data) => {
-        set({ isCreating: true });
+        set({ isCreating: true, openModal: true});
+        let open = true
+        
         try {
             const res = await axiosInstance.post("http://localhost:5001/api/ingredient/create", data);
             toast.success("Ingredient Added");
+            open = false
         } catch (error) {
             toast.error(error.response.data.message);
+            open = true
         } finally {
-            set({ isCreating: false });
+            set({ isCreating: false, openModal: open });
         }
     },
 
@@ -33,6 +38,9 @@ export const useIngredientsStore = create((set, get) => ({
     },
 
     updateIngredient: async (id, updatedData) => {
+        set({ openModal: true});
+        let open = true
+
         try {
             await axiosInstance.post(`http://localhost:5001/api/ingredient/updt/${id}`, updatedData);
             toast.success("Ingredient updated");
@@ -40,12 +48,16 @@ export const useIngredientsStore = create((set, get) => ({
                 ing._id === id ? { ...ing, ...updatedData } : ing
             );
             set({ ingredients });
+            open = false
         } catch (error) {
             toast.error(error.response?.data?.message || "Error al actualizar ingrediente");
+            open = true
+        } finally {
+            set({ openModal: open });
         }
     },
 
-    deleteIngredient: async (id) => {
+    deleteIngredient: async (id) => {   
     try {
         await axiosInstance.delete(`http://localhost:5001/api/ingredient/del/${id}`);
         
