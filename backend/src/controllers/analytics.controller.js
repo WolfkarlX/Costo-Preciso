@@ -1,83 +1,85 @@
+// controllers/analytics.controller.js
 import mongoose from "mongoose";
-import Recipe from '../models/recipe.model.js';
-import Ingredient from '../models/ingredient.models.js'; // Asegúrate de que este sea el modelo correcto
-import { toNum, sortData } from "../services/analytics.service.js"; // Importamos las funciones del servicio
+import Recipe from "../models/recipe.model.js";
 
-export async function topRecipes(req, res, next) {
+export async function recipesRankings(req, res, next) {
   try {
-    const { metric = "profit", limit = 5, periodDays } = req.query;
+    const {
+      metric = "netProfit",   // netProfit | expectedProfit | totalCost
+      order,                  // asc | desc (si no se pasa, elegimos)
+      limit = 5,
+      periodDays
+    } = req.query;
 
-    // Acceder al userId del usuario autenticado
-    const userId = req.user._id;  // Aquí obtenemos el userId del usuario autenticado
-    console.log("User ID:", userId);  // Verifica que el userId sea correcto
+    const userId = req.user._id;
 
-    // Creamos el filtro para la consulta (filtramos por userId)
     const match = { userId: new mongoose.Types.ObjectId(userId) };
-
     if (periodDays) {
       const from = new Date();
-      from.setDate(from.getDate() - Number(periodDays)); // Filtramos por los últimos N días
+      from.setDate(from.getDate() - Number(periodDays));
       match.createdAt = { $gte: from };
     }
 
-    // Realiza la consulta a la base de datos para obtener las recetas
-    const rows = await Recipe.find(match, {
-      name: 1,
-      totalCost: 1,
-      ingredients: 1,  // Obtenemos los ingredientes
-    }).lean();
-    
-    console.log("Rows from Recipe:", rows);  // Verifica los datos que vienen de las recetas
+    // Orden por defecto según la métrica
+    const defaultOrder =
+      metric === "totalCost" ? -1 : -1; // “top” suele ser descendente
+    const sortDir = order === "asc" ? 1 : order === "desc" ? -1 : defaultOrder;
 
-    // Preparamos los datos para el gráfico de ingredientes
-    const dataForPieChart = rows.map(async (recipe) => {
-      const totalCost = toNum(recipe.totalCost); // Asegurándonos de que sea un número
-      console.log("Total Cost for recipe", recipe.name, ":", totalCost);
-
-      const ingredientsCost = await Promise.all(recipe.ingredients.map(async (ingredient) => {
-        // Buscamos el precio por unidad del ingrediente
-        const ingredientData = await Ingredient.findById(ingredient.materialId); // Aquí obtenemos la información del ingrediente desde la base de datos
-
-        if (!ingredientData) {
-          console.error(`Ingrediente con ID ${ingredient.materialId} no encontrado.`);
-          return {
-            ingredient: 'Desconocido', 
-            cost: 0,
-            percentage: 0
-          };
+    const pipeline = [
+      { $match: match },
+      {
+        $addFields: {
+          totalCostNum: { $toDouble: "$totalCost" },
+          netProfitNum: { $toDouble: "$netProfit" },
+          unitSalePriceNum: { $toDouble: "$unitSalePrice" },
+          portionsNum: { $toDouble: "$portionsPerrecipe" },
+          costPerunityNum: { $toDouble: "$costPerunity" }
         }
+      },
+      {
+        $addFields: {
+          // expectedProfit por receta (ventas estimadas de todas las porciones - costo total)
+          expectedProfitNum: {
+            $subtract: [
+              { $multiply: ["$unitSalePriceNum", "$portionsNum"] },
+              "$totalCostNum"
+            ]
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          name: 1,
+          totalCost: { $ifNull: ["$totalCostNum", 0] },
+          netProfit: { $ifNull: ["$netProfitNum", 0] },
+          expectedProfit: { $ifNull: ["$expectedProfitNum", 0] },
+          createdAt: 1
+        }
+      },
+      {
+        $addFields: {
+          metricValue:
+            metric === "totalCost"
+              ? "$totalCost"
+              : metric === "expectedProfit"
+              ? "$expectedProfit"
+              : "$netProfit"
+        }
+      },
+      { $sort: { metricValue: sortDir, createdAt: -1 } },
+      { $limit: Number(limit) }
+    ];
 
-        const ingredientCost = toNum(ingredientData.unityPrice) * toNum(ingredient.units); // Calcular el costo de este ingrediente
-        const percentage = (ingredientCost / totalCost) * 100; // Porcentaje de costo de este ingrediente
+    const rows = await Recipe.aggregate(pipeline).exec();
 
-        return {
-          ingredient: ingredientData.name,  // Nombre del ingrediente
-          cost: ingredientCost,
-          percentage: percentage,
-        };
-      }));
-
-      // Filtrar ingredientes con porcentaje 0 si no fueron encontrados
-      const validIngredients = ingredientsCost.filter(item => item.percentage > 0);
-
-      return {
-        recipeName: recipe.name,
-        ingredientsCost: validIngredients,
-      };
-    });
-
-    // Esperamos a que todas las promesas se resuelvan
-    const finalData = await Promise.all(dataForPieChart);
-
-    // Verifica los datos antes de enviarlos
-    console.log("Final data for Pie Chart:", finalData);
-
-    // Devuelve los datos procesados para el gráfico
     return res.json({
-      dataForPieChart: finalData,
+      metric,
+      order: sortDir === 1 ? "asc" : "desc",
+      rows // [{name, totalCost, netProfit, expectedProfit, metricValue}]
     });
   } catch (err) {
-    console.error("Error en el controlador:", err);  // Verifica el error en el servidor
-    next(err); // Manejo de errores
+    console.error("Error en recipesRankings:", err);
+    next(err);
   }
 }

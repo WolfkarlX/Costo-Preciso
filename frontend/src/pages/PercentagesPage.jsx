@@ -1,45 +1,46 @@
-import { axiosInstance } from "../lib/axios.js"; // Ajusta la ruta según corresponda
-import IngredientCostChart from "../components/TopRecipesChart.jsx";  // Componente para mostrar el gráfico de torta
+// pages/PercentagesPage.jsx (o AnalyticsPage.jsx)
+import RecipesRankingChart from "../components/RecipesRankingChart.jsx";
 
 export default function AnalyticsPage() {
   return (
-    <main style={{ padding: 24, display: "grid", gap: 24 }}>
+    <main style={{ padding: 24, display: "grid", gap: 32 }}>
       <h1>Analítica de Recetas</h1>
 
-      {/* Sección para el gráfico de ganancia neta de las recetas */}
       <section>
-        <h2>Top Recetas por Ganancia Neta</h2>
-        <p>
-          Este gráfico muestra las recetas con la mayor ganancia neta, para ayudar a entender qué recetas están generando más ingresos después de los costos.
-        </p>
-        <IngredientCostChart
-          metric="profit"
+        <RecipesRankingChart
+          title="Recetas con mayor ganancia neta"
+          metric="netProfit"
+          order="desc"   // top mayores
           limit={5}
-          // periodDays={30} // si quieres filtrar últimos 30 días
+          // periodDays={30}
         />
       </section>
 
-      {/* Sección para el gráfico de margen de las recetas */}
       <section>
-        <h2>Top Recetas por Margen (%)</h2>
-        <p>
-          Este gráfico muestra el porcentaje de margen de ganancia de las recetas. Es útil para ver qué recetas tienen un mayor margen en relación con su costo.
-        </p>
-        <IngredientCostChart
-          metric="margin"
+        <RecipesRankingChart
+          title="Recetas con mayor ganancia esperada"
+          metric="expectedProfit"
+          order="desc"
+          limit={5}
+          // periodDays={30}
+        />
+      </section>
+
+      <section>
+        <RecipesRankingChart
+          title="Recetas más costosas de hacer"
+          metric="totalCost"
+          order="desc"   // más costosas = costo más alto primero
           limit={5}
         />
       </section>
 
-      {/* Sección para el gráfico de costos por ingrediente */}
       <section>
-        <h2>Distribución del Costo por Ingrediente</h2>
-        <p>
-          Este gráfico muestra cómo se distribuye el costo de cada receta entre sus ingredientes. Puedes ver qué ingredientes tienen mayor impacto en el costo total de la receta.
-        </p>
-        <IngredientCostChart
+        <RecipesRankingChart
+          title="Recetas más baratas de hacer"
+          metric="totalCost"
+          order="asc"    // más baratas = costo menor primero
           limit={5}
-          // periodDays={30} // si quieres filtrar los últimos 30 días
         />
       </section>
     </main>
