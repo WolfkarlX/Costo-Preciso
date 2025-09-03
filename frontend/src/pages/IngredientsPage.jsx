@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Plus, Loader2, ChevronDown, Upload, Camera, ImageIcon, Ellipsis, X, Pencil, Trash } from "lucide-react"; // íconos
+import { Plus, Loader2, ChevronDown, Ellipsis, CircleX, Pencil, Trash, CloudDownload, FileImage   } from "lucide-react";
 import SearchBar from "../components/SearchBar";
 import SearchResult from "../components/SearchResult";
 import "../styles/styles.css";
@@ -118,7 +118,7 @@ const IngredientsPage = () => {
             Units: ingredient.Units,
             unityOfmeasurement: ingredient.unityOfmeasurement,
             totalPrice: ingredient.totalPrice,
-            image: ingredient.image,
+            image: ingredient.image || ingredient.imageUrl,
         });
         setSelectedOption(ingredient.unityOfmeasurement);
         setSelectedIngredient(ingredient);
@@ -144,64 +144,19 @@ const IngredientsPage = () => {
                     "cup",
                 ];
 
-
-    const [imagePreview, setImagePreview] = useState("");
-        const [isUploading, setIsUploading] = useState(false);
-
+    // constantes para subir imagen
     const fileInputRef = useRef(null);
-
-  // Función para manejar la selección de archivos
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Validar tipo de archivo
-      if (!file.type.match('image.*')) {
-        alert('Por favor, selecciona solo archivos de imagen');
-        return;
-      }
-      
-      // Validar tamaño (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('La imagen no debe exceder los 5MB');
-        return;
-      }
-      
-      // Crear preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-        setFormData({
-          ...formData,
-          image: file // Guardamos el archivo para enviarlo al backend
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Función para eliminar la imagen seleccionada
-  const removeImage = () => {
-    setImagePreview("");
-    setFormData({
-      ...formData,
-      image: ""
-    });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  // Función para simular clic en el input file
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
+    const [fileName, setFileName] = useState("");
 
     return (
         <section className="bg-color-primary-light w-full min-h-screen">
             <div className="mx-4 sm:mx-10 lg:mx-16">
                 {/* image */}
                 <div className="w-full flex justify-center">
-                    <img src="/image-13.png" alt="Imagen decorativa" title="Imagen ilustrativa de ingredientes" className="w-full max-w-full h-auto object-contain"
+                    <img src="/image-13.png" 
+                    alt="Imagen decorativa" 
+                    title="Imagen ilustrativa de ingredientes" 
+                    className="w-full max-w-full h-auto object-contain"
                     />
                 </div>
 
@@ -237,28 +192,72 @@ const IngredientsPage = () => {
                                         <label className="label">
                                             <span className="label-text font-medium mt-4 my-2">Imagen</span>
                                         </label>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            if (file) {
-                                                const reader = new FileReader();
-                                                reader.onloadend = () => {
-                                                setFormData({ ...formData, image: reader.result }); // Base64
-                                                };
-                                                reader.readAsDataURL(file);
-                                            }
-                                            }}
-                                        />
-                                        {formData.image && (
-                                            <img
-                                            src={formData.image}
-                                            alt="preview"
-                                            className="w-20 h-20 object-cover mt-2 rounded-full border"
-                                            />
-                                        )}
-                                    </div>
+                                        <div className="bg-white rounded-[20px] shadow-md w-full flex flex-col justify-center items-center">
+                                            {formData.image ? (
+                                                <img
+                                                className="w-full h-40 object-contain rounded-md"
+                                                src={formData.image}
+                                                alt="preview"
+                                                />
+                                            ) : (
+                                                <div className="gap-4 w-full h-40 flex flex-col justify-center items-center text-md text-color-primary">
+                                                <CloudDownload size={60} />
+                                                Cargar imagen
+                                                </div>
+                                            )}
+                                            </div>
+
+                                            <div className="w-full mt-4">
+                                                <div className="w-full flex justify-between items-center bg-color-primary input border border-none shadow-md p-2">
+                                                    {/* Botón para seleccionar */}
+                                                    <FileImage 
+                                                    size={20}
+                                                    className="text-white cursor-pointer"
+                                                    onClick={() => fileInputRef.current.click()}
+                                                    />
+
+                                                    {/* Nombre del archivo */}
+                                                    <div className="text-sm text-white truncate max-w-[110px] text-center">
+                                                    {fileName || "No seleccionado"}
+                                                    </div>
+
+                                                    {/* Botón para limpiar */}
+                                                    <CircleX 
+                                                    size={20}
+                                                    className="text-white cursor-pointer"
+                                                    onClick={() => {
+                                                        fileInputRef.current.value = "";
+                                                        setFormData({ ...formData, image: "" });
+                                                        setFileName("");
+                                                    }}
+                                                    />
+                                                </div>
+
+                                                {/* Input oculto */}
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    ref={fileInputRef}
+                                                    accept="image/*"
+                                                    onChange={(e) => {
+                                                    const file = e.target.files[0];
+                                                    if (file) {
+                                                        setFileName(file.name);
+                                                        const reader = new FileReader();
+                                                        reader.onloadend = () => {
+                                                        setFormData({ ...formData, image: reader.result });
+                                                        };
+                                                        reader.readAsDataURL(file);
+                                                    }
+                                                    }}
+                                                />
+                                                 {/* Texto de ayuda */}
+                                                <p className="text-xs text-gray-500 text-center mt-2">
+                                                    Formatos: JPG, PNG, WEBP<br />
+                                                    Máx: 5MB
+                                                </p>
+                                            </div>
+                                        </div>
 
                                     {/* Sección de campos de texto */}
                                     <div className="w-full md:w-2/3 space-y-4">
@@ -282,7 +281,7 @@ const IngredientsPage = () => {
                                                 <span className="label-text font-medium mt-4 my-2">Cantidad</span>
                                                 </label>
                                                 <input
-                                                type="select"
+                                                type="number"
                                                 step="any"
                                                 className="input w-full px-10 shadow-md border-none"
                                                 value={formData.Units}
@@ -323,7 +322,8 @@ const IngredientsPage = () => {
                                                                         setFormData({ ...formData, unityOfmeasurement: option });
                                                                         setIsOpen(false);
                                                                     }}
-                                                                    className="block w-full px-4 py-2 cursor-pointer font-black text-color-secondary no-underline rounded-[10px] hover:bg-color-primary-light"                                                                   
+                                                                    className="block w-full px-4 py-2 cursor-pointer font-black 
+                                                                        text-color-secondary no-underline rounded-[10px] hover:bg-color-primary-light"                                                                   
                                                                     key={option} >
                                                                         {option}
                                                                     </button>

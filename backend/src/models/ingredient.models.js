@@ -30,6 +30,7 @@ const ingredientSchema = new mongoose.Schema(
             type: String,
             default: ""
         },
+        publicId: { type: String }
     },
     { timestamps: true }
 );

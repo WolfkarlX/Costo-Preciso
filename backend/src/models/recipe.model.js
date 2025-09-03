@@ -81,10 +81,11 @@ const recipeSchema = new mongoose.Schema(
             type: String,
             default: ""
         },
-        image: {
+        imageUrl: {
             type: String,
             default: ""
         },
+        publicId: { type: String }
     },
     { timestamps: true }
 );
