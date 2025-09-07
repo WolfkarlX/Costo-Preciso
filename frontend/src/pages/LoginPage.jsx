@@ -37,7 +37,7 @@ const LoginPage = () => {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center mb-8">
             <div className="flex flex-col items-center gap-2 group">
-              <h1 className="text-2xl font-bold signup-title">test Inicio de sesión</h1>
+              <h1 className="text-2xl font-bold signup-title">Inicio de sesión</h1>
             </div>
           </div>
 
