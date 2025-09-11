@@ -92,72 +92,88 @@ const HomePage = () => {
     const options = ["L", "ml", "kg", "g", "pz", "oz", "cup"];
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    const hasInvalidIngredients = selectedIngredients.some(ing =>
-        isNaN(parseFloat(ing.units)) || !ing.UnitOfmeasure
-    );
+        const hasInvalidIngredients = selectedIngredients.some(ing =>
+            isNaN(parseFloat(ing.units)) || !ing.UnitOfmeasure
+        );
 
-    if (hasInvalidIngredients) {
-        toast.error("Por favor completa todos los campos de ingredientes");
-        return;
-    }
-
-    const recipeData = {
-        name: formData.name,
-        portionsPerrecipe: formData.portionsPerrecipe,
-        quantityPermeasure: formData.quantityPermeasure,
-        profitPercentage: formData.profitPercentage,
-        recipeunitOfmeasure: formData.recipeunitOfmeasure,
-        aditionalCostpercentages: formData.aditionalCostpercentages,
-        image: formData.image,
-        ingredients: selectedIngredients.map(({ materialId, units, UnitOfmeasure }) => ({
-        materialId,
-        units: units.toString(),
-        UnitOfmeasure,
-        })),
-    };
-
-    try {
-        if (isEditMode && editingRecipe) {
-        await updateRecipe(editingRecipe._id, recipeData);
-        } else {
-        await create({
-            ...recipeData,
-            totalCost: "0",
-            netProfit: "0",
-            costPerunity: "0",
-            favorite: false,
-            userId: "user-id-placeholder",
-            additionalCost: "0",
-            materialCostTotal: "0",
-            grossProfit: "0",
-            unitSalePrice: "0",
-        });
+        if (hasInvalidIngredients) {
+            toast.error("Por favor completa todos los campos de ingredientes");
+            return;
         }
 
-        // Resetear y cerrar modal después del éxito
-        setFormData({
-        name: "",
-        ingredients: [],
-        portionsPerrecipe: "",
-        quantityPermeasure: "",
-        aditionalCostpercentages: "",
-        profitPercentage: "",
-        UnitOfmeasure: "",
-        recipeunitOfmeasure: "",
-        image: "",
-        });
-        setSelectedIngredients([]);
-        setSelected("");
-        setIsOpen(false);
-        setOpen(false);  // Cierra el modal
-        setIsEditMode(false);
-        setEditingRecipe(null);
-        fetchRecipes(); //se atraen las recetas despues de crear receta
-    } catch (error) {
-        console.error("Error al guardar receta:", error);
-    }
+        // Construcción del objeto receta
+        // Construcción del objeto receta
+const recipeData = {
+  name: formData.name,
+  portionsPerrecipe: formData.portionsPerrecipe,
+  quantityPermeasure: formData.quantityPermeasure,
+  profitPercentage: formData.profitPercentage,
+  recipeunitOfmeasure: formData.recipeunitOfmeasure,
+  aditionalCostpercentages: formData.aditionalCostpercentages,
+  ingredients: selectedIngredients.map(({ materialId, units, UnitOfmeasure }) => ({
+    materialId,
+    units: units.toString(),
+    UnitOfmeasure,
+  })),
+};
+
+// Si hay imagen nueva en Base64
+if (formData.image && formData.image.startsWith("data:image")) {
+  recipeData.image = formData.image;
+}
+// Si estamos editando y mantenemos la URL existente
+else if (editingRecipe && formData.image) {
+  recipeData.imageUrl = formData.image;
+}
+// Si el usuario quitó la imagen
+else {
+  recipeData.image = null; // 🔑 fuerza el borrado
+  recipeData.imageUrl = null;
+}
+
+
+        try {
+            if (isEditMode && editingRecipe) {
+            await updateRecipe(editingRecipe._id, recipeData);
+            } else {
+            await create({
+                ...recipeData,
+                totalCost: "0",
+                netProfit: "0",
+                costPerunity: "0",
+                favorite: false,
+                userId: "user-id-placeholder",
+                additionalCost: "0",
+                materialCostTotal: "0",
+                grossProfit: "0",
+                unitSalePrice: "0",
+            });
+            }
+
+            // Reset
+            setFormData({
+            name: "",
+            ingredients: [],
+            portionsPerrecipe: "",
+            quantityPermeasure: "",
+            aditionalCostpercentages: "",
+            profitPercentage: "",
+            UnitOfmeasure: "",
+            recipeunitOfmeasure: "",
+            image: "",
+            });
+            setSelectedIngredients([]);
+            setSelected("");
+            setIsOpen(false);
+            setOpen(false);
+            setIsEditMode(false);
+            setEditingRecipe(null);
+            fetchRecipes();
+        } catch (error) {
+            console.error("Error al guardar receta:", error);
+        }
     };
 
     useEffect(() => {
@@ -191,47 +207,44 @@ const HomePage = () => {
     const [selectedRecipe, setSelectedRecipes] = useState(null);
 
     // editar receta
-    const handleEdit = async (recipe) => {
-    setEditingRecipe(recipe);
+    const handleEdit = (recipe) => {
+        setEditingRecipe(recipe);
 
-    setFormData({
-        name: recipe.name,
-        portionsPerrecipe: recipe.portionsPerrecipe,
-        quantityPermeasure: recipe.quantityPermeasure,
-        aditionalCostpercentages: recipe.aditionalCostpercentages,
-        profitPercentage: recipe.profitPercentage,
-        recipeunitOfmeasure: recipe.recipeunitOfmeasure,
-        image: recipe.imageUrl || "",
-    });
-    setSelected(recipe.recipeunitOfmeasure);
-    setIsEditMode(true);
-    setOpen(true);
-    setOpenDropdownId(null);
+        setFormData({
+            name: recipe.name,
+            portionsPerrecipe: recipe.portionsPerrecipe,
+            quantityPermeasure: recipe.quantityPermeasure,
+            aditionalCostpercentages: recipe.aditionalCostpercentages,
+            profitPercentage: recipe.profitPercentage,
+            recipeunitOfmeasure: recipe.recipeunitOfmeasure,
+            image: recipe.imageUrl || "",
+        });
 
-    try {
-        // Verificamos si ya hay ingredientes cargados
+        setSelected(recipe.recipeunitOfmeasure);
+        setIsEditMode(true);
+        setOpen(true);
+        setOpenDropdownId(null);
+
+        // Si no hay ingredientes en el store, los traemos
         if (ingredients.length === 0) {
-        await fetchIngredients(); // Carga desde API si es necesario
+            fetchIngredients();
         }
+    };
 
-        // Mapear los ingredientes de la receta con los datos completos del store
-        const enrichedIngredients = recipe.ingredients.map((ingredient) => {
-        // CORRECCIÓN: Usar el estado 'ingredients' en lugar de get().ingredients
-        const fullIngredient = ingredients.find(ing => ing._id === ingredient.materialId) || {};
-        return {
-            ...ingredient,
-            name: fullIngredient.name || "Desconocido",
-            dropdownOpen: false,
-        };
+    useEffect(() => {
+        if (!editingRecipe || ingredients.length === 0) return;
+
+        const enrichedIngredients = editingRecipe.ingredients.map((ingredient) => {
+            const fullIngredient = ingredients.find(ing => ing._id === ingredient.materialId) || {};
+            return {
+                ...ingredient,
+                name: fullIngredient.name || "Desconocido",
+                dropdownOpen: false,
+            };
         });
 
         setSelectedIngredients(enrichedIngredients);
-    } catch (error) {
-        console.error("Error al cargar ingredientes:", error);
-        toast.error("No se pudieron cargar los ingredientes de la receta");
-    }
-    };
-
+    }, [ingredients, editingRecipe]);
 
     const handleDelete = async (id) => {
         await deleteRecipes(id);
@@ -285,9 +298,24 @@ const validatePositiveNumber = (e) => {
                 title="Agregar una nueva receta"
                 className="p-2 sm:p-4 shadow-md rounded-full bg-color-primary text-white"
                 onClick={() => {
+                    setFormData({
+                        name: "",
+                        ingredients: [],
+                        portionsPerrecipe: "",
+                        quantityPermeasure: "",
+                        aditionalCostpercentages: "",
+                        profitPercentage: "",
+                        UnitOfmeasure: "",
+                        recipeunitOfmeasure: "",
+                        image: "",
+                    });
+                    setSelectedIngredients([]);
+                    setSelected("");
+                    setEditingRecipe(null);
+                    setIsEditMode(false);
                     setOpen(true);
-                    setIsEditMode(false);}}
-                >
+                }}
+            >
                 <Plus size={28} />
             </button>
             </div>
@@ -314,23 +342,19 @@ const validatePositiveNumber = (e) => {
                             />
                         ) : (
                             <div className="gap-4 w-full h-40 flex flex-col justify-center items-center text-md text-color-primary">
-                            <CloudDownload size={60} />
+                            <CloudDownload 
+                                size={60}
+                                onClick={() => fileInputRef.current.click()}
+                                className="cursor-pointer"/>
                             Cargar imagen
                             </div>
                         )}
                         </div>
 
                         <div className="w-full mt-4">
-                            <div className="w-full flex justify-between items-center bg-color-primary input border border-none shadow-md p-2">
-                                {/* Botón para seleccionar */}
-                                <FileImage 
-                                size={20}
-                                className="text-white cursor-pointer"
-                                onClick={() => fileInputRef.current.click()}
-                                />
-
+                            <div className="w-full flex justify-between items-center bg-color-primary input border border-none shadow-md p-4">
                                 {/* Nombre del archivo */}
-                                <div className="text-sm text-white truncate max-w-[110px] text-center">
+                                <div className="text-sm text-white truncate max-w-[110px]">
                                 {fileName || "No seleccionado"}
                                 </div>
 
@@ -340,7 +364,7 @@ const validatePositiveNumber = (e) => {
                                 className="text-white cursor-pointer"
                                 onClick={() => {
                                     fileInputRef.current.value = "";
-                                    setFormData({ ...formData, image: "" });
+                                    setFormData({ ...formData, image: null });
                                     setFileName("");
                                 }}
                                 />
@@ -442,7 +466,7 @@ const validatePositiveNumber = (e) => {
                                     )
                                 }
                                 >
-                                <CircleX size={20} cursor-pointer/>
+                                <CircleX size={20} className="cursor-pointer" />
                                 </button>
                                 </div>
 

@@ -96,8 +96,21 @@ export const getRecipes = async (req, res) => {
         const userRecipes = await Recipe.find({ userId: req.user._id }).select("-userId");
         res.status(200).json(userRecipes);
     } catch (error) {
-        console.error("Error in getRecipes controller", error.message);
-        res.status(500).json({ message: "Internal Server Error" });
+        // Handles errors from services and server errors
+        if (error.message.startsWith("it is not possible to convert Volume, Weight and pieces:")) {
+            return res.status(400).json({ message: error.message });
+        }
+        
+        if (error.message.startsWith("Material with ID")) {
+            return res.status(400).json({ message: error.message });
+        }
+       
+        if (error.message.startsWith("Unity Unknown")) {
+            return res.status(400).json({ message: error.message });
+        }
+
+        console.error("Error in createRecipe controller", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 };
 
@@ -157,7 +170,7 @@ export const updateRecipe = async (req, res) => {
             quantityPermeasure,
             recipeunitOfmeasure,
             image
-        } = req.body; // <-- aquí lees la info correctamente
+        } = req.body;
         const userId = req.user._id;
 
         const recipe = await Recipe.findOne({ _id: id, userId });
@@ -173,10 +186,22 @@ export const updateRecipe = async (req, res) => {
             recipeunitOfmeasure
         };
 
-        // Subir nueva imagen si se proporcionó
-        if (image) {
+        // Borrar imagen si el cliente manda null
+        if (image === null) {
+            if (recipe.publicId) {
+                try {
+                    await cloudinary.uploader.destroy(recipe.publicId);
+                } catch (err) {
+                    console.error("Error deleting Cloudinary image:", err.message);
+                }
+            }
+            filteredUpdates.imageUrl = "";
+            filteredUpdates.publicId = "";
+        }
+
+        // Subir nueva imagen si se proporcionó en base64
+        else if (image) {
             try {
-                // borrar imagen anterior si existe
                 if (recipe.publicId) await cloudinary.uploader.destroy(recipe.publicId);
 
                 const uploadResponse = await cloudinary.uploader.upload(image, {
@@ -195,13 +220,51 @@ export const updateRecipe = async (req, res) => {
             }
         }
 
-        // Calcular costos si cambian los ingredientes
-        if (filteredUpdates.ingredients) {
+            // Calcular costos si cambian los ingredientes
+            if (filteredUpdates.ingredients) {
+                if (!Array.isArray(filteredUpdates.ingredients) || filteredUpdates.ingredients.length === 0) {
+                return res.status(400).json({ message: "Ingredients list is empty or invalid." });
+            }
+
+                // 2. Validates if all the ingredinet ids are correct 
+            const allIdsPresent = filteredUpdates.ingredients.every(ing => ing.materialId);
+            if (!allIdsPresent) {
+                return res.status(400).json({ message: "Ingredient does not exist or not authorized." });
+            }
+            
+            const allIdsValid = filteredUpdates.ingredients.every(ing => mongoose.Types.ObjectId.isValid(ing.materialId));
+            if (!allIdsValid) {
+                return res.status(400).json({ message: "Ingredient does not exist or not authorized." });
+            }
+            
+            // 3. Validate Quantity > 0 before going to the DB
+            const invalidQuantity = filteredUpdates.ingredients.find(ing => !ing.units || Number(ing.units) <= 0);
+            if (invalidQuantity) {
+                return res.status(400).json({ message: "Invalid quantity in one or more ingredients." });
+            }
+
+            const invalidUnitOfmeasure = filteredUpdates.ingredients.find(ing => !ing.UnitOfmeasure || Number(ing.UnitOfmeasure) <= 0);
+            if (invalidUnitOfmeasure) {
+                return res.status(400).json({ message: "Invalid unit of measure in one or more ingredients." });
+            }
+
             const materialIds = filteredUpdates.ingredients.map(i => i.materialId);
             const dbMaterials = await Ingredient.find({ _id: { $in: materialIds } });
 
             if (!dbMaterials || dbMaterials.length !== materialIds.length) 
                 return res.status(400).json({ message: "One or more ingredients do not exist or not authorized" });
+
+            if(!filteredUpdates.aditionalCostpercentages){
+            filteredUpdates.aditionalCostpercentages = recipe.aditionalCostpercentages
+            }
+
+            if(!filteredUpdates.profitPercentage){
+                filteredUpdates.profitPercentage = recipe.profitPercentage
+            }
+
+            if(!filteredUpdates.portionsPerrecipe){
+                filteredUpdates.portionsPerrecipe = recipe.portionsPerrecipe
+            }
 
             const costData = calculateRecipeCost({
                 ingredientsData: dbMaterials,
@@ -224,7 +287,27 @@ export const updateRecipe = async (req, res) => {
         res.status(200).json(updatedRecipe);
 
     } catch (error) {
+        
+        // Handles errors from services and server errors
+        if (error.message.startsWith("it is not possible to convert Volume, Weight and pieces:")) {
+            return res.status(400).json({ message: error.message });
+        }
+        
+        if (error.message.startsWith("Material with ID")) {
+            return res.status(400).json({ message: error.message });
+        }
+       
+        if (error.message.startsWith("Unity Unknown")) {
+            return res.status(400).json({ message: error.message });
+        }
+        
+        // Handle validation errors (e.g., "quantity must be a number")
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: "Validation failed" });
+        }
+
         console.error("Error in updateRecipe controller", error.message);
+
         res.status(500).json({ message: "Internal Server Error" });
     }
 };

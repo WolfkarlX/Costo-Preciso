@@ -163,8 +163,16 @@ export const updateIngredient = async (req, res) => {
             return res.status(404).json({ message: "Ingredient not found or unauthorized" });
         }
 
-        // 🔹 Verificar si se quiere cambiar la imagen
-        if (image && image.startsWith("data:image")) {
+        // Manejo de imagen
+        if (image === null || image === "") {
+            // Eliminar imagen existente si había
+            if (ingredient.publicId) {
+                await cloudinary.uploader.destroy(ingredient.publicId);
+            }
+            filteredUpdates.imageUrl = "";
+            filteredUpdates.publicId = "";
+        } else if (image && image.startsWith("data:image")) {
+            // Subir nueva imagen
             try {
                 const uploadResponse = await cloudinary.uploader.upload(image, {
                     folder: "ingredients",
@@ -172,7 +180,14 @@ export const updateIngredient = async (req, res) => {
                     max_file_size: 5 * 1024 * 1024, // 5MB
                     invalidate: true,
                 });
+
+                // Si había imagen previa, eliminarla
+                if (ingredient.publicId) {
+                    await cloudinary.uploader.destroy(ingredient.publicId);
+                }
+
                 filteredUpdates.imageUrl = uploadResponse.secure_url;
+                filteredUpdates.publicId = uploadResponse.public_id;
             } catch (error) {
                 console.error("Cloudinary upload error:", error.message);
                 return res.status(400).json({
@@ -181,7 +196,6 @@ export const updateIngredient = async (req, res) => {
             }
         }
 
-        // 🔹 Evitar duplicado de nombre
         if (filteredUpdates.name) {
             const SameName = await Ingredient.findOne({
                 name: filteredUpdates.name,
@@ -193,12 +207,10 @@ export const updateIngredient = async (req, res) => {
             }
         }
 
-        // 🔹 Recalcular precio unitario
         const totalPrice = filteredUpdates.totalPrice ?? ingredient.totalPrice;
         const Units = filteredUpdates.Units ?? ingredient.Units;
         filteredUpdates.unityPrice = totalPrice / Units;
 
-        // 🔹 Actualizar
         const updatedIngredient = await Ingredient.findByIdAndUpdate(
             ingredientId,
             { $set: filteredUpdates },

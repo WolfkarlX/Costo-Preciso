@@ -201,21 +201,17 @@ const IngredientsPage = () => {
                                                 />
                                             ) : (
                                                 <div className="gap-4 w-full h-40 flex flex-col justify-center items-center text-md text-color-primary">
-                                                <CloudDownload size={60} />
+                                                <CloudDownload 
+                                                    size={60}
+                                                    onClick={() => fileInputRef.current.click()}
+                                                    className="cursor-pointer"/>
                                                 Cargar imagen
                                                 </div>
                                             )}
                                             </div>
 
                                             <div className="w-full mt-4">
-                                                <div className="w-full flex justify-between items-center bg-color-primary input border border-none shadow-md p-2">
-                                                    {/* Botón para seleccionar */}
-                                                    <FileImage 
-                                                    size={20}
-                                                    className="text-white cursor-pointer"
-                                                    onClick={() => fileInputRef.current.click()}
-                                                    />
-
+                                                <div className="w-full flex justify-between items-center bg-color-primary input border border-none shadow-md p-4">
                                                     {/* Nombre del archivo */}
                                                     <div className="text-sm text-white truncate max-w-[110px] text-center">
                                                     {fileName || "No seleccionado"}
@@ -227,7 +223,7 @@ const IngredientsPage = () => {
                                                     className="text-white cursor-pointer"
                                                     onClick={() => {
                                                         fileInputRef.current.value = "";
-                                                        setFormData({ ...formData, image: "" });
+                                                        setFormData({ ...formData, image: null });
                                                         setFileName("");
                                                     }}
                                                     />
@@ -289,7 +285,7 @@ const IngredientsPage = () => {
                                                 />
                                             </div>
 
-                                            <div className="form-control relative">
+                                            <div className="form-control relative z-50">
                                                 <label className="label">
                                                     <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
                                                 </label>
@@ -311,7 +307,7 @@ const IngredientsPage = () => {
                                                         </button>
                                                     </div>
                                                     {isOpen && (
-                                                        <div className="absolute top-[100%] left-0 right-0 z-50 mt-2 w-full px-4 py-2
+                                                        <div className="absolute top-[100%] left-0 right-0 z-[9999] mt-2 w-full px-4 py-2
                                                         origin-top-right rounded-[20px] border border-none bg-white shadow-md">
                                                             <div className="max-h-40 overflow-y-auto"> {/* Contenedor con scroll */}
                                                             {options.map((option) => (
