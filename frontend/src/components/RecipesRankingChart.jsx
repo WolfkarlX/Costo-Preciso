@@ -1,5 +1,6 @@
 // src/components/RecipesRankingChart.jsx
 import { Bar } from "react-chartjs-2";
+import { useMemo } from "react";
 import {
   Chart as ChartJS,
   BarElement,
@@ -17,56 +18,57 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
  * - title: string
  * - metric: "netProfit" | "expectedProfit" | "totalCost"
  * - rows: [{ name, metricValue, ... }]
- * - isLoading: boolean
- * - error: string | null
  */
-export default function RecipesRankingChart({ title, metric, rows, isLoading, error }) {
-  if (error) return <div className="text-red-500">Error: {error}</div>;
-  if (isLoading) return <div className="spinner"></div>;
-  if (!rows || rows.length === 0) return <p>No hay datos para mostrar.</p>;
 
-  const labels = rows.map((r) => r.name);
-  const values = rows.map((r) => Number(r.metricValue ?? 0));
+// No manejar errores en el componente. Utilizar unicamente Store para manejar errores. y Pages para mostrar "errores" fuera del backend.
+export default function RecipesRankingChart({ title, metric, rows = [] }) {
+  if (rows.length === 0) return null;
 
-  const chartData = {
+  const labels = useMemo(() => rows.map(r => r.name), [rows]);
+  const values = useMemo(() => rows.map(r => Number(r.metricValue ?? 0)), [rows]);
+
+  const datasetLabel =
+    metric === "totalCost"
+      ? "Costo total"
+      : metric === "expectedProfit"
+      ? "Ganancia esperada"
+      : "Ganancia neta";
+
+  const chartData = useMemo(() => ({
     labels,
     datasets: [
       {
-        label:
-          metric === "totalCost"
-            ? "Costo total"
-            : metric === "expectedProfit"
-            ? "Ganancia esperada"
-            : "Ganancia neta",
-        data: values,
+        label: datasetLabel,
+        data : values,
         backgroundColor: "rgba(79, 149, 157, 0.8)",
-        borderColor: "rgba(79, 149, 157, 1)",
-        borderWidth: 1
-      }
-    ]
-  };
+        borderColor : "rgba(79, 149, 157, 1)",
+        borderWidth : 1
+      },
+    ],
+  }), [labels, values, datasetLabel]);
 
-  const options = {
+  const options = useMemo(() => ({
     indexAxis: "y",
-    responsive: true,
+    responsive : true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: { display: true },
+      legend: { display: true},
       tooltip: {
         mode: "nearest",
         intersect: false,
         callbacks: {
           title: (items) => items?.[0]?.label ?? "",
-          label: (item) => `${item.label}: ${item.raw}`
+          label: (item) => `${item.dataset.label}: ${item.raw}`
         }
       }
     },
     scales: {
-      x: { ticks: { callback: (v) => `${v}` } }
+      x: { beginAtZero: true }
     }
-  };
+  }), []);
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto" style={{ height: 360 }}>
       {title && <h3 className="text-xl font-semibold text-primary">{title}</h3>}
       <Bar data={chartData} options={options} />
     </div>

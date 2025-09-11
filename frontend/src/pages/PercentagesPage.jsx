@@ -1,35 +1,29 @@
 // src/pages/AnalyticsPage.jsx
 import { useEffect, useMemo, useState } from "react";
-import { useAnalyticsStore, useRecipesRankings } from "../store/useAnalyticsStore";
+import { useAnalyticsStore, makeKey } from "../store/useAnalyticsStore";
 import RecipesRankingChart from "../components/RecipesRankingChart";
 
-const SectionRanking = ({ title, metric, order, limit, periodDays }) => {
-  const fetchRank = useAnalyticsStore((s) => s.fetchRecipesRankings);
-  const params = useMemo(() => ({ metric, order, limit, periodDays }), [metric, order, limit, periodDays]);
-
-  useEffect(() => {
-    fetchRank(params);
-  }, [fetchRank, params]);
-
-  const { rows, isLoading, error } = useRecipesRankings(params);
-
-  return (
-    <section className="p-4 bg-white rounded-lg shadow-lg">
-      <RecipesRankingChart
-        title={title}
-        metric={metric}
-        rows={rows}
-        isLoading={isLoading}
-        error={error}
-      />
-    </section>
-  );
-};
+/**
+ * Hook local: calcula la key y selecciona {rows,isLoading,error} del store.
+ */
+function useRecipesRankings(params) {
+  const key = useMemo(() => makeKey(params), [params]);
+  const rows = useAnalyticsStore((s) => s.rankingsByKey[key]?.rows);
+  const isLoading = useAnalyticsStore((s) => !!s.loadingByKey[key]);
+  const error = useAnalyticsStore((s) => s.errorByKey[key] ?? null);
+  return { rows, isLoading, error };
+}
 
 export default function AnalyticsPage() {
-  // Filtros globales (aplicados a todas las secciones)
+  // Filtros globales
   const [periodDays, setPeriodDays] = useState(""); // "", "7", "30", etc.
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(5);           // valor numérico real usado por la app
+  const [limitInput, setLimitInput] = useState("5"); // lo que se ve en el input (string)
+
+  // Mantiene sync el input cuando cambie 'limit' por codigo.
+  useEffect(() => {
+    setLimitInput(String(limit));
+  }, [limit]);
 
   // Config base por ranking
   const cfgTopNet = { metric: "netProfit", order: "desc" };
@@ -43,6 +37,49 @@ export default function AnalyticsPage() {
     periodDays: periodDays ? Number(periodDays) : undefined
   });
 
+  // Memo de params por sección (evita objetos nuevos en cada render)
+  const paramsTopNet = useMemo(() => withGlobals(cfgTopNet), [limit, periodDays]);
+  const paramsTopExpected = useMemo(() => withGlobals(cfgTopExpected), [limit, periodDays]);
+  const paramsMostExpensive = useMemo(() => withGlobals(cfgMostExpensive), [limit, periodDays]);
+  const paramsCheapest = useMemo(() => withGlobals(cfgCheapest), [limit, periodDays]);
+
+  // Disparar fetch para TODAS las secciones con un solo efecto
+  const fetchRank = useAnalyticsStore((s) => s.fetchRecipesRankings);
+  useEffect(() => {
+    if (limit === 0) return;
+    fetchRank(paramsTopNet);
+    fetchRank(paramsTopExpected);
+    fetchRank(paramsMostExpensive);
+    fetchRank(paramsCheapest);
+  }, [fetchRank, paramsTopNet, paramsTopExpected, paramsMostExpensive, paramsCheapest, limit]);
+
+  // Leer estado de cada sección (hooks directos, sin loops)
+  const topNet = useRecipesRankings(paramsTopNet);
+  const topExpected = useRecipesRankings(paramsTopExpected);
+  const mostExpensive = useRecipesRankings(paramsMostExpensive);
+  const cheapest = useRecipesRankings(paramsCheapest);
+
+  // Helper presentacional para no repetir el ternario de estado
+  const renderSection = (title, metric, state) => {
+    const { rows, isLoading, error } = state;
+    return (
+      <section className="p-4 bg-white rounded-lg shadow-lg">
+        {limit === 0 ? (
+          <p className="text-base-content/70">Debes establecer un limite para mostrar las gráficas.</p>
+        ) : error ? (
+          <div className="text-red-500 font-medium">Error: {error}</div>
+        ) : isLoading ? (
+          <div className="spinner" aria-busy="true" aria-live="polite" />
+        ) : !rows || rows.length === 0 ? (
+          <p className="text-base-content/70">No hay datos para mostrar.</p>
+        ) : (
+          <RecipesRankingChart title={title} metric={metric} rows={rows} />
+        )}
+      </section>
+    );
+  };
+
+  // ✅ Un SOLO return en todo el archivo
   return (
     <main className="p-6 space-y-8 bg-primary-light font-title">
       <h1 className="text-4xl font-semibold text-primary">Analítica de Recetas</h1>
@@ -70,19 +107,34 @@ export default function AnalyticsPage() {
           <label className="label">
             <span className="label-text font-medium mb-2">Límite por ranking</span>
           </label>
-          <select
-            className="select w-full shadow-md border-none"
-            value={String(limit)}
-            onChange={(e) => setLimit(Number(e.target.value))}
+          <input
+            type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            min="0"
+            step="1"
+            placeholder="Ejemplo: 0, 3, 10, 15..."
+            className="input w-full shadow-md border-none"
+            value={limitInput}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => {
+              const v = e.target.value;
+              // permite vacío o solo dígitos (incluye 0)
+              if (v === "" || /^\d+$/.test(v)) {
+                setLimitInput(v);
+              }
+            }}
+            onBlur={() => {
+              // normaliza al salir del input
+              const n = parseInt(limitInput, 10);
+              const normalized = Number.isFinite(n) && n >= 0 ? n : 0;
+              setLimit(normalized);
+              setLimitInput(String(normalized));
+            }}
             aria-label="Cantidad de recetas a mostrar por ranking"
-          >
-            <option value="5">5 (recomendado)</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
-          </select>
+          />
           <small className="text-base-content/60 mt-1">
-            Número de recetas que se mostrarán en cada gráfica.
+            Número de recetas a mostrar por ranking. Si pones 0, no se mostrarán gráficas.
           </small>
         </div>
 
@@ -101,7 +153,10 @@ export default function AnalyticsPage() {
             <button
               type="button"
               className="btn"
-              onClick={() => { setPeriodDays(""); setLimit(5); }}
+              onClick={() => { setPeriodDays(""); 
+                setLimit(5); 
+                setLimitInput("5");
+              }}
             >
               Reset
             </button>
@@ -110,25 +165,10 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Secciones */}
-      <SectionRanking
-        title="Recetas con mayor ganancia neta"
-        {...withGlobals(cfgTopNet)}
-      />
-
-      <SectionRanking
-        title="Recetas con mayor ganancia esperada"
-        {...withGlobals(cfgTopExpected)}
-      />
-
-      <SectionRanking
-        title="Recetas más costosas de hacer"
-        {...withGlobals(cfgMostExpensive)}
-      />
-
-      <SectionRanking
-        title="Recetas más baratas de hacer"
-        {...withGlobals(cfgCheapest)}
-      />
+      {renderSection("Recetas con mayor ganancia neta", "netProfit", topNet)}
+      {renderSection("Recetas con mayor ganancia esperada", "expectedProfit", topExpected)}
+      {renderSection("Recetas más costosas de hacer", "totalCost", mostExpensive)}
+      {renderSection("Recetas más baratas de hacer", "totalCost", cheapest)}
     </main>
   );
 }

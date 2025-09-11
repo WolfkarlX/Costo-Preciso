@@ -3,14 +3,14 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
-export const makeKey = ({ metric = "netProfit", order, limit = 5, periodDays }) =>
-  [
+export function makeKey({ metric = "netProfit", order, limit = 5, periodDays } = {}) {
+  return [
     metric ?? "netProfit",
     order ?? "",
     String(limit ?? 5),
     periodDays ? String(periodDays) : ""
   ].join("|");
-
+}
 export const useAnalyticsStore = create((set, get) => ({
   rankingsByKey: {}, // { [key]: { rows, fetchedAt } }
   loadingByKey: {},  // { [key]: boolean }
@@ -20,20 +20,22 @@ export const useAnalyticsStore = create((set, get) => ({
     const key = makeKey({ metric, order, limit, periodDays });
 
     // Evita llamadas duplicadas si ya está cargando
+    /* Antes de pedir datos, revisa si ya está cargando esa misma key.
+      Si sí → sale de la función para no duplicar peticiones innecesarias.
+    */
     if (get().loadingByKey[key]) return;
 
-    // (Opcional) TTL para reusar datos recientes (descomenta si quieres cache por 60s)
-    // const cached = get().rankingsByKey[key];
-    // const TTL = 60 * 1000;
-    // if (cached && Date.now() - cached.fetchedAt < TTL) return;
-
+    /*
+    Marca que esa petición está cargando (loadingByKey[key] = true).
+    Limpia cualquier error previo para esa key.
+    */
     set((s) => ({
       loadingByKey: { ...s.loadingByKey, [key]: true },
       errorByKey: { ...s.errorByKey, [key]: null }
     }));
 
     try {
-      const params = new URLSearchParams({ metric, limit });
+      const params = new URLSearchParams({ metric, limit }); // Investigar la seguridad.
       if (order) params.set("order", order);
       if (periodDays) params.set("periodDays", String(periodDays));
 
@@ -52,14 +54,3 @@ export const useAnalyticsStore = create((set, get) => ({
     }
   }
 }));
-
-/**
- * Hook suscrito por clave de parámetros: garantiza re-render tras el fetch
- */
-export const useRecipesRankings = (params) => {
-  const key = makeKey(params);
-  const rows = useAnalyticsStore((s) => s.rankingsByKey[key]?.rows);
-  const isLoading = useAnalyticsStore((s) => !!s.loadingByKey[key]);
-  const error = useAnalyticsStore((s) => s.errorByKey[key] ?? null);
-  return { rows, isLoading, error };
-};

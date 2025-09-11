@@ -15,3 +15,11 @@ export function sortData(rows, metric) {
     return b.netProfitNum - a.netProfitNum; // Ordenar por ganancia neta por defecto
   });
 }
+
+export const makeKey = ({ metric = "netProfit", order, limit = 5, periodDays } = {}) =>
+[
+  metric ?? "netProfit",
+  order ?? "",
+  String(limit ?? 5),
+  periodDays ? String(periodDays) : ""
+].join("|");
