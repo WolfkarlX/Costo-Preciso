@@ -326,14 +326,14 @@ const IngredientsPage = () => {
                     <img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente" />
                 </div>
                 <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
-                <p className="text-lg text-color-secondary my-2">
-                    Cantidad: <span className="font-black">{item.Units} {item.unityOfmeasurement}</span>
+                <p className="font-black text-lg text-color-secondary my-2">
+                    Cantidad: <span className="font-normal">{item.Units} {item.unityOfmeasurement}</span>
                 </p>
-                <p className="text-lg text-color-secondary my-2">
-                    Precio total: <span className="font-black">${item.totalPrice}</span>
+                <p className="font-black text-lg text-color-secondary my-2">
+                    Precio total: <span className="font-normal">${item.totalPrice}</span>
                 </p>
-                <p className="text-lg text-color-secondary my-2">
-                    Precio unitario: <span className="font-black">${item.unityPrice}</span>
+                <p className="font-black text-lg text-color-secondary my-2">
+                    Precio unitario: <span className="font-normal">${item.unityPrice}</span>
                 </p>
             </div>
         ))
