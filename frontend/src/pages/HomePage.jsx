@@ -102,23 +102,28 @@ const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edic
     }
 
     // Resetear y cerrar modal después del éxito
-    setFormData({
-      name: "",
-      ingredients: [],
-      portionsPerrecipe: "",
-      quantityPermeasure: "",
-      aditionalCostpercentages: "",
-      profitPercentage: "",
-      UnitOfmeasure: "",
-      recipeunitOfmeasure: ""
-    });
-    setSelectedIngredients([]);
-    setSelected("");
-    setIsOpen(false);
-    setOpen(false);  // Cierra el modal
-    setIsEditMode(false);
-    setEditingRecipe(null);
-    fetchRecipes(); //se atraen las recetas despues de crear receta
+    const currentModalState = useRecipesStore.getState().openModal;//gets the openModal State updated(from IngredientsStore)
+    
+    if (!currentModalState) {
+        setFormData({
+        name: "",
+        ingredients: [],
+        portionsPerrecipe: "",
+        quantityPermeasure: "",
+        aditionalCostpercentages: "",
+        profitPercentage: "",
+        UnitOfmeasure: "",
+        recipeunitOfmeasure: ""
+        });
+        
+        setSelectedIngredients([]);
+        setSelected("");
+        setIsOpen(false);
+        setOpen(false);  // Cierra el modal
+        setIsEditMode(false);
+        setEditingRecipe(null);
+        fetchRecipes(); //se atraen las recetas despues de crear receta
+    }
   } catch (error) {
     console.error("Error al guardar receta:", error);
   }

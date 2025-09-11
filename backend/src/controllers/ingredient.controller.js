@@ -223,7 +223,7 @@ export const updateIngredient = async (req, res) => {
         res.status(200).json(updatedIngredient);
     } catch (error) {
         
-        console.error("Error in deleteIngredient Controller:", error.message);
+        console.error("Error in updateIngredient Controller:", error.message);
         // Handle validation errors (e.g., "quantity must be a number")
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: "Validation failed" });

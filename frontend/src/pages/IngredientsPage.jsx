@@ -62,7 +62,7 @@ const IngredientsPage = () => {
         isCreating
     } = useIngredientsStore();
 
-    // Agregar un nuevo ingrediente
+    // handles the submit of the form(creating or editing)
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -71,20 +71,24 @@ const IngredientsPage = () => {
         } else {
             await create(formData);
         }
+        
+        const currentModalState = useIngredientsStore.getState().openModal;//gets the openModal State updated(from IngredientsStore)
 
-        await fetchIngredients();
-        setOpen(false);
-        setFormData({
-            name: "",
-            Units: "",
-            unityOfmeasurement: "",
-            totalPrice: "",
-            image: "",
-        });
-        setSelected(null);
-        setIsEditMode(false);
-        setSelectedIngredient(null);
-    };
+        if (!currentModalState) {
+            setOpen(false);
+            await fetchIngredients();
+            setFormData({
+                name: "",
+                Units: "",
+                unityOfmeasurement: "",
+                totalPrice: "",
+                image: "",
+            });
+            setSelected(null);
+            setIsEditMode(false);
+            setSelectedIngredient(null);
+        }
+    }; 
 
 
     // Visualizar ingredientes del usuario
@@ -323,7 +327,7 @@ const IngredientsPage = () => {
                 </div>
 
                 <div className="img-container">
-                    <img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente" />
+                                        <img id="img-ingredient" src={item.image} alt="imagen del ingrediente" title="Imagen del ingrediente" />
                 </div>
                 <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
                 <p className="font-black text-lg text-color-secondary my-2">
