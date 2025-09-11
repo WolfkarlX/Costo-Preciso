@@ -524,13 +524,13 @@ const validatePositiveNumber = (e) => {
 
                         <img id="img-recipe" src={item.image} alt="imagen de la receta" title="imagen de la receta" />
                         <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
-                        <p className="text-lg text-color-secondary my-2">
-                        Precio de venta: <span className="font-black">${item.unitSalePrice}</span>
+                        <p className="text-lg font-black text-color-secondary my-2">
+                        Precio de venta: <span className="font-normal">${item.unitSalePrice}</span>
                         </p>
-                        <p id="netProfit_item" className="text-lg text-color-secondary my-2">
-                        Ganancia neta: <span className="font-black">${item.netProfit}</span></p>
-                        <p className="text-lg text-color-secondary my-2">
-                        En hacerla se gasta: <span className="font-black">${item.totalCost}</span>
+                        <p id="netProfit_item" className="text-lg font-black text-color-secondary my-2">
+                        Ganancia neta: <span className="font-normal">${item.netProfit}</span></p>
+                        <p className="text-lg font-black text-color-secondary my-2">
+                        En hacerla se gasta: <span className="font-normal">${item.totalCost}</span>
                         </p>
                         <button
                             onClick={() => {
