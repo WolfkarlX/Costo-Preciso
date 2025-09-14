@@ -1,6 +1,5 @@
 // controllers/analytics.controller.js
-import mongoose from "mongoose";
-import Recipe from "../models/recipe.model.js";
+import * as AnalyticsService from "../services/analytics.service.js"; // ajusta el path si es distinto
 
 /**
  * Utilidades de validación y respuesta
@@ -14,8 +13,7 @@ function parsePositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTE
   return fallback;
 }
 
-function badRequest(res, message, details) {
-  // details solo se loggea, no se envía
+function badRequest(res, message) {
   return res.status(400).json({ message });
 }
 
@@ -23,10 +21,16 @@ function unauthorized(res, message = "No autorizado") {
   return res.status(401).json({ message });
 }
 
+/**
+ * Controller delgado:
+ * - Revisa auth
+ * - Valida/parsea params
+ * - Delega TODO al service
+ * - Responde
+ */
 export async function recipesRankings(req, res) {
   // 1) Autenticación básica
   if (!req?.user?._id) {
-    // No exponer detalles al cliente
     return unauthorized(res);
   }
 
@@ -59,104 +63,30 @@ export async function recipesRankings(req, res) {
       periodDays = pd;
     }
 
-    // 3) Construir match por usuario y periodo
-    const userId = req.user._id;
-    let userObjectId;
-    try {
-      userObjectId = new mongoose.Types.ObjectId(userId);
-    } catch (_) {
-      // Si el _id no es válido, no exponemos el dato al cliente
-      return unauthorized(res);
-    }
+    // 3) Delegar toda la lógica pesada al service
+    const userId = String(req.user._id);
 
-    const match = { userId: userObjectId };
-    if (periodDays) {
-      const from = new Date();
-      from.setDate(from.getDate() - Number(periodDays));
-      match.createdAt = { $gte: from };
-    }
+    const { rows, effectiveOrder } = await AnalyticsService.recipesRankingsService({
+      userId,
+      metric,
+      order,      // 'asc' | 'desc' | undefined
+      limit,
+      periodDays, // undefined | number
+    });
 
-    // 4) Dirección de ordenamiento
-    // Por defecto “top” descendente para todas las métricas
-    const defaultOrderDir = -1;
-    const sortDir = order === "asc" ? 1 : order === "desc" ? -1 : defaultOrderDir;
-
-    // 5) Pipeline de agregación
-    const pipeline = [
-      { $match: match },
-      {
-        $addFields: {
-          totalCostNum: { $toDouble: "$totalCost" },
-          netProfitNum: { $toDouble: "$netProfit" },
-          unitSalePriceNum: { $toDouble: "$unitSalePrice" },
-          portionsNum: { $toDouble: "$portionsPerrecipe" }, // mantener nombre exacto del campo
-          costPerunityNum: { $toDouble: "$costPerunity" }
-        }
-      },
-      {
-        $addFields: {
-          // expectedProfit = (precio_venta_unitario * porciones) - costo_total
-          expectedProfitNum: {
-            $subtract: [
-              { $multiply: ["$unitSalePriceNum", "$portionsNum"] },
-              "$totalCostNum"
-            ]
-          }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          name: 1,
-          totalCost: { $ifNull: ["$totalCostNum", 0] },
-          netProfit: { $ifNull: ["$netProfitNum", 0] },
-          expectedProfit: { $ifNull: ["$expectedProfitNum", 0] },
-          createdAt: 1
-        }
-      },
-      {
-        $addFields: {
-          metricValue:
-            metric === "totalCost"
-              ? "$totalCost"
-              : metric === "expectedProfit"
-              ? "$expectedProfit"
-              : "$netProfit"
-        }
-      },
-      { $sort: { metricValue: sortDir, createdAt: -1 } },
-      { $limit: Number(limit) }
-    ];
-
-    // 6) Ejecutar consulta
-    let rows;
-    try {
-      rows = await Recipe.aggregate(pipeline).exec();
-    } catch (aggErr) {
-      // Log detallado solo en servidor
-      console.error("[recipesRankings] Error en aggregate:", {
-        err: aggErr?.message || aggErr,
-        userId: String(userId),
-        metric,
-        order: order ?? "(default)",
-        limit,
-        periodDays: periodDays ?? "(none)"
-      });
-      return res.status(500).json({ message: "No fue posible obtener la analítica en este momento." });
-    }
-
-    // 7) Respuesta exitosa (no exponemos detalles internos)
+    // 4) Responder (shape idéntico al actual)
     return res.status(200).json({
       metric,
-      order: sortDir === 1 ? "asc" : "desc",
-      rows // [{ name, totalCost, netProfit, expectedProfit, metricValue }]
+      order: effectiveOrder, // "asc" | "desc"
+      rows,                  // [{ name, totalCost, netProfit, expectedProfit, metricValue, createdAt }]
     });
   } catch (err) {
-    // Cualquier error inesperado
-    console.error("[recipesRankings] Error inesperado:", {
-      err: err?.message || err,
-      stack: err?.stack
-    });
-    return res.status(500).json({ message: "Ocurrió un error inesperado." });
+    // Respuestas amigables si el service lanza status/message
+    const status = err?.status ?? 500;
+    const message = err?.message ?? "Ocurrió un error inesperado.";
+    if (status >= 500) {
+      console.error("[recipesRankings] Error inesperado:", { err: err?.message || err, stack: err?.stack });
+    }
+    return res.status(status).json({ message });
   }
 }
