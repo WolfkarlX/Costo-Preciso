@@ -289,7 +289,7 @@ const IngredientsPage = () => {
                                                 <label className="label">
                                                     <span className="label-text font-medium mt-4 my-2">Unidad de medida</span>
                                                 </label>
-                                                <div className="w-[100%] relative inline-flex rounded-[20px] bg-white shadow-md input border-none" ref={dropdownRef}>
+                                                <div className="w-[100%] relative inline-flex rounded-[20px] shadow-md input border-none" ref={dropdownRef}>
                                                     <div className="w-[100%]">
                                                         <button
                                                         type="button"
