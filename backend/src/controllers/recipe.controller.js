@@ -26,6 +26,10 @@ export const createRecipe = async (req, res) => {
             return res.status(400).json({ message: "Missing fields" });
         }
 
+        if (!Array.isArray(ingredients) || ingredients.length === 0) {
+            return res.status(400).json({ message: "La receta debe tener al menos 1 ingrediente" });
+        }
+        
         const materialIds = ingredients.map(i => i.materialId);
         const allValid = materialIds.every(id => mongoose.Types.ObjectId.isValid(id));
         if (!allValid) return res.status(400).json({ message: "Ingredient does not exist or not authorized" });

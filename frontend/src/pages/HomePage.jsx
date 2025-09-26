@@ -103,8 +103,7 @@ const HomePage = () => {
             return;
         }
 
-        // Construcción del objeto receta
-        // Construcción del objeto receta
+// Construcción del objeto receta
 const recipeData = {
   name: formData.name,
   portionsPerrecipe: formData.portionsPerrecipe,
@@ -249,6 +248,30 @@ else {
     const handleDelete = async (id) => {
         await deleteRecipes(id);
     };
+// helpers (fuera del return)
+const isEmpty = v => v === undefined || v === null || String(v).trim() === "";
+const isPosNumber = v => Number.isFinite(Number(v)) && Number(v) > 0;
+
+const hasAllIngredients =
+  selectedIngredients.length > 0 &&
+  selectedIngredients.every(ing =>
+    ing?.materialId &&
+    isPosNumber(ing?.units) &&
+    !isEmpty(ing?.UnitOfmeasure)
+  );
+
+// Validar que el formulario esté completo
+const isFormComplete =
+  !isEmpty(formData.name) &&
+  hasAllIngredients &&
+  isPosNumber(formData.portionsPerrecipe) &&
+  isPosNumber(formData.quantityPermeasure) &&
+  isPosNumber(formData.profitPercentage) &&
+  isPosNumber(formData.aditionalCostpercentages) &&
+  !isEmpty(formData.recipeunitOfmeasure) &&
+  // estos porcentajes pueden ser 0, por eso validamos número >= 0
+  Number.isFinite(Number(formData.profitPercentage)) && Number(formData.profitPercentage) >= 0 &&
+  Number.isFinite(Number(formData.aditionalCostpercentages)) && Number(formData.aditionalCostpercentages) >= 0;
 
 // Validar que en los campos numéricos ingresen números positivos aceptando decimales
 // No uso el atributo min="0" porque no acepta decimales
@@ -501,7 +524,7 @@ const validatePositiveNumber = (e) => {
                                     {ingredient.dropdownOpen && (
                                         <div
                                             ref={el => unitDropdownRefs.current[index] = el}
-                                            className="absolute top-[100%] right-0 z-50 mt-2 w-full w-fit px-4 py-2
+                                            className="absolute top-[100%] right-0 z-50 mt-2 w-full px-4 py-2
                                             origin-top-right rounded-[20px] border border-none bg-white shadow-md">
                                             <div className="max-h-40 overflow-y-auto"> {/* Contenedor con scroll */}
                                         {options.map((option) => (
@@ -576,7 +599,7 @@ const validatePositiveNumber = (e) => {
                                 {isOpen && (
                                     <div 
                                         ref={portionUnitDropdownRef}
-                                        className="absolute top-[100%] right-0 z-50 mt-2 w-full w-fit px-4 py-2
+                                        className="absolute top-[100%] right-0 z-50 mt-2 w-full px-4 py-2
                                                     origin-top-right rounded-[20px] border border-none bg-white shadow-md"
                                     >
                                         <div className="max-h-40 overflow-y-auto">
@@ -657,8 +680,9 @@ const validatePositiveNumber = (e) => {
                     </button>
                     <button 
                         type="submit" 
-                        className="btn btn-primary font-bold" 
-                        disabled={isCreating || isUpdating}
+                        className="btn btn-primary font-bold bg-color-primary rounded-[15px] shadow-md
+                            hover:bg-color-primary hover:text-black disabled:bg-gray-300 disabled:text-gray-500" 
+                        disabled={isCreating || isUpdating || !isFormComplete}
                         >
                         {isCreating || isUpdating ? (
                             <Loader2 className="size-5 animate-spin" />
