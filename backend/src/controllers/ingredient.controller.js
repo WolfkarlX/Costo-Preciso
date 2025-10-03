@@ -5,51 +5,46 @@ import mongoose from "mongoose";
 
 //logic of creating an ingredient
 export const createIngredient = async (req, res) => {
-    if (!req.body) {
-        return res.status(400).json({ message: "Request is empty" });
-    }
+    if (!req.body) return res.status(400).json({ message: "Request is empty" });
 
     //gets id from middleware auth
-    const userId = req.user._id
-    const imageUrl = ""
+    const userId = req.user._id;
+    let imageUrl = "";
+    let publicId = "";
 
-    const { name, Units, unityOfmeasurement, totalPrice, image} = req.body;
+    const { name, Units, unityOfmeasurement, totalPrice, image } = req.body;
+
     try {
         if(!name || !Units || !unityOfmeasurement || !totalPrice) {
             return res.status(400).json({ message: "All fields are required"});
         }
-
+        
         //Gets the unitPrice for this material or ingredient
-        const unityPrice = parseFloat(totalPrice) / parseFloat(Units)
+        const unityPrice = parseFloat(totalPrice) / parseFloat(Units);
 
-        //Verify if the image was sent and validate the image
+        // Subida de imagen
         if(image){
             try {
                 const uploadResponse = await cloudinary.uploader.upload(image, {
                   folder: 'ingredients',
-                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'mov', 'wav'], // Reject non-images
+                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp'], // Reject non-images
                   max_file_size: 5 * 1024 * 1024, // 5MB limit (in bytes)
                   invalidate: true // Force Cloudinary to revalidate
                 });
                 
                 imageUrl = uploadResponse.secure_url;
+                publicId = uploadResponse.public_id;
             } catch (error) {
                 console.error('Cloudinary upload error:', error.message);
-                return res.status(400).json({ 
-                    message: 'Invalid image. Must be JPG/PNG/GIF under 5MB.' 
-                });
+                return res.status(400).json({ message: 'Imagen inválida. Debe ser JPG/PNG/JPEG/GIF/WEBP y pesar menos de 5 MB'});
             }
         }
-
         //checks if there is an ingredient with the same name
-        const ingredient = await Ingredient.findOne({ 
-            name: name,
-            userId: userId
-        });
-
+        const ingredientExist = await Ingredient.findOne({ name, userId });
+      
         if(ingredient){
             return res.status(409).json({ 
-                message: "Ingredient already exists" 
+                message: "El ingrediente ya existe" 
             });
         }
         
@@ -60,13 +55,14 @@ export const createIngredient = async (req, res) => {
             totalPrice, 
             unityPrice, 
             userId,
-            imageUrl
+            imageUrl,
+            publicId
         });
 
         if(newIngredient) {
             //save the ingredient in the DB
             await newIngredient.save();
-
+            
             //returns a JSON object of the model created and saved in the DB
             res.status(201).json({
                 _id: newIngredient._id,
@@ -75,9 +71,10 @@ export const createIngredient = async (req, res) => {
                 unityOfmeasurement: newIngredient.unityOfmeasurement, 
                 totalPrice: newIngredient.totalPrice, 
                 unityPrice: newIngredient.unityPrice, 
-                imageUrl: newIngredient.image
+                imageUrl: newIngredient.image,
+                publicId: newIngredient.publicId
             });
-        } else {
+         } else {
             res.status(400).json({ message: "Invalid Ingredient data" });
         }
     } catch (error) {
@@ -178,30 +175,61 @@ export const deleteIngredient = async (req, res) => {
 //Logic for updating ingredients using filter
 export const updateIngredient = async (req, res) => {
     try {
-        const { id:ingredientId } = req.params;
+        const { id: ingredientId } = req.params;
         const userId = req.user._id;
-        const { filteredUpdates } = req; // Already validated/filtered by middleware
-    
-        //in here is not neccesary to check if there's no data coming from the user because
-        //the middleware does that
+        let { filteredUpdates } = req; // vienen los updates validados por middleware
+        const { image } = req.body;
 
         const ingredient = await Ingredient.findOne({ _id: ingredientId, userId: userId });
         if (!ingredient) {
             return res.status(404).json({ message: "Ingredient not found or unauthorized" });
         }
 
+        // Manejo de imagen
+        if (image === null || image === "") {
+            // Eliminar imagen existente si había
+            if (ingredient.publicId) {
+                await cloudinary.uploader.destroy(ingredient.publicId);
+            }
+            filteredUpdates.imageUrl = "";
+            filteredUpdates.publicId = "";
+        } else if (image && image.startsWith("data:image")) {
+            // Subir nueva imagen
+            try {
+                const uploadResponse = await cloudinary.uploader.upload(image, {
+                    folder: "ingredients",
+                    allowed_formats: ["jpg", "png", "jpeg", "gif", "webp"],
+                    max_file_size: 5 * 1024 * 1024, // 5MB
+                    invalidate: true,
+                });
+
+                // Si había imagen previa, eliminarla
+                if (ingredient.publicId) {
+                    await cloudinary.uploader.destroy(ingredient.publicId);
+                }
+
+                filteredUpdates.imageUrl = uploadResponse.secure_url;
+                filteredUpdates.publicId = uploadResponse.public_id;
+            } catch (error) {
+                console.error("Cloudinary upload error:", error.message);
+                return res.status(400).json({
+                    message: "Imagen inválida. Debe ser JPG/PNG/JPEG/GIF/WEBP y pesar menos de 5 MB",
+                });
+            }
+        }
+
         //checks if the user updates to a name occupied
         if (filteredUpdates.name) {
-            const SameName = await Ingredient.findOne({ 
-                name: filteredUpdates.name, 
-                userId: userId, 
+            const SameName = await Ingredient.findOne({
+                name: filteredUpdates.name,
+                userId: userId,
                 _id: { $ne: ingredientId } // excluye el actual ingrediente
             });
             if (SameName) {
                 return res.status(409).json({ message: "Ingredient already exists" });
             }
         }
-        
+      
         //logic for restricting the unit price and updating it
         if(!filteredUpdates.totalPrice){
             filteredUpdates.totalPrice = ingredient.totalPrice
@@ -212,14 +240,19 @@ export const updateIngredient = async (req, res) => {
         }
 
         filteredUpdates.unityPrice = filteredUpdates.totalPrice / filteredUpdates.Units;
-
+        
+        // Revisar
+        const totalPrice = filteredUpdates.totalPrice ?? ingredient.totalPrice;
+        const Units = filteredUpdates.Units ?? ingredient.Units;
+        filteredUpdates.unityPrice = totalPrice / Units;
+    
         //Apply updates (fields are pre-filtered)
         const updatedIngredient = await Ingredient.findByIdAndUpdate(
             ingredientId,
             { $set: filteredUpdates },
             { new: true, runValidators: true }
-        );        
-    
+        );
+
         res.status(200).json(updatedIngredient);
     } catch (error) {
         
@@ -230,4 +263,4 @@ export const updateIngredient = async (req, res) => {
         }
         res.status(500).json({ message: "Internal Server Error" });
     }
-  };
+};
