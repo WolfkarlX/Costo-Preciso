@@ -11,12 +11,15 @@ export const useRecipesStore = create((set, get) => ({
     isGetting: false,
     isDeleting: false,
     deletingId: null, // ID de la receta que se está eliminando
+    openModal: false,
+
 
     fetchIngredients: async () => {
         set({ isGetting: true });
         try {
             const res = await axiosInstance.get("ingredient/ingredients");
             set({ ingredients: res.data }); // Guarda la lista en el estado
+            return res.data //retorna el valor directo sin esperar async await
         } catch (error) {
             toast.error(error.response?.data?.message || "Error al obtener ingredientes.");
         } finally {
@@ -25,14 +28,21 @@ export const useRecipesStore = create((set, get) => ({
     },
 
     create: async (data) => {
-        set({ isCreating: true });
+        set({ isCreating: true, openModal: true });
+        let open = true
+
         try {
             const res = await axiosInstance.post("/recipe/create", data);
-            toast.success("Recipe Added");
+            toast.success("Receta agregada");
+            open = false
+            return res.data;
+
         } catch (error) {
             toast.error(error.response.data.message);
+            open = true
+
         } finally {
-            set({ isCreating: false });
+            set({ isCreating: false, openModal: open });
         }
     },
 
@@ -49,18 +59,23 @@ export const useRecipesStore = create((set, get) => ({
     },
 
     updateRecipe: async (id, updatedData) => {
-    set({ isUpdating: true });
+      set({ isUpdating: true, openModal: true });
+      let open = true
+      
     try {
         await axiosInstance.post(`/recipe/updt/${id}`, updatedData);
         toast.success("Recipe updated");
-        
-        // Llama a fetchRecipes para actualizar la lista desde el servidor
-        await get().fetchRecipes();
-    } catch (error) {
-        toast.error(error.response?.data?.message || "Error al actualizar receta");
-    }finally {
-        set({ isUpdating: false });
-    }
+            
+            // Llama a fetchRecipes para actualizar la lista desde el servidor
+            await get().fetchRecipes();
+            open = false
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Error al actualizar receta");
+            open = true
+
+        } finally {
+            set({ openModal: open });
+        }
     },
 
     deleteRecipes: async (id) => {
@@ -71,12 +86,11 @@ export const useRecipesStore = create((set, get) => ({
 
             const updateRecipes = get().recipes.filter((ing) => ing._id !== id);
             set({ recipes: updateRecipes });
-
-            toast.success("Recipe deleted");
-
+            toast.success("Receta eliminada");
+          
             // Llama a fetchRecipes para obtener la lista actualizada
             await get().fetchRecipes();
-            
+          
         } catch (error) {
             toast.error(error.response?.data?.message || "Error al eliminar receta");
         }finally {

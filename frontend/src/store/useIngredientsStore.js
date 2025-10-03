@@ -9,17 +9,22 @@ export const useIngredientsStore = create((set, get) => ({
     isGetting: false,
     isDeleting: false,
     deletingId: null, // ID del ingrediente que se está eliminando
+    openModal: false,
     ingredients: [],
 
     create: async (data) => {
-        set({ isCreating: true });
+        set({ isCreating: true, openModal: true});
+        let open = true
+        
         try {
             const res = await axiosInstance.post("/ingredient/create", data);
             toast.success("Ingredient Added");
+            open = false
         } catch (error) {
             toast.error(error.response.data.message);
+            open = true
         } finally {
-            set({ isCreating: false });
+            set({ isCreating: false, openModal: open });
         }
     },
 
@@ -36,7 +41,9 @@ export const useIngredientsStore = create((set, get) => ({
     },
 
     updateIngredient: async (id, updatedData) => {
-        set({ isUpdating: true });
+        set({isUpdating: true, openModal: true });
+        let open = true
+
         try {
             await axiosInstance.post(`/ingredient/updt/${id}`, updatedData);
             toast.success("Ingredient updated");
@@ -44,15 +51,19 @@ export const useIngredientsStore = create((set, get) => ({
                 ing._id === id ? { ...ing, ...updatedData } : ing
             );
             set({ ingredients });
+            open = false
         } catch (error) {
             toast.error(error.response?.data?.message || "Error al actualizar ingrediente");
+            open = true
         } finally {
-        set({ isUpdating: false });
+        set({ isUpdating: false, openModal: open });
         }
     },
 
      deleteIngredient: async (id) => {
         set({ isDeleting: true, deletingId: id }); // Activar estado de eliminación y guardar ID
+    try {
+        await axiosInstance.delete(`http://localhost:5001/api/ingredient/del/${id}`);
         
         try {
             await axiosInstance.delete(`/ingredient/del/${id}`);
@@ -60,7 +71,7 @@ export const useIngredientsStore = create((set, get) => ({
             const updatedIngredients = get().ingredients.filter((ing) => ing._id !== id);
             set({ ingredients: updatedIngredients });
 
-            toast.success("Ingredient deleted");
+            toast.success("Ingrediente eliminado");
         } catch (error) {
             toast.error(error.response?.data?.message || "Error al eliminar ingrediente");
         } finally {

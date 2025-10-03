@@ -19,6 +19,7 @@ const HomePage = () => {
     const [open, setOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
+    const [inputValue, setInputValue] = useState('');
 
     const [formData, setFormData] = useState({
         name: "",
@@ -103,19 +104,65 @@ const HomePage = () => {
             return;
         }
 
-// Construcción del objeto receta
-const recipeData = {
-  name: formData.name,
-  portionsPerrecipe: formData.portionsPerrecipe,
-  quantityPermeasure: formData.quantityPermeasure,
-  profitPercentage: formData.profitPercentage,
-  recipeunitOfmeasure: formData.recipeunitOfmeasure,
-  aditionalCostpercentages: formData.aditionalCostpercentages,
-  ingredients: selectedIngredients.map(({ materialId, units, UnitOfmeasure }) => ({
-    materialId,
-    units: units.toString(),
-    UnitOfmeasure,
-  })),
+  // Construcción del objeto receta
+  const recipeData = {
+    name: formData.name,
+    portionsPerrecipe: formData.portionsPerrecipe,
+    quantityPermeasure: formData.quantityPermeasure,
+    profitPercentage: formData.profitPercentage,
+    recipeunitOfmeasure: formData.recipeunitOfmeasure,
+    aditionalCostpercentages: formData.aditionalCostpercentages,
+    ingredients: selectedIngredients.map(({ materialId, units, UnitOfmeasure }) => ({
+      materialId,
+      units: units.toString(),
+      UnitOfmeasure
+    })),
+  };
+
+  try {
+    if (isEditMode && editingRecipe) {
+      await updateRecipe(editingRecipe._id, recipeData);
+    } else {
+      await create({
+        ...recipeData,
+        totalCost: "0",
+        netProfit: "0",
+        costPerunity: "0",
+        favorite: false,
+        userId: "user-id-placeholder",
+        additionalCost: "0",
+        materialCostTotal: "0",
+        grossProfit: "0",
+        unitSalePrice: "0",
+      });
+    }
+
+    // Resetear y cerrar modal después del éxito
+    const currentModalState = useRecipesStore.getState().openModal;//gets the openModal State updated(from IngredientsStore)
+    
+    if (!currentModalState) {
+        setFormData({
+        name: "",
+        ingredients: [],
+        portionsPerrecipe: "",
+        quantityPermeasure: "",
+        aditionalCostpercentages: "",
+        profitPercentage: "",
+        UnitOfmeasure: "",
+        recipeunitOfmeasure: ""
+        });
+        
+        setSelectedIngredients([]);
+        setSelected("");
+        setIsOpen(false);
+        setOpen(false);  // Cierra el modal
+        setIsEditMode(false);
+        setEditingRecipe(null);
+        fetchRecipes(); //se atraen las recetas despues de crear receta
+    }
+  } catch (error) {
+    console.error("Error al guardar receta:", error);
+  }
 };
 
 // Si hay imagen nueva en Base64
@@ -315,7 +362,7 @@ const validatePositiveNumber = (e) => {
 
             <div className="flex flex-row w-full mt-4">
             <div className="w-full mr-4 sm:mr-10">
-                <SearchBar setResult={setResult} />
+                <SearchBar setResult={setResult} ingredients={recipes}/>
             </div>
             <button
                 title="Agregar una nueva receta"
@@ -692,13 +739,13 @@ const validatePositiveNumber = (e) => {
                 </form>
                 </Modal>
 
-            <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div>
+        {/* <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div> */}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                     {isGetting ? (
                         <p className="col-span-full text-center"><Loader2 /></p>
                     ) : (
-                        recipes.map((item) => (
+                        (result.length > 0 ? result : recipes).map((item) => (
                         <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
                             <div ref={dropdownRef} className="relative flex justify-end">
                             <button
@@ -737,6 +784,7 @@ const validatePositiveNumber = (e) => {
                                             {isDeleting && deletingId === item._id ? "" : "Eliminar"}
                                         </button>
                                     </div>
+
                                 </div>
                                 )}
                             </div>
@@ -750,13 +798,13 @@ const validatePositiveNumber = (e) => {
                                     className="w-24 h-24 object-cover rounded-full border border-none"
                                 />
                                 <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
-                                <p className="text-lg text-color-secondary my-2">
-                                Precio de venta: <span className="font-black">${item.unitSalePrice}</span>
+                                <p className="text-lg font-black text-color-secondary my-2">
+                                Precio de venta: <span className="font-normal">${item.unitSalePrice}</span>
                                 </p>
-                                <p id="netProfit_item" className="text-lg text-color-secondary my-2">
-                                Ganancia neta: <span className="font-black">${item.netProfit}</span></p>
-                                <p className="text-lg text-color-secondary my-2">
-                                En hacerla se gasta: <span className="font-black">${item.totalCost}</span>
+                                <p id="netProfit_item" className="text-lg font-black text-color-secondary my-2">
+                                Ganancia neta: <span className="font-normal">${item.netProfit}</span></p>
+                                <p className="text-lg font-black text-color-secondary my-2">
+                                En hacerla se gasta: <span className="font-normal">${item.totalCost}</span>
                                 </p>
                                 <button
                                     onClick={() => {
@@ -771,7 +819,6 @@ const validatePositiveNumber = (e) => {
                         </div>
                         ))
                     )}
-                </div>
             </div>
 
             <Modal open={isOpen2} onClose={() => setIsOpen2(false)}>

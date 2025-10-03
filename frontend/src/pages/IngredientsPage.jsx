@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Plus, Loader2, ChevronDown, Ellipsis, CircleX, Pencil, Trash, CloudDownload, FileImage   } from "lucide-react";
+import { Plus, Loader2, ChevronDown, Ellipsis, CircleX, Pencil, Trash, CloudDownload, FileImage, ImageUp, FileInput, Camera } from "lucide-react"; // íconos
 import SearchBar from "../components/SearchBar";
 import SearchResult from "../components/SearchResult";
 import "../styles/styles.css";
@@ -16,6 +16,7 @@ const IngredientsPage = () => {
     const [open, setOpen] = useState(false)
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
+    const [inputValue, setInputValue] = useState('');
 
     // funcion para cerrar modal cuando das clic fuera
     useEffect(() => {
@@ -40,6 +41,7 @@ const IngredientsPage = () => {
     // constantes para Menú desplegable dentro de Modal
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [selected, setSelected] = useState();
     const toggling = () => setIsOpen(!isOpen);
 
     // Efecto para cerrar el dropdown al hacer clic fuera
@@ -78,7 +80,7 @@ const IngredientsPage = () => {
         deletingId // ID del elemento que se está eliminando    
         } = useIngredientsStore();
 
-    // Agregar un nuevo ingrediente
+    // handles the submit of the form(creating or editing)
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -87,21 +89,24 @@ const IngredientsPage = () => {
         } else {
             await create(formData);
         }
+        
+        const currentModalState = useIngredientsStore.getState().openModal;//gets the openModal State updated(from IngredientsStore)
 
-        await fetchIngredients();
-        setOpen(false);
-        setFormData({
-            name: "",
-            Units: "",
-            unityOfmeasurement: "",
-            totalPrice: "",
-            image: "",
-        });
-        setSelectedOption(null);
-        setIsEditMode(false);
-        setSelectedIngredient(null);
-    };
-
+        if (!currentModalState) {
+            setOpen(false);
+            await fetchIngredients();
+            setFormData({
+                name: "",
+                Units: "",
+                unityOfmeasurement: "",
+                totalPrice: "",
+                image: "",
+            });
+            setSelectedOption(null);
+            setIsEditMode(false);
+            setSelectedIngredient(null);
+        }
+    }; 
 
     // Visualizar ingredientes del usuario
     useEffect(() => {
@@ -163,7 +168,7 @@ const IngredientsPage = () => {
                 {/* search bar */}
                 <div className="flex flex-row w-full mt-4">
                     <div className="w-full mr-4 sm:mr-10">
-                        <SearchBar setResult={setResult} ingredients={ingredients} />
+                        <SearchBar setResult={setResult} ingredients={ingredients} setInputValue={setInputValue} />
                     </div>
                     <button title="Agregar un nuevo ingrediente" className="p-2 sm:p-4 shadow-md rounded-[50%] bg-color-primary text-white"
                     onClick={() => {
@@ -380,14 +385,16 @@ const IngredientsPage = () => {
                             </form>
                         </Modal>
                 </div>
-                <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div>
+                {/* <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div> */}
+
 
                 {/*Visualización de ingredientes*/}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {isGetting ? (
                     <p className="col-span-full text-center"><Loader2 /></p>
                 ) : (
-                    ingredients.map((item) => (
+                    // Check if there are search results (result) or fallback to all ingredients
+                    (result.length > 0 ? result : ingredients).map((item) => (
                     <div key={item._id} className="relative bg-white rounded-[20px] shadow-md p-4 flex flex-col min-h-[400px]">
                         <div className="absolute top-3 right-3">
                             <button 
@@ -429,6 +436,8 @@ const IngredientsPage = () => {
                                 </div>
                             )}
                         </div>
+                    )}
+                </div>
 
                         <div className="flex-grow flex flex-col pt-6 px-4">
                             <img 
@@ -462,6 +471,20 @@ const IngredientsPage = () => {
                     ))
                 )}
                 </div>
+                <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
+                <p className="font-black text-lg text-color-secondary my-2">
+                    Cantidad: <span className="font-normal">{item.Units} {item.unityOfmeasurement}</span>
+                </p>
+                <p className="font-black text-lg text-color-secondary my-2">
+                    Precio total: <span className="font-normal">${item.totalPrice}</span>
+                </p>
+                <p className="font-black text-lg text-color-secondary my-2">
+                    Precio unitario: <span className="font-normal">${item.unityPrice}</span>
+                </p>
+            </div>
+        ))
+    )}
+</div>
             </div> 
         </section>
     );

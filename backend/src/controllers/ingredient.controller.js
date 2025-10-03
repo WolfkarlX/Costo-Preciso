@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 export const createIngredient = async (req, res) => {
     if (!req.body) return res.status(400).json({ message: "Request is empty" });
 
+    //gets id from middleware auth
     const userId = req.user._id;
     let imageUrl = "";
     let publicId = "";
@@ -15,9 +16,10 @@ export const createIngredient = async (req, res) => {
 
     try {
         if(!name || !Units || !unityOfmeasurement || !totalPrice) {
-            return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({ message: "All fields are required"});
         }
-
+        
+        //Gets the unitPrice for this material or ingredient
         const unityPrice = parseFloat(totalPrice) / parseFloat(Units);
 
         // Subida de imagen
@@ -25,23 +27,28 @@ export const createIngredient = async (req, res) => {
             try {
                 const uploadResponse = await cloudinary.uploader.upload(image, {
                   folder: 'ingredients',
-                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp'],
-                  max_file_size: 5 * 1024 * 1024,
-                  invalidate: true
+                  allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'webp'], // Reject non-images
+                  max_file_size: 5 * 1024 * 1024, // 5MB limit (in bytes)
+                  invalidate: true // Force Cloudinary to revalidate
                 });
                 
                 imageUrl = uploadResponse.secure_url;
                 publicId = uploadResponse.public_id;
             } catch (error) {
                 console.error('Cloudinary upload error:', error.message);
-                return res.status(400).json({ message: 'Invalid image. Must be JPG/PNG/GIF under 5MB.' });
+                return res.status(400).json({ message: 'Imagen inválida. Debe ser JPG/PNG/JPEG/GIF/WEBP y pesar menos de 5 MB'});
             }
         }
-
+        //checks if there is an ingredient with the same name
         const ingredientExist = await Ingredient.findOne({ name, userId });
-        if(ingredientExist) return res.status(409).json({ message: "Ingredient already exists" });
-
-        const newIngredient = new Ingredient({
+      
+        if(ingredient){
+            return res.status(409).json({ 
+                message: "El ingrediente ya existe" 
+            });
+        }
+        
+        const newIngredient = await new Ingredient({
             name, 
             Units, 
             unityOfmeasurement, 
@@ -52,10 +59,24 @@ export const createIngredient = async (req, res) => {
             publicId
         });
 
-        await newIngredient.save();
-
-        res.status(201).json(newIngredient);
-
+        if(newIngredient) {
+            //save the ingredient in the DB
+            await newIngredient.save();
+            
+            //returns a JSON object of the model created and saved in the DB
+            res.status(201).json({
+                _id: newIngredient._id,
+                name: newIngredient.name,
+                Units: newIngredient.Units, 
+                unityOfmeasurement: newIngredient.unityOfmeasurement, 
+                totalPrice: newIngredient.totalPrice, 
+                unityPrice: newIngredient.unityPrice, 
+                imageUrl: newIngredient.image,
+                publicId: newIngredient.publicId
+            });
+         } else {
+            res.status(400).json({ message: "Invalid Ingredient data" });
+        }
     } catch (error) {
         console.log("Error in createIngredient controller", error.message);
         res.status(500).json({ message: "Internal Server Error" });
@@ -151,6 +172,7 @@ export const deleteIngredient = async (req, res) => {
     }
 };
 
+//Logic for updating ingredients using filter
 export const updateIngredient = async (req, res) => {
     try {
         const { id: ingredientId } = req.params;
@@ -191,36 +213,52 @@ export const updateIngredient = async (req, res) => {
             } catch (error) {
                 console.error("Cloudinary upload error:", error.message);
                 return res.status(400).json({
-                    message: "Invalid image. Must be JPG/PNG/GIF under 5MB.",
+                    message: "Imagen inválida. Debe ser JPG/PNG/JPEG/GIF/WEBP y pesar menos de 5 MB",
                 });
             }
         }
 
+        //checks if the user updates to a name occupied
         if (filteredUpdates.name) {
             const SameName = await Ingredient.findOne({
                 name: filteredUpdates.name,
                 userId: userId,
-                _id: { $ne: ingredientId }
+                _id: { $ne: ingredientId } // excluye el actual ingrediente
             });
             if (SameName) {
                 return res.status(409).json({ message: "Ingredient already exists" });
             }
         }
+      
+        //logic for restricting the unit price and updating it
+        if(!filteredUpdates.totalPrice){
+            filteredUpdates.totalPrice = ingredient.totalPrice
+        }
 
+        if(!filteredUpdates.Units){
+            filteredUpdates.Units = ingredient.Units
+        }
+
+        filteredUpdates.unityPrice = filteredUpdates.totalPrice / filteredUpdates.Units;
+        
+        // Revisar
         const totalPrice = filteredUpdates.totalPrice ?? ingredient.totalPrice;
         const Units = filteredUpdates.Units ?? ingredient.Units;
         filteredUpdates.unityPrice = totalPrice / Units;
-
+    
+        //Apply updates (fields are pre-filtered)
         const updatedIngredient = await Ingredient.findByIdAndUpdate(
             ingredientId,
             { $set: filteredUpdates },
             { new: true, runValidators: true }
         );
 
-        return res.status(200).json(updatedIngredient);
+        res.status(200).json(updatedIngredient);
     } catch (error) {
+        
         console.error("Error in updateIngredient Controller:", error.message);
-        if (error.name === "ValidationError") {
+        // Handle validation errors (e.g., "quantity must be a number")
+        if (error.name === 'ValidationError') {
             return res.status(400).json({ message: "Validation failed" });
         }
         res.status(500).json({ message: "Internal Server Error" });
