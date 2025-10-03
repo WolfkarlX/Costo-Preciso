@@ -1,8 +1,10 @@
 // controllers/analytics.controller.js
-import * as AnalyticsService from "../services/analytics.service.js"; // ajusta el path si es distinto
+import mongoose from "mongoose";
+import Recipe from "../models/recipe.model.js";
+import { sortData, toNum, makeKey } from "../services/analytics.service.js"; // utilidades ligeras
 
 /**
- * Utilidades de validación y respuesta
+ * Utils de validación
  */
 const METRICS = new Set(["netProfit", "expectedProfit", "totalCost"]);
 const ORDERS = new Set(["asc", "desc"]);
@@ -22,71 +24,113 @@ function unauthorized(res, message = "No autorizado") {
 }
 
 /**
- * Controller delgado:
- * - Revisa auth
- * - Valida/parsea params
- * - Delega TODO al service
- * - Responde
+ * Controller para rankings
  */
 export async function recipesRankings(req, res) {
-  // 1) Autenticación básica
   if (!req?.user?._id) {
     return unauthorized(res);
   }
 
   try {
-    // 2) Leer y validar query params
+    // 1) Validar params
     const rawMetric = (req.query.metric || "netProfit").trim();
-    const rawOrder = (req.query.order || "").trim();
-    const rawLimit = req.query.limit;
-    const rawPeriodDays = req.query.periodDays;
-
-    // metric
     if (!METRICS.has(rawMetric)) {
       return badRequest(res, "Parámetro 'metric' inválido. Usa: netProfit | expectedProfit | totalCost");
     }
     const metric = rawMetric;
 
-    // order (opcional)
+    const rawOrder = (req.query.order || "").trim();
     const order = ORDERS.has(rawOrder) ? rawOrder : undefined;
 
-    // limit (default 5; clamp 1..50)
-    const limit = parsePositiveInt(rawLimit, 5, { min: 1, max: 50 });
+    const limit = parsePositiveInt(req.query.limit, 5, { min: 1, max: 50 });
 
-    // periodDays (opcional, entero >= 1)
     let periodDays;
-    if (rawPeriodDays !== undefined) {
-      const pd = parsePositiveInt(rawPeriodDays, NaN, { min: 1, max: 3650 });
+    if (req.query.periodDays !== undefined) {
+      const pd = parsePositiveInt(req.query.periodDays, NaN, { min: 1, max: 3650 });
       if (!Number.isFinite(pd)) {
         return badRequest(res, "Parámetro 'periodDays' debe ser un entero positivo.");
       }
       periodDays = pd;
     }
 
-    // 3) Delegar toda la lógica pesada al service
-    const userId = String(req.user._id);
+    // 2) Validar userId
+    let userObjectId;
+    try {
+      userObjectId = new mongoose.Types.ObjectId(req.user._id);
+    } catch {
+      return unauthorized(res);
+    }
 
-    const { rows, effectiveOrder } = await AnalyticsService.recipesRankingsService({
-      userId,
-      metric,
-      order,      // 'asc' | 'desc' | undefined
-      limit,
-      periodDays, // undefined | number
-    });
+    // 3) Armar match
+    const match = { userId: userObjectId };
+    if (periodDays) {
+      const from = new Date();
+      from.setDate(from.getDate() - periodDays);
+      match.createdAt = { $gte: from };
+    }
 
-    // 4) Responder (shape idéntico al actual)
+    // 4) Ordenamiento
+    const defaultOrderDir = -1;
+    const sortDir = order === "asc" ? 1 : order === "desc" ? -1 : defaultOrderDir;
+    const effectiveOrder = sortDir === 1 ? "asc" : "desc";
+
+    // 5) Pipeline
+    const pipeline = [
+      { $match: match },
+      {
+        $addFields: {
+          totalCostNum: { $toDouble: "$totalCost" },
+          netProfitNum: { $toDouble: "$netProfit" },
+          unitSalePriceNum: { $toDouble: "$unitSalePrice" },
+          portionsNum: { $toDouble: "$portionsPerrecipe" },
+          costPerunityNum: { $toDouble: "$costPerunity" }
+        }
+      },
+      {
+        $addFields: {
+          expectedProfitNum: {
+            $subtract: [
+              { $multiply: ["$unitSalePriceNum", "$portionsNum"] },
+              "$totalCostNum"
+            ]
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          name: 1,
+          totalCost: { $ifNull: ["$totalCostNum", 0] },
+          netProfit: { $ifNull: ["$netProfitNum", 0] },
+          expectedProfit: { $ifNull: ["$expectedProfitNum", 0] },
+          createdAt: 1
+        }
+      },
+      {
+        $addFields: {
+          metricValue:
+            metric === "totalCost"
+              ? "$totalCost"
+              : metric === "expectedProfit"
+              ? "$expectedProfit"
+              : "$netProfit"
+        }
+      },
+      { $sort: { metricValue: sortDir, createdAt: -1 } },
+      { $limit: Number(limit) }
+    ];
+
+    // 6) Ejecutar
+    const rows = await Recipe.aggregate(pipeline).exec();
+
     return res.status(200).json({
       metric,
-      order: effectiveOrder, // "asc" | "desc"
-      rows,                  // [{ name, totalCost, netProfit, expectedProfit, metricValue, createdAt }]
+      order: effectiveOrder,
+      rows,
     });
+
   } catch (err) {
-    // Respuestas amigables si el service lanza status/message
-    const status = err?.status ?? 500;
-    const message = err?.message ?? "Ocurrió un error inesperado.";
-    if (status >= 500) {
-      console.error("[recipesRankings] Error inesperado:", { err: err?.message || err, stack: err?.stack });
-    }
-    return res.status(status).json({ message });
+    console.error("[recipesRankings] Error inesperado:", err.message || err);
+    return res.status(500).json({ message: "Ocurrió un error inesperado." });
   }
 }
