@@ -46,12 +46,14 @@ export default function AnalyticsPage() {
   // Disparar fetch para TODAS las secciones con un solo efecto
   const fetchRank = useAnalyticsStore((s) => s.fetchRecipesRankings);
   useEffect(() => {
-    if (limit === 0) return;
+    const n = Number(periodDays);
+    const periodValid = periodDays === "" || (Number.isInteger(n) && n >= 1 && n <= 3650);
+    if (limit === 0 || !periodValid) return;
     fetchRank(paramsTopNet);
     fetchRank(paramsTopExpected);
     fetchRank(paramsMostExpensive);
     fetchRank(paramsCheapest);
-  }, [fetchRank, paramsTopNet, paramsTopExpected, paramsMostExpensive, paramsCheapest, limit]);
+  }, [fetchRank, paramsTopNet, paramsTopExpected, paramsMostExpensive, paramsCheapest, limit, periodDays]);
 
   // Leer estado de cada sección (hooks directos, sin loops)
   const topNet = useRecipesRankings(paramsTopNet);
@@ -66,7 +68,7 @@ export default function AnalyticsPage() {
     return (
       <section className="p-4 bg-white rounded-lg shadow-lg space-y-2">
         <h3 className="text-xl font-semibold text-primary text-center">{title}</h3>
-        
+
         {limit === 0 ? (
           <p className="text-gray-700 font-medium text-center">Debes establecer un limite para mostrar las gráficas.</p>
         ) : error ? (
@@ -94,16 +96,38 @@ export default function AnalyticsPage() {
             <span className="label-text font-medium mb-2">Periodo (días)</span>
           </label>
           <input
-            type="number"
-            min="1"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="Ej. 7, 30…"
             className="input w-full shadow-md border-none"
             value={periodDays}
-            onChange={(e) => setPeriodDays(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              // Solo permitir vacio o numero enteros positivos
+              if (v === "" || /^\d{0,4}$/.test(v)) {
+                setPeriodDays(v);
+              }
+            }}
+            onBlur={() => {
+              // Convertir a número valido o limpiar
+              const n = parseInt(periodDays, 10);
+              if (!Number.isFinite(n) || n < 1 || n > 3650) {
+                setPeriodDays(""); // limpiar si es invalido.
+              } else {
+                setPeriodDays(String(n));
+              }
+            }}
           />
           <small className="text-gray-700 font-medium text-center">
             Filtra recetas creadas en los últimos N días.
           </small>
+
+          {periodDays !== "" && parseInt(periodDays, 10) > 3650 && (
+            <small className="text-red-500 mt-1">
+              Máximo permitido: 3650 días.
+            </small>
+          )}
         </div>
 
         <div className="form-control">
@@ -111,26 +135,28 @@ export default function AnalyticsPage() {
             <span className="label-text font-medium mb-2">Límite por ranking</span>
           </label>
           <input
-            type="number"
+            type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            min="0"
-            step="1"
             placeholder="Ejemplo: 0, 3, 10, 15..."
             className="input w-full shadow-md border-none"
             value={limitInput}
-            onFocus={(e) => e.target.select()}
             onChange={(e) => {
               const v = e.target.value;
               // permite vacío o solo dígitos (incluye 0)
-              if (v === "" || /^\d+$/.test(v)) {
+              if (v === "" || /^\d{0,2}$/.test(v)) {
                 setLimitInput(v);
+                // Validar e inmediatamente actualizar el valor en el store.
+                const n = parseInt(v, 10);
+                if (Number.isFinite(n) && n >= 0 && n <= 50){
+                  setLimit(n);
+                }
               }
             }}
             onBlur={() => {
               // normaliza al salir del input
               const n = parseInt(limitInput, 10);
-              const normalized = Number.isFinite(n) && n >= 0 ? n : 0;
+              const normalized = Number.isFinite(n) && n >= 1 && n <= 50 ? n : 5;
               setLimit(normalized);
               setLimitInput(String(normalized));
             }}
@@ -148,20 +174,14 @@ export default function AnalyticsPage() {
           <div className="flex gap-2">
             <button
               type="button"
-              className="btn btn-primary font-bold"
-              onClick={() => { /* Los cambios ya se aplican automáticamente */ }}
-            >
-              Aplicar filtros
-            </button>
-            <button
-              type="button"
               className="btn"
-              onClick={() => { setPeriodDays(""); 
-                setLimit(5); 
+              onClick={() => {
+                setPeriodDays("");
+                setLimit(5);
                 setLimitInput("5");
               }}
             >
-              Reset
+              Resetear filtros
             </button>
           </div>
         </div>
