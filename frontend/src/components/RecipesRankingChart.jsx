@@ -69,7 +69,6 @@ export default function RecipesRankingChart({ title, metric, rows = [] }) {
 
   return (
     <div className="max-w-4xl mx-auto" style={{ height: 360 }}>
-      {title && <h3 className="text-xl font-semibold text-primary">{title}</h3>}
       <Bar data={chartData} options={options} />
     </div>
   );

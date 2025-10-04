@@ -60,18 +60,21 @@ export default function AnalyticsPage() {
   const cheapest = useRecipesRankings(paramsCheapest);
 
   // Helper presentacional para no repetir el ternario de estado
+  // Bloque de codigoq ue controla el color y el contenido del texto dentro de cada sección.
   const renderSection = (title, metric, state) => {
     const { rows, isLoading, error } = state;
     return (
-      <section className="p-4 bg-white rounded-lg shadow-lg">
+      <section className="p-4 bg-white rounded-lg shadow-lg space-y-2">
+        <h3 className="text-xl font-semibold text-primary text-center">{title}</h3>
+        
         {limit === 0 ? (
-          <p className="text-base-content/70">Debes establecer un limite para mostrar las gráficas.</p>
+          <p className="text-gray-700 font-medium text-center">Debes establecer un limite para mostrar las gráficas.</p>
         ) : error ? (
-          <div className="text-red-500 font-medium">Error: {error}</div>
+          <div className="text-red-600 font-medium text-center">Error: {error}</div>
         ) : isLoading ? (
           <div className="spinner" aria-busy="true" aria-live="polite" />
         ) : !rows || rows.length === 0 ? (
-          <p className="text-base-content/70">No hay datos para mostrar.</p>
+          <p className="text-gray-700 font-medium text-center">No hay recetas activas para mostrar en esta categoría.</p>
         ) : (
           <RecipesRankingChart title={title} metric={metric} rows={rows} />
         )}
@@ -98,7 +101,7 @@ export default function AnalyticsPage() {
             value={periodDays}
             onChange={(e) => setPeriodDays(e.target.value)}
           />
-          <small className="text-base-content/60 mt-1">
+          <small className="text-gray-700 font-medium text-center">
             Filtra recetas creadas en los últimos N días.
           </small>
         </div>
@@ -133,7 +136,7 @@ export default function AnalyticsPage() {
             }}
             aria-label="Cantidad de recetas a mostrar por ranking"
           />
-          <small className="text-base-content/60 mt-1">
+          <small className="text-gray-700 font-medium text-center">
             Número de recetas a mostrar por ranking. Si pones 0, no se mostrarán gráficas.
           </small>
         </div>
