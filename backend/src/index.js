@@ -8,7 +8,7 @@ import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import ingredientRoutes from "./routes/ingredient.route.js";
 import recipeRoutes from "./routes/recipe.route.js";
-import analyticsRoutes from "./routes/analytics.routes.js";
+import analyticsRoutes from "./routes/analytic.route.js";
 
 dotenv.config();
 

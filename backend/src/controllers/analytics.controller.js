@@ -1,41 +1,25 @@
 // controllers/analytics.controller.js
 import mongoose from "mongoose";
 import Recipe from "../models/recipe.model.js";
-import { sortData, toNum, makeKey } from "../services/analytics.service.js"; // utilidades ligeras
+import { sortData, toNum, makeKey, parsePositiveInt } from "../services/analytics.service.js"; // utilidades ligeras
 
-/**
- * Utils de validación
- */
+// Utils de validación.
 const METRICS = new Set(["netProfit", "expectedProfit", "totalCost"]);
 const ORDERS = new Set(["asc", "desc"]);
 
-function parsePositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
-  const n = Number.parseInt(value, 10);
-  if (Number.isFinite(n) && n >= min && n <= max) return n;
-  return fallback;
-}
-
-function badRequest(res, message) {
-  return res.status(400).json({ message });
-}
-
-function unauthorized(res, message = "No autorizado") {
-  return res.status(401).json({ message });
-}
-
-/**
- * Controller para rankings
- */
+// Controller para rankings.
 export async function recipesRankings(req, res) {
   if (!req?.user?._id) {
-    return unauthorized(res);
+    return res.status(401).json({ message: "No autorizado" });
   }
 
   try {
     // 1) Validar params
     const rawMetric = (req.query.metric || "netProfit").trim();
     if (!METRICS.has(rawMetric)) {
-      return badRequest(res, "Parámetro 'metric' inválido. Usa: netProfit | expectedProfit | totalCost");
+      return res.status(400).json({
+        message: "Parámetro 'metric' inválido. Usa: netProfit | expectedProfit | totalCost"
+      });
     }
     const metric = rawMetric;
 
@@ -48,7 +32,7 @@ export async function recipesRankings(req, res) {
     if (req.query.periodDays !== undefined) {
       const pd = parsePositiveInt(req.query.periodDays, NaN, { min: 1, max: 3650 });
       if (!Number.isFinite(pd)) {
-        return badRequest(res, "Parámetro 'periodDays' debe ser un entero positivo.");
+        return res.status(400).json({ message: "Parámetro 'periodDays' debe ser un entero positivo."});
       }
       periodDays = pd;
     }
@@ -58,7 +42,7 @@ export async function recipesRankings(req, res) {
     try {
       userObjectId = new mongoose.Types.ObjectId(req.user._id);
     } catch {
-      return unauthorized(res);
+      return res.status(401).json({ message: "No autorizado" });
     }
 
     // 3) Armar match
@@ -123,6 +107,13 @@ export async function recipesRankings(req, res) {
     // 6) Ejecutar
     const rows = await Recipe.aggregate(pipeline).exec();
 
+    if (!rows || !Array.isArray(rows)) {
+      return res.status(500).json({ message: "Error al generar los resultados." });
+    }
+
+    if (rows.length === 0){
+      return res.status(404).json({ message: "No se encontraron recetas para los criterios especificados." });
+    }
     return res.status(200).json({
       metric,
       order: effectiveOrder,

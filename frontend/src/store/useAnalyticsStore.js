@@ -64,7 +64,15 @@ export const useAnalyticsStore = create((set, get) => ({
       }));
     } catch (error) {
       // Manejo de errores
-      handleError(set, key, error);
+      // Si el servidor respondió con 404, tratamos como "sin datos" y no mostramos el toast.
+      if (error?.response?.status === 404){
+        set((s) => ({
+          rankingsByKey: { ...s.rankingsByKey, [key]: { rows: [], fetchedAt: Date.now() } },
+          errorByKey: { ...s.errorByKey, [key]: null }
+        }));
+      } else {
+        handleError(set, key, error);
+      }
     } finally {
       // Marca que la petición ha finalizado
       setDoneLoading(set, key);

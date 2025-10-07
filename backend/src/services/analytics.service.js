@@ -1,5 +1,11 @@
 // services/analytics.service.js
 
+// Convierte y valida un número entero positivo con límites opcionales.
+export function parsePositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
+  const n = Number.parseInt(value, 10);
+  if (Number.isFinite(n) && n >= min && n <= max) return n;
+  return fallback;
+}
 /**
  * Utilidad para convertir strings con símbolos a números
  */
