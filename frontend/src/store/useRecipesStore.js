@@ -7,14 +7,17 @@ export const useRecipesStore = create((set, get) => ({
     ingredients: [],
     recipes: [],
     isCreating: false,
+    isUpdating: false,
     isGetting: false,
+    isDeleting: false,
+    deletingId: null, // ID de la receta que se está eliminando
     openModal: false,
 
 
     fetchIngredients: async () => {
         set({ isGetting: true });
         try {
-            const res = await axiosInstance.get("http://localhost:5001/api/ingredient/ingredients");
+            const res = await axiosInstance.get("ingredient/ingredients");
             set({ ingredients: res.data }); // Guarda la lista en el estado
             return res.data //retorna el valor directo sin esperar async await
         } catch (error) {
@@ -29,8 +32,9 @@ export const useRecipesStore = create((set, get) => ({
         let open = true
 
         try {
-            const res = await axiosInstance.post("http://localhost:5001/api/recipe/create", data);
-            toast.success("Recipe Added");
+            console.log(data);
+            const res = await axiosInstance.post("/recipe/create", data);
+            toast.success("Receta agregada");
             open = false
             return res.data;
 
@@ -46,22 +50,22 @@ export const useRecipesStore = create((set, get) => ({
     fetchRecipes: async () => {
         set({ isGetting: true });
         try {
-            const res = await axiosInstance.get("http://localhost:5001/api/recipe/recipes");
+            const res = await axiosInstance.get("/recipe/recipes");
             set({ recipes: res.data }); // Guarda la lista en el estado
         } catch (error) {
-            toast.error(error.response?.data?.message || "Error al obtener ingredientes.");
+            toast.error(error.response?.data?.message || "Error al obtener recetas.");
         } finally {
             set({ isGetting: false });
         }
     },
 
     updateRecipe: async (id, updatedData) => {
-        set({ openModal: true });
-        let open = true
-
-        try {
-            await axiosInstance.post(`http://localhost:5001/api/recipe/updt/${id}`, updatedData);
-            toast.success("Recipe updated");
+      set({ isUpdating: true, openModal: true });
+      let open = true
+      
+    try {
+        await axiosInstance.post(`/recipe/updt/${id}`, updatedData);
+        toast.success("Recipe updated");
             
             // Llama a fetchRecipes para actualizar la lista desde el servidor
             await get().fetchRecipes();
@@ -76,15 +80,22 @@ export const useRecipesStore = create((set, get) => ({
     },
 
     deleteRecipes: async (id) => {
+        set({ isDeleting: true, deletingId: id }); // Activar estado de eliminación y guardar ID
+        
         try {
-            await axiosInstance.delete(`http://localhost:5001/api/recipe/del/${id}`);
-            toast.success("Recipe deleted");
+            await axiosInstance.delete(`/recipe/del/${id}`);
 
+            const updateRecipes = get().recipes.filter((ing) => ing._id !== id);
+            set({ recipes: updateRecipes });
+            toast.success("Receta eliminada");
+          
             // Llama a fetchRecipes para obtener la lista actualizada
             await get().fetchRecipes();
-
+          
         } catch (error) {
             toast.error(error.response?.data?.message || "Error al eliminar receta");
+        }finally {
+            set({ isDeleting: false, deletingId: null }); // Desactivar estado de eliminación
         }
     },
 

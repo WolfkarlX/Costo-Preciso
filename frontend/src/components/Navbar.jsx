@@ -20,14 +20,16 @@ const Navbar = () => {
       setActiveLink(savedLink);
     }
 
-    // Cerrar menú accesibilidad al hacer clic fuera
+    // Cerrar menú de accesibilidad al hacer clic fuera
     const handleClickOutside = (event) => {
-      if (
-        accessibilityRef.current &&
-        !accessibilityRef.current.contains(event.target)
-      ) {
-        setOpenAccessibility(false);
-      }
+        //console.log("clic fuera del menú:", event.target); // Mensaje de depuración
+        if (
+            accessibilityRef.current &&
+            !accessibilityRef.current.contains(event.target)
+        ) {
+            //console.log("Cerrando menú"); // Mensaje de depuración
+            setOpenAccessibility(false);
+        }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -61,7 +63,7 @@ const Navbar = () => {
         toast(
             (t) => (
                 <div>
-                    <p className="pb-3 pt-2 font-bold">Está seguro de cerrar sesión?</p>
+                    <p className="pb-3 pt-2 font-bold">¿Está seguro de cerrar sesión?</p>
                     <div className="flex">
                         <button
                             onClick={() => {
@@ -99,13 +101,13 @@ const Navbar = () => {
     
     //Navbar
     return (
-        <header className="sticky top-0 z-30 shadow bg-color-primary-light p-2">
+        <header className="sticky top-0 z-30 shadow bg-[#f9f7db] p-2">
             <div className="relative flex max-w-screen-xl flex-col overflow-hidden px-4 py-0 md:mx-auto md:flex-row md:items-center">
                 <a href="#" className="flex items-center whitespace-nowrap text-2xl font-black justify-start">
                 <span className="mr-1 flex-shrink-0">
-                    <img src={logo} className="h-24 w-auto" alt="Logo" />
+                    <img src={logo} className="h-24 w-auto" alt="Logo" title="Regresar arriba"/>
                 </span>
-                <span className="text-black">Costo Preciso</span>
+                <span className="text-black" title="Regresar arriba">Costo Preciso</span>
                 </a>
                 <input type="checkbox" className="peer hidden" id="navbar-open" />
                 <label className="absolute top-5 right-7 cursor-pointer md:hidden" htmlFor="navbar-open">
@@ -137,16 +139,6 @@ const Navbar = () => {
                         <span className={`${activeLink === "ingredients" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ingredientes</span>
                     </Link>
                     <Link
-                        to="/percentages" 
-                        className={`flex items-center md:mr-12 ${
-                            activeLink === "percentages" ? " -mt-3 border-b-4 border-[var(--color-secondary)] rounded-sm" : "border-b-4 border-transparent"
-                        }`}
-                        onClick={() => handleClick("percentages")}
-                    >
-                        <Percent size={20} color={activeLink === "percentages" ? "var(--color-secondary)" : "var(--color-primary)"} />
-                        <span className={`nav-link ${activeLink === "percentages" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Porcentajes</span>
-                    </Link> 
-                    <Link
                         to="/recipebook" 
                         className={`flex items-center md:mr-12 ${
                             activeLink === "recipebook" ? " -mt-3 border-b-4 border-[var(--color-secondary)] rounded-sm" : "border-b-4 border-transparent"
@@ -156,13 +148,27 @@ const Navbar = () => {
                         <BookMarked size={20} color={activeLink === "recipebook" ? "var(--color-secondary)" : "var(--color-primary)"} />
                         <span className={`${activeLink === "recipebook" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetario</span>
                     </Link>
+                    <Link
+                        to="/percentages" 
+                        className={`flex items-center md:mr-12 ${
+                            activeLink === "percentages" ? " -mt-3 border-b-4 border-[var(--color-secondary)] rounded-sm" : "border-b-4 border-transparent"
+                        }`}
+                        onClick={() => handleClick("percentages")}
+                    >
+                        <Percent size={20} color={activeLink === "percentages" ? "var(--color-secondary)" : "var(--color-primary)"} />
+                        <span className={`nav-link ${activeLink === "percentages" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Porcentajes</span>
+                    </Link>
 
                     {/* Botón de accesibilidad */}
                     {authUser && (
                     <li className="relative" ref={accessibilityRef}>
                         <button
-                        className="rounded-md border-2 border-[#4F959D] px-4 py-1 font-medium text-[#4F959D] hover:bg-[#4F959D] hover:text-white flex items-center gap-1"
-                        onClick={() => setOpenAccessibility(!openAccessibility)}
+                        className="rounded-md border-2 border-[#4F959D] px-4 py-1 font-medium text-[#4F959D] hover:bg-[#4F959D] hover:text-white flex items-center gap-1"                        
+                        onClick={() => { // Toggle menu visibility
+                            console.log("openAccessibility antes:", openAccessibility); // Muestra el valor actual
+                            setOpenAccessibility(!openAccessibility);
+                            console.log("openAccessibility después:", !openAccessibility); // Muestra el valor después del cambio
+                        }}
                         aria-haspopup="true"
                         aria-expanded={openAccessibility}
                         aria-controls="accessibility-menu"
@@ -174,11 +180,13 @@ const Navbar = () => {
 
                         {openAccessibility && (
                         <div
-                            id="accessibility-menu"
-                            className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white border border-gray-300 z-50 p-4 text-gray-800"
-                            role="menu"
+                            id="accessibility-menu" // Menú de accesibilidad: se muestra cuando openAccessibility es true
+                            className="border-2 border-red-500 absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white z-50 p-4 text-gray-800"
+                            role="menu"           // borrar absolute ↑
                             aria-label="Opciones de accesibilidad"
                         >
+                            {console.log("Menú de accesibilidad se ha mostrado")} {/* Mensaje de depuración */}
+
                             {/* Sección Tamaño de texto */}
                             <div className="mb-4">
                             <h4 className="font-bold mb-2 text-color-primary">Tamaño de texto</h4>
