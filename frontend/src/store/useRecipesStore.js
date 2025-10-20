@@ -32,6 +32,7 @@ export const useRecipesStore = create((set, get) => ({
         let open = true
 
         try {
+            console.log(data);
             const res = await axiosInstance.post("/recipe/create", data);
             toast.success("Receta agregada");
             open = false

@@ -19,7 +19,21 @@ const HomePage = () => {
     const [open, setOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
-    const [inputValue, setInputValue] = useState('');
+    //const [inputValue, setInputValue] = useState('');
+    const [recipeData, setRecipeData] = useState({});
+
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const dropdown = document.getElementById(`dropdown-${openDropdownId}`);
+            const button = document.getElementById(`button-${openDropdownId}`);
+            if (dropdown && !dropdown.contains(event.target) && button && !button.contains(event.target)) {
+                setOpenDropdownId(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [openDropdownId]);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -117,6 +131,7 @@ const HomePage = () => {
       units: units.toString(),
       UnitOfmeasure
     })),
+    image: formData.image || "",
   };
 
   try {
@@ -149,7 +164,8 @@ const HomePage = () => {
         aditionalCostpercentages: "",
         profitPercentage: "",
         UnitOfmeasure: "",
-        recipeunitOfmeasure: ""
+        recipeunitOfmeasure: "",
+        image: ""
         });
         
         setSelectedIngredients([]);
@@ -175,52 +191,9 @@ else if (editingRecipe && formData.image) {
 }
 // Si el usuario quitó la imagen
 else {
-  recipeData.image = null; // 🔑 fuerza el borrado
+  recipeData.image = null; // fuerza el borrado
   recipeData.imageUrl = null;
 }
-
-
-        try {
-            if (isEditMode && editingRecipe) {
-            await updateRecipe(editingRecipe._id, recipeData);
-            } else {
-            await create({
-                ...recipeData,
-                totalCost: "0",
-                netProfit: "0",
-                costPerunity: "0",
-                favorite: false,
-                userId: "user-id-placeholder",
-                additionalCost: "0",
-                materialCostTotal: "0",
-                grossProfit: "0",
-                unitSalePrice: "0",
-            });
-            }
-
-            // Reset
-            setFormData({
-            name: "",
-            ingredients: [],
-            portionsPerrecipe: "",
-            quantityPermeasure: "",
-            aditionalCostpercentages: "",
-            profitPercentage: "",
-            UnitOfmeasure: "",
-            recipeunitOfmeasure: "",
-            image: "",
-            });
-            setSelectedIngredients([]);
-            setSelected("");
-            setIsOpen(false);
-            setOpen(false);
-            setIsEditMode(false);
-            setEditingRecipe(null);
-            fetchRecipes();
-        } catch (error) {
-            console.error("Error al guardar receta:", error);
-        }
-    };
 
     useEffect(() => {
         fetchRecipes();
@@ -359,11 +332,11 @@ const validatePositiveNumber = (e) => {
                         className="w-full max-w-full h-auto object-contain"
                     />
                 </div>
-
+            
             <div className="flex flex-row w-full mt-4">
-            <div className="w-full mr-4 sm:mr-10">
-                <SearchBar setResult={setResult} ingredients={recipes}/>
-            </div>
+                <div className="w-full mr-4 sm:mr-10">
+                    <SearchBar setResult={setResult} ingredients={recipes}/>
+                </div>
             <button
                 title="Agregar una nueva receta"
                 className="p-2 sm:p-4 shadow-md rounded-full bg-color-primary text-white"
@@ -451,6 +424,7 @@ const validatePositiveNumber = (e) => {
                                 if (file) {
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
+                                        console.log(reader.result); // Verifica que se esté generando la cadena base64
                                         setFormData({ ...formData, image: reader.result }); // reader.result ya incluye data:image/png;base64,...
                                     };
                                     reader.readAsDataURL(file);
@@ -459,7 +433,7 @@ const validatePositiveNumber = (e) => {
                             />
                                 {/* Texto de ayuda */}
                             <p className="text-xs text-gray-500 text-center mt-2">
-                                Formatos: JPG, PNG, WEBP<br />
+                                Formatos: JPG, PNG, GPEG, GIF, WEBP<br />
                                 Máx: 5MB
                             </p>
                         </div>
@@ -739,8 +713,6 @@ const validatePositiveNumber = (e) => {
                 </form>
                 </Modal>
 
-        {/* <div className="relative">{result.length > 0 && <SearchResult result={result} />}</div> */}
-
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                     {isGetting ? (
                         <p className="col-span-full text-center"><Loader2 /></p>
@@ -819,6 +791,7 @@ const validatePositiveNumber = (e) => {
                         </div>
                         ))
                     )}
+                </div>
             </div>
 
             <Modal open={isOpen2} onClose={() => setIsOpen2(false)}>
@@ -844,7 +817,7 @@ const validatePositiveNumber = (e) => {
             </Modal>
 
         </section>
-  );
+    );
 };
 
 export default HomePage;

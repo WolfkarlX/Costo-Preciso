@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
-import { data } from "react-router-dom";
+//import { data } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export const useIngredientsStore = create((set, get) => ({
@@ -62,20 +62,20 @@ export const useIngredientsStore = create((set, get) => ({
 
      deleteIngredient: async (id) => {
         set({ isDeleting: true, deletingId: id }); // Activar estado de eliminación y guardar ID
-    try {
-        await axiosInstance.delete(`http://localhost:5001/api/ingredient/del/${id}`);
-        
         try {
+            // Llamada al backend
             await axiosInstance.delete(`/ingredient/del/${id}`);
             
+            // Actualizar estado local
             const updatedIngredients = get().ingredients.filter((ing) => ing._id !== id);
             set({ ingredients: updatedIngredients });
 
             toast.success("Ingrediente eliminado");
         } catch (error) {
-            toast.error(error.response?.data?.message || "Error al eliminar ingrediente");
+                toast.error(error.response?.data?.message || "Error al eliminar ingrediente");
         } finally {
             set({ isDeleting: false, deletingId: null }); // Desactivar estado de eliminación
         }
+
     },
 }));

@@ -254,7 +254,7 @@ const IngredientsPage = () => {
                                                 />
                                                  {/* Texto de ayuda */}
                                                 <p className="text-xs text-gray-500 text-center mt-2">
-                                                    Formatos: JPG, PNG, WEBP<br />
+                                                    Formatos: JPG, PNG, GPEG, GIF, WEBP<br />
                                                     Máx: 5MB
                                                 </p>
                                             </div>
@@ -396,6 +396,7 @@ const IngredientsPage = () => {
                     // Check if there are search results (result) or fallback to all ingredients
                     (result.length > 0 ? result : ingredients).map((item) => (
                     <div key={item._id} className="relative bg-white rounded-[20px] shadow-md p-4 flex flex-col min-h-[400px]">
+                        {/* Botón menú de opciones */}
                         <div className="absolute top-3 right-3">
                             <button 
                                 id={`button-${item._id}`}
@@ -407,38 +408,38 @@ const IngredientsPage = () => {
 
                             {openDropdownId === item._id && (
                                 <div
-                                id={`dropdown-${item._id}`}
-                                className="absolute right-0 mt-2 rounded-[20px] shadow-md bg-color-primary-light z-50"
-                                role="menu"
+                                    id={`dropdown-${item._id}`}
+                                    className="absolute right-0 mt-2 rounded-[20px] shadow-md bg-color-primary-light z-50"
+                                    role="menu"
                                 >
-                                <div className="text-md text-color-primary font-black flex flex-col">
-                                    <button
-                                        className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
-                                        onClick={() => handleEdit(item)}
-                                        role="menuitem"
-                                    >
-                                        <Pencil size={20} /> Editar
-                                    </button>
-                                    <button
-                                        className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
-                                        onClick={() => handleDelete(item._id)}
-                                        disabled={isDeleting}
-                                        role="menuitem"
-                                    >
-                                    {isDeleting && deletingId === item._id ? (
-                                        <Loader2 size={20} className="animate-spin mr-2" />
-                                    ) : (
-                                        <Trash size={20} />
-                                    )}
-                                    {isDeleting && deletingId === item._id ? "" : "Eliminar"}
-                                    </button>
-                                </div>
+                                
+                                    <div className="text-md text-color-primary font-black flex flex-col">
+                                        <button
+                                            className="flex items-center px-4 py-2 m-2 hover:bg-white rounded-[15px] gap-x-2"
+                                            onClick={() => handleEdit(item)}
+                                            role="menuitem"
+                                        >
+                                            <Pencil size={20} /> Editar
+                                        </button>
+                                        <button
+                                            className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
+                                            onClick={() => handleDelete(item._id)}
+                                            disabled={isDeleting}
+                                            role="menuitem"
+                                        >
+                                        {isDeleting && deletingId === item._id ? (
+                                            <Loader2 size={20} className="animate-spin mr-2" />
+                                        ) : (
+                                            <Trash size={20} />
+                                        )}
+                                        {isDeleting && deletingId === item._id ? "" : "Eliminar"}
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
-                    )}
-                </div>
-
+                            
+                        {/* Contenido de la tarjeta */}
                         <div className="flex-grow flex flex-col pt-6 px-4">
                             <img 
                                 id="img-ingredient" 
@@ -470,21 +471,7 @@ const IngredientsPage = () => {
                     </div>
                     ))
                 )}
-                </div>
-                <p className="text-xl font-black text-color-primary my-2">{item.name}</p>
-                <p className="font-black text-lg text-color-secondary my-2">
-                    Cantidad: <span className="font-normal">{item.Units} {item.unityOfmeasurement}</span>
-                </p>
-                <p className="font-black text-lg text-color-secondary my-2">
-                    Precio total: <span className="font-normal">${item.totalPrice}</span>
-                </p>
-                <p className="font-black text-lg text-color-secondary my-2">
-                    Precio unitario: <span className="font-normal">${item.unityPrice}</span>
-                </p>
-            </div>
-        ))
-    )}
-</div>
+                 </div>
             </div> 
         </section>
     );
