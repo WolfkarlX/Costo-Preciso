@@ -1,0 +1,40 @@
+// services/analytics.service.js
+
+// Convierte y valida un número entero positivo con límites opcionales.
+export function parsePositiveInt(value, fallback, { min = 1, max = Number.MAX_SAFE_INTEGER } = {}) {
+  const n = Number.parseInt(value, 10);
+  if (Number.isFinite(n) && n >= min && n <= max) return n;
+  return fallback;
+}
+/**
+ * Utilidad para convertir strings con símbolos a números
+ */
+export function toNum(val) {
+  if (val == null) return 0;
+  if (typeof val === "number") return val;
+  if (typeof val !== "string") return Number(val) || 0;
+  const cleaned = val.replace(/[^\d.\-]/g, ""); // Elimina $, %, comas, espacios
+  const n = Number(cleaned);
+  return Number.isNaN(n) ? 0 : n;
+}
+
+/**
+ * Lógica para ordenar arreglos en memoria (fallback local).
+ */
+export function sortData(rows, metric) {
+  return rows.sort((a, b) => {
+    if (metric === "margin") return b.profitPercentageNum - a.profitPercentageNum;
+    return b.netProfitNum - a.netProfitNum; // Ordenar por ganancia neta por defecto
+  });
+}
+
+/**
+ * Generar clave cache.
+ */
+export const makeKey = ({ metric = "netProfit", order, limit = 5, periodDays } = {}) =>
+  [
+    metric ?? "netProfit",
+    order ?? "",
+    String(limit ?? 5),
+    periodDays ? String(periodDays) : ""
+  ].join("|");
