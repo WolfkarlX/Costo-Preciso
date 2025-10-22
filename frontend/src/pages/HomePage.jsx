@@ -303,7 +303,7 @@ const validatePositiveNumber = (e) => {
   if (value.trim() === '') return;
   
   if (isNaN(numValue)) {
-    // Usar toast en lugar de alert para no bloquear, porque el alert bloqueaba la navegación y se ve menos estético
+    // Usar toast en lugar de alert para no bloquear, porque el alert bloquea la navegación y se ve menos estético
     toast.error("Por favor ingrese un número válido");
     setFormData(prev => ({ ...prev, [name]: "" }));
     return;

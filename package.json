@@ -4,6 +4,8 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
+    "chart.js": "^4.5.0",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "headlessui": "^0.0.0"
   }
 }
