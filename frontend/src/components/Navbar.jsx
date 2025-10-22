@@ -182,7 +182,7 @@ const Navbar = () => {
                         <div
                             id="accessibility-menu" // Menú de accesibilidad: se muestra cuando openAccessibility es true
                             className="border-2 border-red-500 absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white z-50 p-4 text-gray-800"
-                            role="menu"           // borrar absolute ↑
+                            role="menu"           // borrar absolute ↑ este atributo mantiene oculto el menú de accesibilidad
                             aria-label="Opciones de accesibilidad"
                         >
                             {console.log("Menú de accesibilidad se ha mostrado")} {/* Mensaje de depuración */}
