@@ -64,8 +64,6 @@ export const createRecipe = async (req, res) => {
             portions: portionsPerrecipe
         });
 
-        console.log('Imagen recibida:', image); // Verifica si la imagen es base64 o está vacía
-
         // if there is image it uploads it to cloudinary
         if (image) {
             try {
@@ -220,7 +218,7 @@ export const getSpecificrecipe = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("Error in getSpecificingredient Controller", error.message);
+        console.error("Error in getSpecificingredient Controller", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -239,22 +237,22 @@ export const deleteRecipe = async (req, res) => {
             return res.status(400).json({ message: "Invalid ID" });
         }
 
-        // Checks if the ingredient exists AND belongs to the user
-        const ingredient = await Recipe.findOne({ 
+        // Checks if the recipe exists AND belongs to the user
+        const recipe = await Recipe.findOne({ 
             _id: recipeId, 
             userId: userId 
         });
 
-        if (!ingredient) {
+        if (!recipe) {
             return res.status(404).json({ 
                 message: "Recipe not found or unauthorized" 
             });
         }
 
         // Delete image from Cloudinary if exists
-        if (recipeId.publicId) {
+        if (recipe.publicId) {
             try {
-                await cloudinary.uploader.destroy(recipeId.publicId);
+                await cloudinary.uploader.destroy(recipe.publicId);
             } catch (err) {
                 console.error("Error deleting Cloudinary image:", err.message);
             }
@@ -281,7 +279,7 @@ export const updateRecipe = async (req, res) => {
             profitPercentage,
             quantityPermeasure,
             recipeunitOfmeasure,
-            image
+            image,
         } = req.body;
         const userId = req.user._id;
 
@@ -295,7 +293,7 @@ export const updateRecipe = async (req, res) => {
             aditionalCostpercentages,
             profitPercentage,
             quantityPermeasure,
-            recipeunitOfmeasure
+            recipeunitOfmeasure,
         };
 
         // Borrar imagen si el cliente manda null

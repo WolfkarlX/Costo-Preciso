@@ -118,83 +118,81 @@ const HomePage = () => {
             return;
         }
 
-  // Construcción del objeto receta
-  const recipeData = {
-    name: formData.name,
-    portionsPerrecipe: formData.portionsPerrecipe,
-    quantityPermeasure: formData.quantityPermeasure,
-    profitPercentage: formData.profitPercentage,
-    recipeunitOfmeasure: formData.recipeunitOfmeasure,
-    aditionalCostpercentages: formData.aditionalCostpercentages,
-    ingredients: selectedIngredients.map(({ materialId, units, UnitOfmeasure }) => ({
-      materialId,
-      units: units.toString(),
-      UnitOfmeasure
-    })),
-    image: formData.image || "",
-  };
+        // Construcción del objeto receta
+        const recipeData = {
+            name: formData.name,
+            portionsPerrecipe: formData.portionsPerrecipe,
+            quantityPermeasure: formData.quantityPermeasure,
+            profitPercentage: formData.profitPercentage,
+            recipeunitOfmeasure: formData.recipeunitOfmeasure,
+            aditionalCostpercentages: formData.aditionalCostpercentages,
+            ingredients: selectedIngredients.map(({ materialId, units, UnitOfmeasure }) => ({
+            materialId,
+            units: units.toString(),
+            UnitOfmeasure
+            })),
+        };
 
-  try {
-    if (isEditMode && editingRecipe) {
-      await updateRecipe(editingRecipe._id, recipeData);
-    } else {
-      await create({
-        ...recipeData,
-        totalCost: "0",
-        netProfit: "0",
-        costPerunity: "0",
-        favorite: false,
-        userId: "user-id-placeholder",
-        additionalCost: "0",
-        materialCostTotal: "0",
-        grossProfit: "0",
-        unitSalePrice: "0",
-      });
-    }
+        // Si hay imagen nueva en Base64
+        if (formData.image && formData.image.startsWith("data:image")) {
+            recipeData.image = formData.image;
+        }
+        // Si estamos editando y mantenemos la URL existente
+        else if (editingRecipe && formData.image) {
+            recipeData.imageUrl = formData.image;
+        }
+        // Si el usuario quitó la imagen
+        else {
+            recipeData.image = null; // fuerza el borrado
+            recipeData.imageUrl = null;
+        }
 
-    // Resetear y cerrar modal después del éxito
-    const currentModalState = useRecipesStore.getState().openModal;//gets the openModal State updated(from IngredientsStore)
-    
-    if (!currentModalState) {
-        setFormData({
-        name: "",
-        ingredients: [],
-        portionsPerrecipe: "",
-        quantityPermeasure: "",
-        aditionalCostpercentages: "",
-        profitPercentage: "",
-        UnitOfmeasure: "",
-        recipeunitOfmeasure: "",
-        image: ""
-        });
-        
-        setSelectedIngredients([]);
-        setSelected("");
-        setIsOpen(false);
-        setOpen(false);  // Cierra el modal
-        setIsEditMode(false);
-        setEditingRecipe(null);
-        fetchRecipes(); //se atraen las recetas despues de crear receta
-    }
-  } catch (error) {
-    console.error("Error al guardar receta:", error);
-  }
-};
+        try {
+            if (isEditMode && editingRecipe) {
+            await updateRecipe(editingRecipe._id, recipeData);
+            } else {
+            await create({
+                ...recipeData,
+                totalCost: "0",
+                netProfit: "0",
+                costPerunity: "0",
+                favorite: false,
+                userId: "user-id-placeholder",
+                additionalCost: "0",
+                materialCostTotal: "0",
+                grossProfit: "0",
+                unitSalePrice: "0",
+            });
+            }
 
-// Si hay imagen nueva en Base64
-if (formData.image && formData.image.startsWith("data:image")) {
-  recipeData.image = formData.image;
-}
-// Si estamos editando y mantenemos la URL existente
-else if (editingRecipe && formData.image) {
-  recipeData.imageUrl = formData.image;
-}
-// Si el usuario quitó la imagen
-else {
-  recipeData.image = null; // fuerza el borrado
-  recipeData.imageUrl = null;
-}
-
+            // Resetear y cerrar modal después del éxito
+            const currentModalState = useRecipesStore.getState().openModal;//gets the openModal State updated(from IngredientsStore)
+            
+            if (!currentModalState) {
+                setFormData({
+                name: "",
+                ingredients: [],
+                portionsPerrecipe: "",
+                quantityPermeasure: "",
+                aditionalCostpercentages: "",
+                profitPercentage: "",
+                UnitOfmeasure: "",
+                recipeunitOfmeasure: "",
+                image: ""
+                });
+                
+                setSelectedIngredients([]);
+                setSelected("");
+                setIsOpen(false);
+                setOpen(false);  // Cierra el modal
+                setIsEditMode(false);
+                setEditingRecipe(null);
+                fetchRecipes(); //se atraen las recetas despues de crear receta
+            }
+        } catch (error) {
+            console.error("Error al guardar receta:", error);
+        }
+    };
     useEffect(() => {
         fetchRecipes();
     }, []);
@@ -424,7 +422,6 @@ const validatePositiveNumber = (e) => {
                                 if (file) {
                                     const reader = new FileReader();
                                     reader.onloadend = () => {
-                                        console.log(reader.result); // Verifica que se esté generando la cadena base64
                                         setFormData({ ...formData, image: reader.result }); // reader.result ya incluye data:image/png;base64,...
                                     };
                                     reader.readAsDataURL(file);
