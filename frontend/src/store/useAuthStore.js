@@ -42,7 +42,7 @@ export const useAuthStore = create((set) => ({
         try {
             const res = await axiosInstance.post("/auth/login", data);
             set({ authUser: res.data });
-            toast.success("Logged in successfully");
+            toast.success("Se inició sesión Exitosamente");
         } catch (error) {
             toast.error(error.response.data.message);
         } finally {
@@ -72,7 +72,7 @@ export const useAuthStore = create((set) => ({
             await axiosInstance.post("/auth/logout");
             set({ authUser: null });
             localStorage.clear();
-            toast.success("Logged out successfully");
+            toast.success("Se cerró sesión Exitosamente");
         } catch (error) {
             toast.error(error.response.data.message);
         }

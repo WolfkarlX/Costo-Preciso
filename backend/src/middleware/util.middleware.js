@@ -7,12 +7,12 @@ export const validateAndFilterUpdates = (allowedUpdates) => {
 
     // 1. Checks for empty request body
     if (!updates || Object.keys(updates).length === 0) {
-      return res.status(400).json({ message: "Request body is empty" });
+      return res.status(400).json({ message: "Petición Vacía" });
     }
 
     // 2. Validate MongoDB ID format (if needed)
     if (id && !mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid ID format" });
+      return res.status(400).json({ message: "ID inválida" });
     }
 
     // 3. Filter updates to only allowed fields
@@ -28,7 +28,7 @@ export const validateAndFilterUpdates = (allowedUpdates) => {
 
     // 5. Reject if no valid updates remain after filtering
     if (Object.keys(filteredUpdates).length === 0) {
-      return res.status(400).json({ message: "No valid updates provided"});
+      return res.status(400).json({ message: "No hay campos validos para editar"});
     }
 
     next(); // Proceed to the controller
