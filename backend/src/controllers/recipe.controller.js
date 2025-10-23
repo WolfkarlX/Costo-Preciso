@@ -23,7 +23,7 @@ export const createRecipe = async (req, res) => {
         } = req.body;
 
         if (!name || !ingredients || !portionsPerrecipe || !aditionalCostpercentages || !profitPercentage || !quantityPermeasure || !recipeunitOfmeasure) {
-            return res.status(400).json({ message: "Missing fields" });
+            return res.status(400).json({ message: "Faltan campos obligatorios" });
         }
 
         // Search for all the necessary ingredients
@@ -32,7 +32,7 @@ export const createRecipe = async (req, res) => {
         // Checks if the id of the ingredients are real or valid
         const allValid = materialIds.every(id => mongoose.Types.ObjectId.isValid(id));
         if (!allValid) {
-             return res.status(400).json({ message: "Ingredient does not exists or not authorized" });
+             return res.status(400).json({ message: "El ingrediente no existe o no está autorizado" });
         }
         
         // Checks if there is at least one ingredient
@@ -45,14 +45,14 @@ export const createRecipe = async (req, res) => {
             return !ing.units || Number(ing.units) <= 0;
         });
 
-        if (invalidIngredient) return res.status(400).json({ message: "Invalid Quantity or unauthorized" });
+        if (invalidIngredient) return res.status(400).json({ message: "Cantidad de ingredientes inválida o no autorizada" });
 
         // Checks for the id within the object 
         const dbMaterials = await Ingredient.find({ _id: { $in: materialIds } });
 
         // Checks if the material does not exists
         if (!dbMaterials || dbMaterials.length !== materialIds.length) {
-            return res.status(400).json({ message: "One or more ingredients do not exist or not authorized" });
+            return res.status(400).json({ message: "Uno o más ingredientes no existen o no están autorizados" });
         }
 
         // Calculate costs
@@ -125,26 +125,26 @@ export const createRecipe = async (req, res) => {
               publicId: newRecipe.publicId
             });
         }else{
-            res.status(400).json({ message: "Invalid Recipe data" });
+            res.status(400).json({ message: "Datos de receta inválidos" });
         }
 
     } catch (error) {
         
         // Handles errors from services and server errors
-        if (error.message.startsWith("it is not possible to convert Volume, Weight and pieces:")) {
+        if (error.message.startsWith("No es posible convertir entre Volumen, Peso y Piezas:")) {
             return res.status(400).json({ message: error.message });
         }
         
-        if (error.message.startsWith("Material with ID")) {
+        if (error.message.startsWith("Material con nombre:")) {
             return res.status(400).json({ message: error.message });
         }
        
-        if (error.message.startsWith("Unity Unknown")) {
+        if (error.message.startsWith("Unidad desconocida")) {
             return res.status(400).json({ message: error.message });
         }
 
         console.error("Error in createRecipe controller", error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
 
@@ -158,20 +158,20 @@ export const getRecipes = async (req, res) => {
 
     } catch (error) {
         // Handles errors from services and server errors
-        if (error.message.startsWith("it is not possible to convert Volume, Weight and pieces:")) {
+        if (error.message.startsWith("No es posible convertir entre Volumen, Peso y Piezas:")) {
             return res.status(400).json({ message: error.message });
         }
         
-        if (error.message.startsWith("Material with ID")) {
+        if (error.message.startsWith("Material con nombre:")) {
             return res.status(400).json({ message: error.message });
         }
        
-        if (error.message.startsWith("Unity Unknown")) {
+        if (error.message.startsWith("Unidad desconocida")) {
             return res.status(400).json({ message: error.message });
         }
 
-        console.error("Error in createRecipe controller", error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        console.error("Error in getRecipes controller", error.message);
+        return res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
 
@@ -179,21 +179,21 @@ export const getRecipes = async (req, res) => {
 export const getSpecificrecipe = async (req, res) => {
     try {
         if(!req.params){
-            return res.status(404).json({ message: "Recipe Not Found" });
+            return res.status(404).json({ message: "Receta no encontrada" });
         }
 
         const userId = req.user._id;
         const {id:recipeId} = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(recipeId)) {
-            return res.status(400).json({ message: "Invalid ID" });
+            return res.status(400).json({ message: "ID no válida" });
         }
 
         const userRecipe = await Recipe.findOne({userId: userId, _id: recipeId}).select("-userId");
 
         if (!userRecipe) {
             return res.status(404).json({ 
-                message: "Recipe not found or unauthorized" 
+                message: "Receta no encontrada o inautorizada" 
             });
         }
 
@@ -219,7 +219,7 @@ export const getSpecificrecipe = async (req, res) => {
 
     } catch (error) {
         console.error("Error in getSpecificingredient Controller", error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
 
@@ -227,14 +227,14 @@ export const getSpecificrecipe = async (req, res) => {
 export const deleteRecipe = async (req, res) => {
     try {
         if(!req.params){
-            return res.status(500).json({ message: "Empty request" });
+            return res.status(500).json({ message: "Solicitud vacía" });
         }
         const {id:recipeId} = req.params;
         const userId = req.user._id;
 
         //checks if id is in the correct structure
         if (!mongoose.Types.ObjectId.isValid(recipeId)) {
-            return res.status(400).json({ message: "Invalid ID" });
+            return res.status(400).json({ message: "ID no válida" });
         }
 
         // Checks if the recipe exists AND belongs to the user
@@ -245,7 +245,7 @@ export const deleteRecipe = async (req, res) => {
 
         if (!recipe) {
             return res.status(404).json({ 
-                message: "Recipe not found or unauthorized" 
+                message: "Receta no encontrada o no autorizada" 
             });
         }
 
@@ -259,11 +259,11 @@ export const deleteRecipe = async (req, res) => {
         }
 
         await Recipe.deleteOne({ _id: recipeId });
-        res.status(200).json({ message: "Recipe deleted successfully" });
+        res.status(200).json({ message: "Receta eliminada con Éxito" });
 
     } catch (error) {
         console.error("Error in deleteRecipe controller:", error.message);
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
 
@@ -284,7 +284,7 @@ export const updateRecipe = async (req, res) => {
         const userId = req.user._id;
 
         const recipe = await Recipe.findOne({ _id: id, userId });
-        if (!recipe) return res.status(404).json({ message: "Recipe not found or unauthorized" });
+        if (!recipe) return res.status(404).json({ message: "Receta no encontrada o no autorizada" });
 
         const filteredUpdates = {
             name,
@@ -333,36 +333,36 @@ export const updateRecipe = async (req, res) => {
             // Calcular costos si cambian los ingredientes
             if (filteredUpdates.ingredients) {
                 if (!Array.isArray(filteredUpdates.ingredients) || filteredUpdates.ingredients.length === 0) {
-                return res.status(400).json({ message: "Ingredients list is empty or invalid." });
+                return res.status(400).json({ message: "La lista de ingredientes está vacía o es inválida." });
             }
 
                 // 2. Validates if all the ingredinet ids are correct 
             const allIdsPresent = filteredUpdates.ingredients.every(ing => ing.materialId);
             if (!allIdsPresent) {
-                return res.status(400).json({ message: "Ingredient does not exist or not authorized." });
+                return res.status(400).json({ message: "El ingrediente no existe o no está autorizado." });
             }
             
             const allIdsValid = filteredUpdates.ingredients.every(ing => mongoose.Types.ObjectId.isValid(ing.materialId));
             if (!allIdsValid) {
-                return res.status(400).json({ message: "Ingredient does not exist or not authorized." });
+                return res.status(400).json({ message: "El ingrediente no existe o no está autorizado." });
             }
             
             // 3. Validate Quantity > 0 before going to the DB
             const invalidQuantity = filteredUpdates.ingredients.find(ing => !ing.units || Number(ing.units) <= 0);
             if (invalidQuantity) {
-                return res.status(400).json({ message: "Invalid quantity in one or more ingredients." });
+                return res.status(400).json({ message: "Cantidad inválida en uno o más ingredientes." });
             }
 
             const invalidUnitOfmeasure = filteredUpdates.ingredients.find(ing => !ing.UnitOfmeasure || Number(ing.UnitOfmeasure) <= 0);
             if (invalidUnitOfmeasure) {
-                return res.status(400).json({ message: "Invalid unit of measure in one or more ingredients." });
+                return res.status(400).json({ message: "Unidad de medida inválida en uno o más ingredientes." });
             }
 
             const materialIds = filteredUpdates.ingredients.map(i => i.materialId);
             const dbMaterials = await Ingredient.find({ _id: { $in: materialIds } });
 
             if (!dbMaterials || dbMaterials.length !== materialIds.length) 
-                return res.status(400).json({ message: "One or more ingredients do not exist or not authorized" });
+                return res.status(400).json({ message: "Uno o más ingredientes no existen o no están autorizados" });
 
             if(!filteredUpdates.aditionalCostpercentages){
             filteredUpdates.aditionalCostpercentages = recipe.aditionalCostpercentages
@@ -399,25 +399,25 @@ export const updateRecipe = async (req, res) => {
     } catch (error) {
         
         // Handles errors from services and server errors
-        if (error.message.startsWith("it is not possible to convert Volume, Weight and pieces:")) {
+        if (error.message.startsWith("No es posible convertir entre Volumen, Peso y Piezas:")) {
             return res.status(400).json({ message: error.message });
         }
         
-        if (error.message.startsWith("Material with ID")) {
+        if (error.message.startsWith("Material con nombre:")) {
             return res.status(400).json({ message: error.message });
         }
        
-        if (error.message.startsWith("Unity Unknown")) {
+        if (error.message.startsWith("Unidad desconocida")) {
             return res.status(400).json({ message: error.message });
         }
         
         // Handle validation errors (e.g., "quantity must be a number")
         if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: "Validation failed" });
+            return res.status(400).json({ message: "La validación falló" });
         }
 
         console.error("Error in updateRecipe controller", error.message);
 
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };

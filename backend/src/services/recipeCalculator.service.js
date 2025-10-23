@@ -6,7 +6,7 @@ export function calculateRecipeCost({ ingredientsData, recipeIngredients, additi
   const ingredientCosts = recipeIngredients.map(ingredient => {
     const dbMaterial = ingredientsData.find(mat => mat._id.toString() == String(ingredient.materialId));
 
-    if (!dbMaterial) throw new Error(`Material with ID ${ingredient.materialId} not found.`);
+    if (!dbMaterial) throw new Error(`Material con nombre: ${ingredient.name} No encontrado.`);
 
     // Change the ingredient unity to the db unity
 
