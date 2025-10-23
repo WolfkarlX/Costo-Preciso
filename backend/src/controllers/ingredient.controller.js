@@ -40,7 +40,7 @@ export const createIngredient = async (req, res) => {
             }
         }
         //checks if there is an ingredient with the same name
-        const ingredientExist = await Ingredient.findOne({ name, userId });
+        const ingredient = await Ingredient.findOne({ name, userId });
       
         if(ingredient){
             return res.status(409).json({ 

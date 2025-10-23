@@ -81,6 +81,14 @@ export const createRecipe = async (req, res) => {
             }
         }
 
+        const recipe = await Recipe.findOne({ name, userId });
+      
+        if(recipe){
+            return res.status(409).json({ 
+                message: "La receta ya existe" 
+            });
+        }
+
         const newRecipe = new Recipe({
             name,
             profitPercentage,
