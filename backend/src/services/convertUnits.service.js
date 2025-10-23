@@ -51,7 +51,7 @@ export function convertUnits(quantity, fromUnit, toUnit) {
   const from = unitAliases[fromUnit.toLowerCase()];
   const to = unitAliases[toUnit.toLowerCase()];
 
-  if (!from || !to) throw new Error(`Unity Unknown: ${fromUnit} to ${toUnit}`);
+  if (!from || !to) throw new Error(`Unidad desconocida: ${fromUnit} a ${toUnit}`);
 
   // if both are pieces, do not change
   if (from === 'pz' && to === 'pz') return quantity;
@@ -60,7 +60,7 @@ export function convertUnits(quantity, fromUnit, toUnit) {
   
   //checks if there is a piece
   if (from === 'pz' || to === 'pz'){
-    throw new Error(`it is not possible to convert Volume, Weight and pieces: ${fromUnit} to ${toUnit}`);
+    throw new Error(`No es posible convertir entre Volumen, Peso y Piezas: ${fromUnit} a ${toUnit}`);
   }
 
   const weightUnits = ['mg','g','kg','lb','oz'];
@@ -81,5 +81,5 @@ export function convertUnits(quantity, fromUnit, toUnit) {
     return quantityInLiters / conversionFactors[to];
   }
 
-  throw new Error(`it is not possible to convert Volume, Weight and pieces: ${fromUnit} to ${toUnit}`);
+  throw new Error(`No es posible convertir entre Volumen, Peso y Piezas: ${fromUnit} a ${toUnit}`);
 }

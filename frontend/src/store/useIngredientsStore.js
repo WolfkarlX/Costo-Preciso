@@ -18,7 +18,7 @@ export const useIngredientsStore = create((set, get) => ({
         
         try {
             const res = await axiosInstance.post("/ingredient/create", data);
-            toast.success("Ingredient Added");
+            toast.success("Ingrediente añadido");
             open = false
         } catch (error) {
             toast.error(error.response.data.message);
@@ -46,7 +46,7 @@ export const useIngredientsStore = create((set, get) => ({
 
         try {
             await axiosInstance.post(`/ingredient/updt/${id}`, updatedData);
-            toast.success("Ingredient updated");
+            toast.success("Ingrediente Actualizado");
             const ingredients = get().ingredients.map((ing) =>
                 ing._id === id ? { ...ing, ...updatedData } : ing
             );

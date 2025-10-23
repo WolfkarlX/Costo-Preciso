@@ -33,7 +33,7 @@ const App = () => {
   }, [location.pathname, checkAuth]);
 
 
-  console.log({ authUser });
+  //console.log({ authUser });
 
   if(isCheckingAuth && !authUser) 
     return (

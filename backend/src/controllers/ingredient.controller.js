@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 //logic of creating an ingredient
 export const createIngredient = async (req, res) => {
-    if (!req.body) return res.status(400).json({ message: "Request is empty" });
+    if (!req.body) return res.status(400).json({ message: "La solicitud está vacía" });
 
     //gets id from middleware auth
     const userId = req.user._id;
@@ -16,7 +16,7 @@ export const createIngredient = async (req, res) => {
 
     try {
         if(!name || !Units || !unityOfmeasurement || !totalPrice) {
-            return res.status(400).json({ message: "All fields are required"});
+            return res.status(400).json({ message: "Todos los campos son obligatorios"});
         }
         
         //Gets the unitPrice for this material or ingredient
@@ -75,11 +75,11 @@ export const createIngredient = async (req, res) => {
                 publicId: newIngredient.publicId
             });
          } else {
-            res.status(400).json({ message: "Invalid Ingredient data" });
+            res.status(400).json({ message: "Datos de ingrediente inválidos" });
         }
     } catch (error) {
-        console.log("Error in createIngredient controller", error.message);
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error("Error in createIngredient controller", error.message);
+        res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
 
@@ -92,8 +92,8 @@ export const getIngredients = async (req, res) => {
           
         return res.status(200).json(userIngredients);
     } catch (error) {
-        console.log("Error in getIngredients controller", error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        console.error("Error in getIngredients controller", error.message);
+        return res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
 
@@ -101,21 +101,21 @@ export const getIngredients = async (req, res) => {
 export const getSpecificingredient = async (req, res) => {
     try {
         if(!req.params){
-            return res.status(404).json({ message: "Not Found" });
+            return res.status(404).json({ message: "No encontrado" });
         }
 
         const userId = req.user._id;
         const {id:ingredientId} = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(ingredientId)) {
-            return res.status(400).json({ message: "Invalid ID" });
+            return res.status(400).json({ message: "ID no válida" });
         }
 
         const userIngredient = await Ingredient.findOne({userId: userId, _id: ingredientId}).select("-userId");
         
         if (!userIngredient) {
             return res.status(404).json({ 
-                message: "Ingredient not found or unauthorized" 
+                message: "Ingrediente no encontrado o no autorizado" 
             });
         }
 
@@ -123,7 +123,7 @@ export const getSpecificingredient = async (req, res) => {
 
     } catch (error) {
         console.log("Error in getSpecificingredient Controller", error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
 
@@ -131,14 +131,14 @@ export const getSpecificingredient = async (req, res) => {
 export const deleteIngredient = async (req, res) => {
     try {
         if(!req.params){
-            return res.status(404).json({ message: "Not Found" });
+            return res.status(404).json({ message: "No encontrado" });
         }
         const {id:ingredientId} = req.params;
         const userId = req.user._id;
         
         //checks if id is in the correct structure
         if (!mongoose.Types.ObjectId.isValid(ingredientId)) {
-            return res.status(400).json({ message: "Invalid ID" });
+            return res.status(400).json({ message: "ID no válida" });
         }
 
         // Checks if the ingredient exists AND belongs to the user
@@ -149,7 +149,7 @@ export const deleteIngredient = async (req, res) => {
 
         if (!ingredient) {
             return res.status(404).json({ 
-                message: "Ingredient not found or unauthorized" 
+                message: "Ingrediente no encontrado o no autorizado"
             });
         }
 
@@ -159,16 +159,16 @@ export const deleteIngredient = async (req, res) => {
         }); 
         
         if (withinRecipe) {
-            return res.status(400).json({ message: "There is a recipe requiring this material" });
+            return res.status(400).json({ message: "Existe una receta que requiere este material" });
         }
           
         await Ingredient.deleteOne({ _id: ingredientId });
 
-        return res.status(200).json({ message: "Ingredient deleted Succesfully" });
+        return res.status(200).json({ message: "Ingrediente eliminado Exitosamente" });
 
     } catch (error) {
         console.error("Error in deleteIngredient Controller:", error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
 
@@ -182,7 +182,7 @@ export const updateIngredient = async (req, res) => {
 
         const ingredient = await Ingredient.findOne({ _id: ingredientId, userId: userId });
         if (!ingredient) {
-            return res.status(404).json({ message: "Ingredient not found or unauthorized" });
+            return res.status(404).json({ message: "Ingrediente no encontrado o no autorizado" });
         }
 
         // Manejo de imagen
@@ -226,7 +226,7 @@ export const updateIngredient = async (req, res) => {
                 _id: { $ne: ingredientId } // excluye el actual ingrediente
             });
             if (SameName) {
-                return res.status(409).json({ message: "Ingredient already exists" });
+                return res.status(409).json({ message: "El ingrediente ya existe" });
             }
         }
       
@@ -259,8 +259,8 @@ export const updateIngredient = async (req, res) => {
         console.error("Error in updateIngredient Controller:", error.message);
         // Handle validation errors (e.g., "quantity must be a number")
         if (error.name === 'ValidationError') {
-            return res.status(400).json({ message: "Validation failed" });
+            return res.status(400).json({ message: "La validación falló" });
         }
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
     }
 };
