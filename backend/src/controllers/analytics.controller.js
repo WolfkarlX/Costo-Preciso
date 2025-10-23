@@ -122,6 +122,6 @@ export async function recipesRankings(req, res) {
 
   } catch (err) {
     console.error("[recipesRankings] Error inesperado:", err.message || err);
-    return res.status(500).json({ message: "Ocurrió un error inesperado." });
+    return res.status(500).json({ message: "No es posible realizar la acción, Inténtelo más tarde" });
   }
 }
