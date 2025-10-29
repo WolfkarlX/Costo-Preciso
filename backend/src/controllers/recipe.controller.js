@@ -2,6 +2,7 @@ import cloudinary from "../lib/cloudinary.js";
 import Ingredient from "../models/ingredient.models.js";
 import mongoose from "mongoose";
 import Recipe from "../models/recipe.model.js";
+import Category from "../models/category.model.js";
 import { calculateRecipeCost } from "../services/recipeCalculator.service.js";
 
 // Logic for creating a recipe
@@ -267,7 +268,13 @@ export const deleteRecipe = async (req, res) => {
         }
 
         await Recipe.deleteOne({ _id: recipeId });
-        res.status(200).json({ message: "Receta eliminada con Éxito" });
+
+        await Category.updateMany(
+        { "recipes.recipeId": recipeId },
+        { $pull: { recipes: { recipeId: recipeId } } }
+       );
+        
+       res.status(200).json({ message: "Receta eliminada con Éxito" });
 
     } catch (error) {
         console.error("Error in deleteRecipe controller:", error.message);
