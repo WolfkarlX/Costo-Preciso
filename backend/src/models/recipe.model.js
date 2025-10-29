@@ -42,7 +42,7 @@ const recipeSchema = new mongoose.Schema(
             {
                 materialId: {
                     type: SchemaTypes.ObjectId,
-                    ref: "ingredients",  // Reference to your Material model
+                    ref: "Ingredient",  // Reference to the ingredient model
                     required: true
                 },
                 units:{

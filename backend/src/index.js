@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.route.js";
 import ingredientRoutes from "./routes/ingredient.route.js";
 import recipeRoutes from "./routes/recipe.route.js";
 import analyticsRoutes from "./routes/analytic.route.js";
+import categoryRoutes from "./routes/category.route.js";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/ingredient", ingredientRoutes);
 app.use("/api/recipe", recipeRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/category", categoryRoutes);
 
 app.listen(PORT, () => {
     console.log("Server is running on PORT:" + PORT);
