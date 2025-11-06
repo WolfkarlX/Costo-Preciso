@@ -56,3 +56,22 @@ img {
 #unidad-medida {
     color: black;
 }
+
+#datos-percentages {
+    width: 100%;
+    height: 50%;
+    font-size: 1.4rem;
+}
+
+#datos-percentages h2 {
+    font-size: 1.4rem;
+}
+
+#datos-percentages p {
+    color: black;
+}
+
+#datos-percentages h1 {
+    color: black;
+}
+

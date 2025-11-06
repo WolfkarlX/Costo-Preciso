@@ -5,6 +5,8 @@ import Modal from "../components/Modal";
 import "../styles/styles.css";
 import { useRecipesStore } from "../store/useRecipesStore";
 import { toast } from "react-hot-toast";
+import { useRecipeDetailsModal } from "../hooks/HomePage/useRecipeDetailsModal";
+import RecipeDetailsModal from "../UI/HomePage/RecipeDetailsModal";
 
 const HomePage = () => {
     const [result, setResult] = useState([]);
@@ -20,8 +22,7 @@ const HomePage = () => {
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
     //const [inputValue, setInputValue] = useState('');
-    const [recipeData, setRecipeData] = useState({});
-
+    const [recipeData, setRecipeData] = useState(null); //useState for porcentages
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -46,6 +47,8 @@ const HomePage = () => {
         recipeunitOfmeasure: "",
         image: "",
     });
+
+    const { isopen, selectedOne, closeModal } = useRecipeDetailsModal(formData);
 
     // Referencias para los dropdowns de unidad de medida
     const unitDropdownRefs = useRef([]);
@@ -234,6 +237,8 @@ const HomePage = () => {
             aditionalCostpercentages: recipe.aditionalCostpercentages,
             profitPercentage: recipe.profitPercentage,
             recipeunitOfmeasure: recipe.recipeunitOfmeasure,
+            totalCost: recipe.totalCost,
+            materialCostTotal: recipe.materialCostTotal,
             image: recipe.imageUrl || "",
         });
 
@@ -812,6 +817,12 @@ const validatePositiveNumber = (e) => {
                 </div>
             )}
             </Modal>
+
+            <RecipeDetailsModal
+                isopen ={isopen}
+                recipe={selectedOne}
+                onClose={closeModal}
+            />
 
         </section>
     );
