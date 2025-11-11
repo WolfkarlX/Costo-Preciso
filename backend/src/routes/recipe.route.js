@@ -5,7 +5,7 @@ import { validateAndFilterUpdates } from "../middleware/util.middleware.js";
 
 const router = express.Router();
 const allowedxUpdates = ['name', 'ingredients', 'portionsPerrecipe', 'aditionalCostpercentages'
-                        , 'profitPercentage', 'quantityPermeasure', 'recipeunitOfmeasure', 'imageUrl'];
+                        , 'profitPercentage', 'quantityPermeasure', 'recipeunitOfmeasure', 'instructions', 'imageUrl'];
 
 router.post("/create", protectRoute, createRecipe);
 router.get("/recipes", protectRoute, getRecipes);
