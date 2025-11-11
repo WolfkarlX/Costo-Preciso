@@ -81,6 +81,10 @@ const recipeSchema = new mongoose.Schema(
             type: String,
             default: ""
         },
+        instructions: {
+            type: String,
+            default: ""
+        },
         imageUrl: {
             type: String,
             default: ""

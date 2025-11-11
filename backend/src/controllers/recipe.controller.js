@@ -222,6 +222,7 @@ export const getSpecificrecipe = async (req, res) => {
             quantityPermeasure: userRecipe.quantityPermeasure,
             recipeunitOfmeasure: userRecipe.recipeunitOfmeasure,
             ingredients: userRecipe.ingredients,
+            instructions: userRecipe.instructions,
             imageUrl: userRecipe.imageUrl,
             publicId: userRecipe.publicId
         });
@@ -294,6 +295,7 @@ export const updateRecipe = async (req, res) => {
             profitPercentage,
             quantityPermeasure,
             recipeunitOfmeasure,
+            instructions,
             image,
         } = req.body;
         const userId = req.user._id;
@@ -309,6 +311,7 @@ export const updateRecipe = async (req, res) => {
             profitPercentage,
             quantityPermeasure,
             recipeunitOfmeasure,
+            instructions
         };
 
         // Borrar imagen si el cliente manda null
