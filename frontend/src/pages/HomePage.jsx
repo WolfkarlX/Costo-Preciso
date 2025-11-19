@@ -21,8 +21,7 @@ const HomePage = () => {
     const dropdownRef = useRef(null);
     //const [inputValue, setInputValue] = useState('');
     const [recipeData, setRecipeData] = useState({});
-
-
+    
     useEffect(() => {
         const handleClickOutside = (event) => {
             const dropdown = document.getElementById(`dropdown-${openDropdownId}`);
@@ -713,7 +712,9 @@ const validatePositiveNumber = (e) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                     {isGetting ? (
                         <p className="col-span-full text-center"><Loader2 /></p>
-                    ) : (
+                    ) : result.length == 0 ? (
+                        <p className="col-span-full text-center text-gray-500">No hay recetas disponibles</p> // No results message
+                    ) : (                        
                         (result.length > 0 ? result : recipes).map((item) => (
                         <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
                             <div ref={dropdownRef} className="relative flex justify-end">
