@@ -20,11 +20,11 @@ const SearchBar = ({ setResult, ingredients }) => {
             .join(" ");                       // join tokens back with spaces
     };
 
-    //Function to handle the inp
+    //Function to handle the input
     const handleChange = (value) => {
         setInput(value);
 
-        if (value.trim() == " ") {
+        if (value.trim() === "") { //if searchBar is empty returns the items
             setResult(ingredients);
             return;
         }

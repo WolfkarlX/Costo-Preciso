@@ -195,6 +195,11 @@ const HomePage = () => {
     useEffect(() => {
         fetchRecipes();
     }, []);
+    
+    //useEffect for searchBar
+    useEffect(() => {
+        setResult(recipes);
+    }, [recipes]);
 
     const handleDropdownToggle = async () => {
         if (!openDropdown) {
@@ -712,10 +717,13 @@ const validatePositiveNumber = (e) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                     {isGetting ? (
                         <p className="col-span-full text-center"><Loader2 /></p>
-                    ) : result.length == 0 ? (
-                        <p className="col-span-full text-center text-gray-500">No hay recetas disponibles</p> // No results message
-                    ) : (                        
-                        (result.length > 0 ? result : recipes).map((item) => (
+                    ) : recipes.length === 0 ? (
+                        <p className="col-span-full text-center text-gray-500"> No hay recetas disponibles. ¡Crea tu primera receta!</p> // No results message
+                    ) : result.length === 0 ?(
+                        <p className="col-span-full text-center text-gray-500">No se encentran recetas disponibles</p> // No results message
+                    ): 
+                    (                        
+                        result.map((item) => (
                         <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
                             <div ref={dropdownRef} className="relative flex justify-end">
                             <button
