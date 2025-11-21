@@ -393,7 +393,10 @@ const IngredientsPage = () => {
                 {/*Handles if there are no items*/}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {isGetting ? (
-                    <p className="col-span-full text-center text-gray-500"> Cargando.. </p> // No results message
+                    <div className="col-span-full ml-[44.54%] text-gray-500">
+                        <p className="col-span-ful text-gray-600 -ml-[1%]"> Obteniendo Ingredientes... </p> <br />
+                        {<Loader2 size={60} className="animate-spin ml-[6%] stroke-[#71C1BE]" />}
+                    </div>
                 ) : ingredients.length === 0 ? (
                     <p className="col-span-full text-center text-gray-500"> No hay Ingredientes disponibles. ¡Crea tu primer Ingrediente!</p> // No results message
                 ) : result.length === 0 && searching ?(

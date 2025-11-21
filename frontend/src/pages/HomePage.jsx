@@ -715,13 +715,16 @@ const validatePositiveNumber = (e) => {
                 {/*Messages at showing recipes*/}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                     {isGetting ? (
-                        <p className="col-span-full text-center text-gray-500"> Cargando.. </p>
+                        <div className="col-span-full ml-[44.54%] text-gray-500">
+                            <p className="col-span-ful text-gray-600"> Obteniendo Recetas... </p> <br />
+                            {<Loader2 size={60} className="animate-spin ml-[6%] stroke-[#71C1BE]" />}
+                        </div>
                     ) : recipes.length === 0 ? (
                         <p className="col-span-full text-center text-gray-500"> No hay recetas disponibles. ¡Crea tu primera receta!</p> // No results message
                     ) : result.length === 0 && searching ?(
                         <p className="col-span-full text-center text-gray-500">No se encontran recetas disponibles</p> // No results message
                     ): 
-                    (                        
+                    (                     
                         (result.length > 0 ? result: recipes).map((item) => (
                         <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
                             <div ref={dropdownRef} className="relative flex justify-end">
