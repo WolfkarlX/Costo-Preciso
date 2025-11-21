@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Search } from 'lucide-react';
 
-const SearchBar = ({ setResult, ingredients }) => {
+const SearchBar = ({ setResult, ingredients, isSearching }) => {
     const [input, setInput] = useState("");
 
     //function which normalizes the input
@@ -25,7 +25,8 @@ const SearchBar = ({ setResult, ingredients }) => {
         setInput(value);
 
         if (value.trim() === "") { //if searchBar is empty returns the items
-            setResult(ingredients);
+            setResult([]);
+            isSearching(false)
             return;
         }
 
@@ -39,6 +40,7 @@ const SearchBar = ({ setResult, ingredients }) => {
             );
         });
 
+        isSearching(true)
         setResult(filtered);
     };
 

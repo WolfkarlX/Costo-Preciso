@@ -11,6 +11,7 @@ const IngredientsPage = () => {
     
     // constantes para Search Bar
     const [result, setResult] = useState([])
+    const [searching, isSearching] = useState(false);
 
     // constantes para Modales
     const [open, setOpen] = useState(false)
@@ -168,7 +169,7 @@ const IngredientsPage = () => {
                 {/* search bar */}
                 <div className="flex flex-row w-full mt-4">
                     <div className="w-full mr-4 sm:mr-10">
-                        <SearchBar setResult={setResult} ingredients={ingredients} setInputValue={setInputValue} />
+                        <SearchBar setResult={setResult} ingredients={ingredients} isSearching={isSearching} />
                     </div>
                     <button title="Agregar un nuevo ingrediente" className="p-2 sm:p-4 shadow-md rounded-[50%] bg-color-primary text-white"
                     onClick={() => {
@@ -389,12 +390,17 @@ const IngredientsPage = () => {
 
 
                 {/*Visualización de ingredientes*/}
+                {/*Handles if there are no items*/}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {isGetting ? (
-                    <p className="col-span-full text-center"><Loader2 /></p>
-                ) : (
+                    <p className="col-span-full text-center text-gray-500"> Cargando.. </p> // No results message
+                ) : ingredients.length === 0 ? (
+                    <p className="col-span-full text-center text-gray-500"> No hay Ingredientes disponibles. ¡Crea tu primer Ingrediente!</p> // No results message
+                ) : result.length === 0 && searching ?(
+                    <p className="col-span-full text-center text-gray-500">No se encuentran ingredientes disponibles</p> // No results message
+                ):
                     // Check if there are search results (result) or fallback to all ingredients
-                    (result.length > 0 ? result : ingredients).map((item) => (
+                (result.length > 0 ? result : ingredients).map((item) => (
                     <div key={item._id} className="relative bg-white rounded-[20px] shadow-md p-4 flex flex-col min-h-[400px]">
                         {/* Botón menú de opciones */}
                         <div className="absolute top-3 right-3">
@@ -469,7 +475,7 @@ const IngredientsPage = () => {
                             </p>
                         </div>
                     </div>
-                    ))
+                    )
                 )}
                  </div>
             </div> 

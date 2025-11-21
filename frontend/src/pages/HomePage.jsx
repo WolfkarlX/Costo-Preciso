@@ -7,7 +7,10 @@ import { useRecipesStore } from "../store/useRecipesStore";
 import { toast } from "react-hot-toast";
 
 const HomePage = () => {
+    //Search bar states
+    const [searching, isSearching] = useState(false);
     const [result, setResult] = useState([]);
+
     const [openDropdown, setOpenDropdown] = useState(null);
     const plusDropdownRef = useRef(null);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -196,11 +199,6 @@ const HomePage = () => {
         fetchRecipes();
     }, []);
     
-    //useEffect for searchBar
-    useEffect(() => {
-        setResult(recipes);
-    }, [recipes]);
-
     const handleDropdownToggle = async () => {
         if (!openDropdown) {
             await fetchIngredients();
@@ -337,7 +335,7 @@ const validatePositiveNumber = (e) => {
             
             <div className="flex flex-row w-full mt-4">
                 <div className="w-full mr-4 sm:mr-10">
-                    <SearchBar setResult={setResult} ingredients={recipes}/>
+                    <SearchBar setResult={setResult} isSearching={isSearching}  ingredients={recipes}/>
                 </div>
             <button
                 title="Agregar una nueva receta"
@@ -713,17 +711,18 @@ const validatePositiveNumber = (e) => {
                 </div>
                 </form>
                 </Modal>
-
+                
+                {/*Messages at showing recipes*/}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                     {isGetting ? (
-                        <p className="col-span-full text-center"><Loader2 /></p>
+                        <p className="col-span-full text-center text-gray-500"> Cargando.. </p>
                     ) : recipes.length === 0 ? (
                         <p className="col-span-full text-center text-gray-500"> No hay recetas disponibles. ¡Crea tu primera receta!</p> // No results message
-                    ) : result.length === 0 ?(
-                        <p className="col-span-full text-center text-gray-500">No se encentran recetas disponibles</p> // No results message
+                    ) : result.length === 0 && searching ?(
+                        <p className="col-span-full text-center text-gray-500">No se encontran recetas disponibles</p> // No results message
                     ): 
                     (                        
-                        result.map((item) => (
+                        (result.length > 0 ? result: recipes).map((item) => (
                         <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
                             <div ref={dropdownRef} className="relative flex justify-end">
                             <button
