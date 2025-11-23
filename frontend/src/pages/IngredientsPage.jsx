@@ -14,6 +14,16 @@ const IngredientsPage = () => {
 
     // constantes para Modales
     const [open, setOpen] = useState(false)
+
+    useEffect(() => {
+        if (open) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [open]);
+    
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
     const [inputValue, setInputValue] = useState('');

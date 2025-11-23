@@ -17,11 +17,20 @@ const HomePage = () => {
     const [selectedIngredients, setSelectedIngredients] = useState([]); // Para ingredientes
     const [editingRecipe, setEditingRecipe] = useState(null); // Para receta en edición
     const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if (open) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => { document.body.style.overflow = 'unset'; };
+    }, [open]);
+
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const dropdownRef = useRef(null);
     //const [inputValue, setInputValue] = useState('');
     const [recipeData, setRecipeData] = useState({});
-
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -195,12 +204,13 @@ const HomePage = () => {
     };
     useEffect(() => {
         fetchRecipes();
+        fetchIngredients();
     }, []);
 
     const handleDropdownToggle = async () => {
-        if (!openDropdown) {
-            await fetchIngredients();
-        }
+        //if (!openDropdown) {
+            //await fetchIngredients();
+        //}
         setOpenDropdown(!openDropdown);
     };
 
@@ -266,6 +276,27 @@ const HomePage = () => {
     const handleDelete = async (id) => {
         await deleteRecipes(id);
     };
+
+    // Función para cerrar el modal y limpiar todo el estado "basura"
+    const handleCloseModal = () => {
+        setOpen(false);
+        setIsEditMode(false);
+        setEditingRecipe(null); // IMPORTANTE: Resetear esto fuerza a que se recarguen los datos originales al volver a abrir
+        setSelectedIngredients([]); // Limpia la lista visual de ingredientes
+        setFormData({ // Limpia el formulario
+            name: "",
+            ingredients: [],
+            portionsPerrecipe: "",
+            quantityPermeasure: "",
+            aditionalCostpercentages: "",
+            profitPercentage: "",
+            UnitOfmeasure: "",
+            recipeunitOfmeasure: "",
+            image: "",
+        });
+        setFileName(""); // Limpia el nombre del archivo si hubiera
+    };
+
 // helpers (fuera del return)
 const isEmpty = v => v === undefined || v === null || String(v).trim() === "";
 const isPosNumber = v => Number.isFinite(Number(v)) && Number(v) > 0;
@@ -362,7 +393,7 @@ const validatePositiveNumber = (e) => {
             </div>
 
             {/* Modal para crear / editar */}
-            <Modal open={open} onClose={() => setOpen(false)}>
+            <Modal open={open} onClose={handleCloseModal}>
             <form onSubmit={handleSubmit}>
                 <h3 className="text-xl font-black text-color-secondary text-center mb-4">
                 {isEditMode ? "Editar receta" : "Nueva receta"}
