@@ -465,7 +465,7 @@ const IngredientsPage = () => {
                             </p>
                             <p className="text-lg text-color-secondary my-1 break-words">
                                 Precio unitario:{" "}
-                                <span className="font-black">${item.unityPrice}</span>
+                                <span className="font-black">${Number(item.unityPrice).toFixed(2)}</span>
                             </p>
                         </div>
                     </div>
