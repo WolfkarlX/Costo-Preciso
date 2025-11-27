@@ -851,13 +851,7 @@ const validatePositiveNumber = (e) => {
                                             onClick={() => handleEdit(item)}
                                         >
                                             <Pencil size={20} /> Editar
-                                        </button>
-                                        <button
-                                            className="flex items-center px-4 py-2 mx-2 hover:bg-white rounded-[15px] gap-x-2"
-                                            onClick={() => handleDownloadPDF(item)}
-                                        >
-                                            <CloudDownload size={20} /> Descargar PDF
-                                        </button>
+                                        </button>                                    
                                         <button
                                             className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
                                             onClick={() => handleDelete(item._id)}
@@ -870,6 +864,12 @@ const validatePositiveNumber = (e) => {
                                                 <Trash size={20} />
                                             )}
                                             {isDeleting && deletingId === item._id ? "" : "Eliminar"}
+                                        </button>
+                                        <button
+                                            className="flex items-center px-4 py-2 mx-2 hover:bg-white rounded-[15px] gap-x-2"
+                                            onClick={() => handleDownloadPDF(item)}
+                                        >
+                                            <CloudDownload size={20} /> Descargar PDF
                                         </button>
                                     </div>
 
