@@ -16,6 +16,8 @@
     "chart.js": "^4.5.0",
     "chartjs-plugin-datalabels": "^2.2.0",
     "google-auth-library": "^9.15.1",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.487.0",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",

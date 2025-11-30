@@ -128,6 +128,7 @@ const Navbar = () => {
                         <Soup size={20} color={activeLink === "recipes" ? "var(--color-secondary)" : "var(--color-primary)"} />
                         <span className={`${activeLink === "recipes" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetas</span>
                     </Link>
+                    
                     <Link
                         to="/ingredients" 
                         className={`flex items-center md:mr-12 ${
@@ -138,6 +139,7 @@ const Navbar = () => {
                         <Egg size={20} color={activeLink === "ingredients" ? "var(--color-secondary)" : "var(--color-primary)"} />
                         <span className={`${activeLink === "ingredients" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ingredientes</span>
                     </Link>
+                    
                     <Link
                         to="/recipebook" 
                         className={`flex items-center md:mr-12 ${
@@ -148,6 +150,7 @@ const Navbar = () => {
                         <BookMarked size={20} color={activeLink === "recipebook" ? "var(--color-secondary)" : "var(--color-primary)"} />
                         <span className={`${activeLink === "recipebook" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetario</span>
                     </Link>
+                    
                     <Link
                         to="/percentages" 
                         className={`flex items-center md:mr-12 ${

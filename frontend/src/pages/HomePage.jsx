@@ -5,6 +5,8 @@ import Modal from "../components/Modal";
 import "../styles/styles.css";
 import { useRecipesStore } from "../store/useRecipesStore";
 import { toast } from "react-hot-toast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const HomePage = () => {
     const [result, setResult] = useState([]);
@@ -195,6 +197,7 @@ const HomePage = () => {
     };
     useEffect(() => {
         fetchRecipes();
+        fetchIngredients();
     }, []);
 
     const handleDropdownToggle = async () => {
@@ -265,6 +268,116 @@ const HomePage = () => {
 
     const handleDelete = async (id) => {
         await deleteRecipes(id);
+    };
+    const handleDownloadPDF = async (recipe) => {
+        // Asegurar que la lista ingredients se cargue.
+        if (ingredients.length === 0) {
+        await fetchIngredients();
+        }
+
+        const doc = new jsPDF();
+
+        // -------------------------
+        // 1) PORTADA Y NOMBRE
+        // -------------------------
+        doc.setFontSize(22);
+        doc.text(recipe.name || "Receta", 105, 20, { align: "center" });
+
+        // -------------------------
+        // 2) IMAGEN (si existe)
+        // -------------------------
+        if (recipe.imageUrl) {
+            try {
+                doc.addImage(recipe.imageUrl, "JPEG", 65, 30, 80, 80);
+            } catch (error) {
+                console.warn("No se pudo cargar la imagen en el PDF:", error);
+            }
+            doc.setFontSize(14);
+            doc.text("Detalles:", 14, 120);
+        } else {
+            doc.setFontSize(14);
+            doc.text("Detalles:", 14, 40);
+        }
+
+        // -------------------------
+        // 3) DATOS GENERALES
+        // -------------------------
+        const detailsTop = recipe.imageUrl ? 130 : 50;
+
+        const generalDetails = [
+            [`Porciones obtenidas`, recipe.portionsPerrecipe || "-"],
+            [`Cantidad por porción`, `${recipe.quantityPermeasure || "-"} ${recipe.recipeunitOfmeasure || ""}`],
+            [`Ganancia esperada`, `${recipe.profitPercentage}%`],
+            [`Costo adicional (%)`, `${recipe.aditionalCostpercentages}%`],
+        ];
+
+        autoTable(doc, {
+            startY: detailsTop,
+            head: [["Campo", "Valor"]],
+            body: generalDetails,
+            styles: { fontSize: 11 }
+        });
+
+        let nextTableY = doc.lastAutoTable.finalY + 10;
+
+        // -------------------------
+        // 4) INGREDIENTES (TABLA)
+        // -------------------------
+        doc.setFontSize(14);
+        doc.text("Ingredientes:", 14, nextTableY);
+
+        // Enriquecer ingredientes con nombres reales
+        const ingWithNames = recipe.ingredients.map((ing) => {
+            const full = ingredients.find((mat) => mat._id === ing.materialId);
+
+            return {
+                name: full ? full.name : "Desconocido",
+                units: ing.units,
+                UnitOfmeasure: ing.UnitOfmeasure
+            };
+        });
+        const ingRows = ingWithNames.map((ing) => [
+            ing.name,
+            ing.units,
+            ing.UnitOfmeasure
+        ]);
+
+        autoTable(doc, {
+            startY: nextTableY + 5,
+            head: [["Ingrediente", "Cantidad", "Unidad"]],
+            body: ingRows,
+            styles: { fontSize: 11 }
+        });
+
+        nextTableY = doc.lastAutoTable.finalY + 10;
+
+        // -------------------------
+        // 5) COSTOS CALCULADOS
+        // -------------------------
+        doc.setFontSize(14);
+        doc.text("Costos calculados:", 14, nextTableY);
+
+        const costos = [
+            ["Costo materiales", `$${recipe.materialCostTotal}`],
+            ["Costos adicionales", `$${recipe.additionalCost}`],
+            ["Costo total receta", `$${recipe.totalCost}`],
+            ["Costo unitario", `$${recipe.costPerunity}`],
+            ["Precio unitario venta", `$${recipe.unitSalePrice}`],
+            ["Ganancia bruta", `$${recipe.grossProfit}`],
+            ["Ganancia neta", `$${recipe.netProfit}`],
+        ];
+
+        autoTable(doc, {
+            startY: nextTableY + 5,
+            head: [["Concepto", "Valor"]],
+            body: costos,
+            styles: { fontSize: 11 }
+        });
+
+        // -------------------------
+        // 6) GUARDAR PDF
+        // -------------------------
+        doc.save(`${recipe.name || "receta"}.pdf`);
     };
 // helpers (fuera del return)
 const isEmpty = v => v === undefined || v === null || String(v).trim() === "";
@@ -738,7 +851,7 @@ const validatePositiveNumber = (e) => {
                                             onClick={() => handleEdit(item)}
                                         >
                                             <Pencil size={20} /> Editar
-                                        </button>
+                                        </button>                                    
                                         <button
                                             className="flex items-center px-4 py-2 mx-2 mb-2 hover:bg-white rounded-[15px] gap-x-2"
                                             onClick={() => handleDelete(item._id)}
@@ -751,6 +864,12 @@ const validatePositiveNumber = (e) => {
                                                 <Trash size={20} />
                                             )}
                                             {isDeleting && deletingId === item._id ? "" : "Eliminar"}
+                                        </button>
+                                        <button
+                                            className="flex items-center px-4 py-2 mx-2 hover:bg-white rounded-[15px] gap-x-2"
+                                            onClick={() => handleDownloadPDF(item)}
+                                        >
+                                            <CloudDownload size={20} /> Descargar PDF
                                         </button>
                                     </div>
 

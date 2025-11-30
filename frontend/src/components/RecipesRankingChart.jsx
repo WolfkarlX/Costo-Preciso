@@ -27,6 +27,12 @@ export default function RecipesRankingChart({ title, metric, rows = [] }) {
   const labels = useMemo(() => rows.map(r => r.name), [rows]);
   const values = useMemo(() => rows.map(r => Number(r.metricValue ?? 0)), [rows]);
 
+  const colors = {
+    netProfit: "rgba(0, 102, 128, 0.85)",       // azul petróleo
+    expectedProfit: "rgba(40, 143, 90, 0.85)",  // verde
+    totalCost: "rgba(207, 112, 40, 0.85)",      // naranja quemado
+  };
+
   const datasetLabel =
     metric === "totalCost"
       ? "Costo total"
@@ -39,33 +45,20 @@ export default function RecipesRankingChart({ title, metric, rows = [] }) {
     datasets: [
       {
         label: datasetLabel,
-        data : values,
-        backgroundColor: "rgba(79, 149, 157, 0.8)",
-        borderColor : "rgba(79, 149, 157, 1)",
-        borderWidth : 1
+        data: values,
+        backgroundColor: colors[metric],
+        borderColor: colors[metric].replace("0.85", "1"),
+        borderWidth: 1
       },
     ],
   }), [labels, values, datasetLabel]);
 
-  const options = useMemo(() => ({
+  const options = {
     indexAxis: "y",
-    responsive : true,
+    responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: { display: true},
-      tooltip: {
-        mode: "nearest",
-        intersect: false,
-        callbacks: {
-          title: (items) => items?.[0]?.label ?? "",
-          label: (item) => `${item.dataset.label}: ${item.raw}`
-        }
-      }
-    },
-    scales: {
-      x: { beginAtZero: true }
-    }
-  }), []);
+    scales: { x: { beginAtZero: true } }
+  };
 
   return (
     <div className="max-w-4xl mx-auto" style={{ height: 360 }}>

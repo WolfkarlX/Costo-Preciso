@@ -27,9 +27,8 @@ export default function AnalyticsPage() {
 
   // Config base por ranking
   const cfgTopNet = { metric: "netProfit", order: "desc" };
-  const cfgTopExpected = { metric: "expectedProfit", order: "desc" };
   const cfgMostExpensive = { metric: "totalCost", order: "desc" };
-  const cfgCheapest = { metric: "totalCost", order: "asc" };
+  const cfgWorstNet = { metric: "netProfit", order: "asc" };
 
   const withGlobals = (cfg) => ({
     ...cfg,
@@ -39,9 +38,8 @@ export default function AnalyticsPage() {
 
   // Memo de params por sección (evita objetos nuevos en cada render)
   const paramsTopNet = useMemo(() => withGlobals(cfgTopNet), [limit, periodDays]);
-  const paramsTopExpected = useMemo(() => withGlobals(cfgTopExpected), [limit, periodDays]);
   const paramsMostExpensive = useMemo(() => withGlobals(cfgMostExpensive), [limit, periodDays]);
-  const paramsCheapest = useMemo(() => withGlobals(cfgCheapest), [limit, periodDays]);
+  const paramsWorstNet = useMemo(() => withGlobals(cfgWorstNet), [limit, periodDays]);
 
   // Disparar fetch para TODAS las secciones con un solo efecto
   const fetchRank = useAnalyticsStore((s) => s.fetchRecipesRankings);
@@ -50,24 +48,21 @@ export default function AnalyticsPage() {
     const periodValid = periodDays === "" || (Number.isInteger(n) && n >= 1 && n <= 3650);
     if (limit === 0 || !periodValid) return;
     fetchRank(paramsTopNet);
-    fetchRank(paramsTopExpected);
     fetchRank(paramsMostExpensive);
-    fetchRank(paramsCheapest);
-  }, [fetchRank, paramsTopNet, paramsTopExpected, paramsMostExpensive, paramsCheapest, limit, periodDays]);
+    fetchRank(paramsWorstNet);
+  }, [fetchRank, paramsTopNet, paramsMostExpensive, paramsWorstNet, limit, periodDays]);
 
   // Leer estado de cada sección (hooks directos, sin loops)
   const topNet = useRecipesRankings(paramsTopNet);
-  const topExpected = useRecipesRankings(paramsTopExpected);
   const mostExpensive = useRecipesRankings(paramsMostExpensive);
-  const cheapest = useRecipesRankings(paramsCheapest);
+  const worstNet = useRecipesRankings(paramsWorstNet);
 
-  // Helper presentacional para no repetir el ternario de estado
-  // Bloque de codigoq ue controla el color y el contenido del texto dentro de cada sección.
+  // Bloque de codigo que controla el color y el contenido del texto dentro de cada sección.
   const renderSection = (title, metric, state) => {
     const { rows, isLoading, error } = state;
     return (
       <section className="p-4 bg-white rounded-lg shadow-lg space-y-2">
-        <h3 className="text-xl font-semibold text-primary text-center">{title}</h3>
+        <h3 className="text-2xl font-semibold text-primary text-center">{title}</h3>
 
         {limit === 0 ? (
           <p className="text-gray-700 font-medium text-center">Debes establecer un limite para mostrar las gráficas.</p>
@@ -86,7 +81,7 @@ export default function AnalyticsPage() {
 
   // ✅ Un SOLO return en todo el archivo
   return (
-    <main className="p-6 space-y-8 bg-primary-light font-title">
+    <main className="p-6 space-y-8 font-title" style={{ backgroundColor: "#f6f4eb" }}>
       <h1 className="text-4xl font-semibold text-primary">Analítica de Recetas</h1>
 
       {/* Controles globales */}
@@ -189,9 +184,8 @@ export default function AnalyticsPage() {
 
       {/* Secciones */}
       {renderSection("Recetas con mayor ganancia neta", "netProfit", topNet)}
-      {renderSection("Recetas con mayor ganancia esperada", "expectedProfit", topExpected)}
       {renderSection("Recetas más costosas de hacer", "totalCost", mostExpensive)}
-      {renderSection("Recetas más baratas de hacer", "totalCost", cheapest)}
+      {renderSection("Recetas con peor ganancia neta", "netProfit", worstNet)}
     </main>
   );
 }

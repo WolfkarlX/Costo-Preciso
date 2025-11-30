@@ -80,6 +80,22 @@ const IngredientsPage = () => {
         deletingId // ID del elemento que se está eliminando    
         } = useIngredientsStore();
 
+    // helpers simples de validación
+    const isEmpty = (value) =>
+        value === null || value === undefined || String(value).trim() === "";
+
+    const isPosNumber = (value) => {
+        const num = Number(value);
+        return Number.isFinite(num) && num > 0;
+    };
+
+    // Validar que el formulario de ingredientes esté completo
+    const isFormComplete =
+        !isEmpty(formData.name) &&
+        isPosNumber(formData.Units) &&
+        !isEmpty(formData.unityOfmeasurement) &&
+        isPosNumber(formData.totalPrice);
+    
     // handles the submit of the form(creating or editing)
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -374,8 +390,8 @@ const IngredientsPage = () => {
                                     </button>
                                     <button 
                                         type="submit" 
-                                        className="btn btn-primary font-bold" 
-                                        disabled={isCreating || isUpdating}
+                                        className="btn btn-primary font-bold bg-color-primary rounded-[15px] shadow-md hover:bg-color-primary hover:text-black disabled:bg-gray-300 disabled:text-gray-500" 
+                                        disabled={isCreating || isUpdating  || !isFormComplete}
                                         >
                                         {isCreating || isUpdating ? (
                                             <Loader2 className="size-5 animate-spin" />
@@ -465,7 +481,7 @@ const IngredientsPage = () => {
                             </p>
                             <p className="text-lg text-color-secondary my-1 break-words">
                                 Precio unitario:{" "}
-                                <span className="font-black">${item.unityPrice}</span>
+                                <span className="font-black">${Number(item.unityPrice).toFixed(2)}</span>
                             </p>
                         </div>
                     </div>
