@@ -128,6 +128,7 @@ const Navbar = () => {
                         <Soup size={20} color={activeLink === "recipes" ? "var(--color-secondary)" : "var(--color-primary)"} />
                         <span className={`${activeLink === "recipes" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetas</span>
                     </Link>
+                    
                     <Link
                         to="/ingredients" 
                         className={`flex items-center md:mr-12 ${
@@ -138,7 +139,7 @@ const Navbar = () => {
                         <Egg size={20} color={activeLink === "ingredients" ? "var(--color-secondary)" : "var(--color-primary)"} />
                         <span className={`${activeLink === "ingredients" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Ingredientes</span>
                     </Link>
-                    {/*
+                    
                     <Link
                         to="/recipebook" 
                         className={`flex items-center md:mr-12 ${
@@ -149,7 +150,7 @@ const Navbar = () => {
                         <BookMarked size={20} color={activeLink === "recipebook" ? "var(--color-secondary)" : "var(--color-primary)"} />
                         <span className={`${activeLink === "recipebook" ? "font-black text-[var(--color-secondary)]" : "font-normal text-[var(--color-primary)]"}`}>Recetario</span>
                     </Link>
-                    */}
+                    
                     <Link
                         to="/percentages" 
                         className={`flex items-center md:mr-12 ${
@@ -162,7 +163,96 @@ const Navbar = () => {
                     </Link>
 
                     {/* Botón de accesibilidad */}
-                
+                    {authUser && (
+                    <li className="relative" ref={accessibilityRef}>
+                        <button
+                        className="rounded-md border-2 border-[#4F959D] px-4 py-1 font-medium text-[#4F959D] hover:bg-[#4F959D] hover:text-white flex items-center gap-1"                        
+                        onClick={() => { // Toggle menu visibility
+                            console.log("openAccessibility antes:", openAccessibility); // Muestra el valor actual
+                            setOpenAccessibility(!openAccessibility);
+                            console.log("openAccessibility después:", !openAccessibility); // Muestra el valor después del cambio
+                        }}
+                        aria-haspopup="true"
+                        aria-expanded={openAccessibility}
+                        aria-controls="accessibility-menu"
+                        title="Opciones de accesibilidad"
+                        >
+                        <Settings size={20} />
+                        Accesibilidad
+                        </button>
+
+                        {openAccessibility && (
+                        <div
+                            id="accessibility-menu" // Menú de accesibilidad: se muestra cuando openAccessibility es true
+                            className="border-2 border-red-500 absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white z-50 p-4 text-gray-800"         
+                            role="menu"           // borrar absolute ↑ este atributo mantiene oculto el menú de accesibilidad
+                            aria-label="Opciones de accesibilidad"
+                        >
+                            {console.log("Menú de accesibilidad se ha mostrado")} {/* Mensaje de depuración */}
+
+                            {/* Sección Tamaño de texto */}
+                            <div className="mb-4">
+                            <h4 className="font-bold mb-2 text-color-primary">Tamaño de texto</h4>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Aumentar
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Disminuir
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Restablecer
+                            </button>
+                            </div>
+
+                            {/* Sección Tipo de fuente */}
+                            <div className="mb-4">
+                            <h4 className="font-bold mb-2 text-color-primary">Tipo de fuente</h4>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Arial
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Comic Sans
+                            </button>
+                            </div>
+
+                            {/* Sección Visualización */}
+                            <div className="mb-4">
+                            <h4 className="font-bold mb-2 text-color-primary">Visualización</h4>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Modo oscuro
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Alto contraste
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Filtro daltónico
+                            </button>
+                            </div>
+
+                            {/* Sección Opciones avanzadas */}
+                            <div className="mb-4">
+                            <h4 className="font-bold mb-2 text-color-primary">Opciones avanzadas</h4>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Cursor grande
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Ocultar imágenes
+                            </button>
+                            <button className="block w-full text-left px-2 py-1 rounded hover:bg-color-primary-light">
+                                Restablecer todo
+                            </button>
+                            </div>
+
+                            {/* Guardar configuración */}
+                            <div>
+                            <button className="w-full bg-color-secondary text-white font-bold py-2 rounded hover:bg-color-secondary-dark transition">
+                                Guardar configuración
+                            </button>
+                            </div>
+                        </div>
+                        )}
+                    </li>
+                    )}
 
                     <li className="text-gray-600 md:mr-12 hover:text-blue-600">
                         {authUser && (
