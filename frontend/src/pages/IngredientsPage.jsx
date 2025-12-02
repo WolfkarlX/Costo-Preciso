@@ -167,7 +167,7 @@ const IngredientsPage = () => {
                 </div>
 
                 {/* search bar */}
-                <div className="flex flex-row w-full mt-4">
+                <div className="sticky-searchbar flex flex-row w-full mt-4">
                     <div className="w-full mr-4 sm:mr-10">
                         <SearchBar setResult={setResult} ingredients={ingredients} isSearching={isSearching} />
                     </div>
@@ -397,10 +397,26 @@ const IngredientsPage = () => {
                         <p className="col-span-ful text-gray-600 -ml-[1%]"> Obteniendo Ingredientes... </p> <br />
                         {<Loader2 size={60} className="animate-spin ml-[6%] stroke-[#71C1BE]" />}
                     </div>
-                ) : ingredients.length === 0 ? (
-                    <p className="col-span-full text-center text-gray-500"> No hay Ingredientes disponibles. ¡Crea tu primer Ingrediente!</p> // No results message
-                ) : result.length === 0 && searching ?(
-                    <p className="col-span-full text-center text-gray-500">No se encuentran ingredientes disponibles</p> // No results message
+                ) : ingredients.length === 0 ? ( // No results message
+                    <div className="col-span-full flex flex-col items-center text-center text-gray-500">
+                        <p className="mb-4"> No hay Ingredientes disponibles. ¡Crea tu primer Ingrediente!</p>
+
+                        <img
+                            src="/cat_not_recipes.png"
+                            alt="Sin recetas"
+                            className="w-48 h-auto"
+                        />
+                    </div> 
+                ) : result.length === 0 && searching ?( // No results message
+                    <div className="col-span-full flex flex-col items-center text-center text-gray-500">
+                        <p className="mb-4">No se encontraron coincidencias</p>
+
+                        <img
+                            src="/no_results.png"
+                            alt="Sin resultados"
+                            className="w-20 h-auto"
+                        />
+                    </div>
                 ):
                     // Check if there are search results (result) or fallback to all ingredients
                 (result.length > 0 ? result : ingredients).map((item) => (

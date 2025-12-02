@@ -45,7 +45,7 @@ const SearchBar = ({ setResult, ingredients, isSearching }) => {
     };
 
     return (
-        <div className="bg-[#ffffff] w-full rounded-[20px] p-2 sm:p-4 shadow-lg items-center flex">
+        <div className="bg-[#ffffff] w-full rounded-2xl p-2 sm:p-4 shadow-lg items-center flex">
             <Search className="text-color-primary" />
             <input
                 type="text"

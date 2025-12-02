@@ -333,7 +333,7 @@ const validatePositiveNumber = (e) => {
                     />
                 </div>
             
-            <div className="flex flex-row w-full mt-4">
+            <div className="sticky-searchbar flex flex-row w-full mt-4">
                 <div className="w-full mr-4 sm:mr-10">
                     <SearchBar setResult={setResult} isSearching={isSearching}  ingredients={recipes}/>
                 </div>
@@ -719,10 +719,26 @@ const validatePositiveNumber = (e) => {
                             <p className="col-span-ful text-gray-600"> Obteniendo Recetas... </p> <br />
                             {<Loader2 size={60} className="animate-spin ml-[6%] stroke-[#71C1BE]" />}
                         </div>
-                    ) : recipes.length === 0 ? (
-                        <p className="col-span-full text-center text-gray-500"> No hay recetas disponibles. ¡Crea tu primera receta!</p> // No results message
-                    ) : result.length === 0 && searching ?(
-                        <p className="col-span-full text-center text-gray-500">No se encontran recetas disponibles</p> // No results message
+                    ) : recipes.length === 0 ? ( // No results message
+                        <div className="col-span-full flex flex-col items-center text-center text-gray-500">
+                            <p className="mb-4"> No hay recetas disponibles. ¡Crea tu primera receta!</p> 
+
+                            <img
+                                src="/cat_no_recipes.png"
+                                alt="Sin recetas"
+                                className="w-48 h-auto"
+                            />
+                        </div>
+                    ) : result.length === 0 && searching ?( // No results message
+                        <div className="col-span-full flex flex-col items-center text-center text-gray-500">
+                            <p className="mb-4">No se encontraron coincidencias</p>
+
+                            <img
+                                src="/no_results.png"
+                                alt="Sin resultados"
+                                className="w-20 h-auto"
+                            />
+                        </div>
                     ): 
                     (                     
                         (result.length > 0 ? result: recipes).map((item) => (

@@ -101,7 +101,7 @@ const Navbar = () => {
     
     //Navbar
     return (
-        <header className="sticky top-0 z-30 shadow bg-[#f9f7db] p-2">
+        <header className="sticky top-0 z-40 shadow bg-[#f9f7db] p-2 rounded-b-2xl">
             <div className="relative flex max-w-screen-xl flex-col overflow-hidden px-4 py-0 md:mx-auto md:flex-row md:items-center">
                 <a href="#" className="flex items-center whitespace-nowrap text-2xl font-black justify-start">
                 <span className="mr-1 flex-shrink-0">
