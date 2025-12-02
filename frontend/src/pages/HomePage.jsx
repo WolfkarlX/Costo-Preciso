@@ -9,7 +9,10 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 const HomePage = () => {
+    //Search bar states
+    const [searching, isSearching] = useState(false);
     const [result, setResult] = useState([]);
+
     const [openDropdown, setOpenDropdown] = useState(null);
     const plusDropdownRef = useRef(null);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -23,8 +26,7 @@ const HomePage = () => {
     const dropdownRef = useRef(null);
     //const [inputValue, setInputValue] = useState('');
     const [recipeData, setRecipeData] = useState({});
-
-
+    
     useEffect(() => {
         const handleClickOutside = (event) => {
             const dropdown = document.getElementById(`dropdown-${openDropdownId}`);
@@ -199,7 +201,7 @@ const HomePage = () => {
         fetchRecipes();
         fetchIngredients();
     }, []);
-
+    
     const handleDropdownToggle = async () => {
         if (!openDropdown) {
             await fetchIngredients();
@@ -444,9 +446,9 @@ const validatePositiveNumber = (e) => {
                     />
                 </div>
             
-            <div className="flex flex-row w-full mt-4">
+            <div className="sticky-searchbar flex flex-row w-full mt-4">
                 <div className="w-full mr-4 sm:mr-10">
-                    <SearchBar setResult={setResult} ingredients={recipes}/>
+                    <SearchBar setResult={setResult} isSearching={isSearching}  ingredients={recipes}/>
                 </div>
             <button
                 title="Agregar una nueva receta"
@@ -822,12 +824,37 @@ const validatePositiveNumber = (e) => {
                 </div>
                 </form>
                 </Modal>
-
+                
+                {/*Messages at showing recipes*/}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                     {isGetting ? (
-                        <p className="col-span-full text-center"><Loader2 /></p>
-                    ) : (
-                        (result.length > 0 ? result : recipes).map((item) => (
+                        <div className="col-span-full ml-[44.54%] text-gray-500">
+                            <p className="col-span-ful text-gray-600"> Obteniendo Recetas... </p> <br />
+                            {<Loader2 size={60} className="animate-spin ml-[6%] stroke-[#71C1BE]" />}
+                        </div>
+                    ) : recipes.length === 0 ? ( // No results message
+                        <div className="col-span-full flex flex-col items-center text-center text-gray-500">
+                            <p className="mb-4"> No hay recetas disponibles. ¡Crea tu primera receta!</p> 
+
+                            <img
+                                src="/cat_no_recipes.png"
+                                alt="Sin recetas"
+                                className="w-48 h-auto"
+                            />
+                        </div>
+                    ) : result.length === 0 && searching ?( // No results message
+                        <div className="col-span-full flex flex-col items-center text-center text-gray-500">
+                            <p className="mb-4">No se encontraron coincidencias</p>
+
+                            <img
+                                src="/no_results.png"
+                                alt="Sin resultados"
+                                className="w-20 h-auto"
+                            />
+                        </div>
+                    ): 
+                    (                     
+                        (result.length > 0 ? result: recipes).map((item) => (
                         <div key={item._id} className="bg-white rounded-[20px] shadow-md p-6 gap-2">
                             <div ref={dropdownRef} className="relative flex justify-end">
                             <button

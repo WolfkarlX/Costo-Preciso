@@ -1,3 +1,7 @@
+body {
+  background-color: #f4f1e3;
+}
+
 .bg-image {
     height: auto;
     width: 100%;
@@ -55,4 +59,20 @@ img {
 
 #unidad-medida {
     color: black;
+}
+
+/* Barra de búsqueda y botón de más fijos al hacer scroll */
+.sticky-searchbar {
+  position: sticky;
+  width: 100%;
+  top: 14.4%;           
+  z-index: 30;          
+  padding-bottom: 0.5rem;
+  background-color: #F9F6EF; 
+  padding-top: 0.5rem;       
+  padding-bottom: 0.5rem;
+  border-radius: 0rem 0rem 1rem 1rem;
+  
+  align-items: center;
+  justify-content: space-between;
 }

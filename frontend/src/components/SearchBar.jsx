@@ -1,27 +1,51 @@
 import React, { useState } from "react";
 import { Search } from 'lucide-react';
 
-const SearchBar = ({ setResult, ingredients }) => {
+const SearchBar = ({ setResult, ingredients, isSearching }) => {
     const [input, setInput] = useState("");
 
+    //function which normalizes the input
+    const normalizeString = (str) => {
+        const stopwords = ["de", "la", "el", "en"];
+
+        return str
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")  // accents
+            .toLowerCase()
+            .replace(/[_-]/g, " ")            // hyphens/underscores → spaces
+            .replace(/[^a-z0-9\s]/gi, "")     // remove other symbols
+            .split(/\s+/)                     // tokenize
+            .filter(word => word && !stopwords.includes(word))
+            .map(word => word.endsWith("s") ? word.slice(0, -1) : word) // plurals
+            .join(" ");                       // join tokens back with spaces
+    };
+
+    //Function to handle the input
     const handleChange = (value) => {
         setInput(value);
 
-        // Si el input está vacío, limpiamos los resultados
-        if (value.trim() === "") {
+        if (value.trim() === "") { //if searchBar is empty returns the items
             setResult([]);
+            isSearching(false)
             return;
         }
 
-        const filtered = ingredients.filter(item =>
-            item.name.toLowerCase().includes(value.toLowerCase())
-        );
+        const filtered = ingredients.filter(item => {
+        const itemTokens = normalizeString(item.name).split(" ");
+        const searchTokens = normalizeString(value).split(" ");
 
+            // every search word must appear somewhere in the item tokens
+            return searchTokens.every(token =>
+                itemTokens.some(t => t.includes(token))
+            );
+        });
+
+        isSearching(true)
         setResult(filtered);
     };
 
     return (
-        <div className="bg-[#ffffff] w-full rounded-[20px] p-2 sm:p-4 shadow-lg items-center flex">
+        <div className="bg-[#ffffff] w-full rounded-2xl p-2 sm:p-4 shadow-lg items-center flex">
             <Search className="text-color-primary" />
             <input
                 type="text"

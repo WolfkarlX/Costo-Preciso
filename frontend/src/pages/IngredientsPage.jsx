@@ -11,6 +11,7 @@ const IngredientsPage = () => {
     
     // constantes para Search Bar
     const [result, setResult] = useState([])
+    const [searching, isSearching] = useState(false);
 
     // constantes para Modales
     const [open, setOpen] = useState(false)
@@ -182,9 +183,9 @@ const IngredientsPage = () => {
                 </div>
 
                 {/* search bar */}
-                <div className="flex flex-row w-full mt-4">
+                <div className="sticky-searchbar flex flex-row w-full mt-4">
                     <div className="w-full mr-4 sm:mr-10">
-                        <SearchBar setResult={setResult} ingredients={ingredients} setInputValue={setInputValue} />
+                        <SearchBar setResult={setResult} ingredients={ingredients} isSearching={isSearching} />
                     </div>
                     <button title="Agregar un nuevo ingrediente" className="p-2 sm:p-4 shadow-md rounded-[50%] bg-color-primary text-white"
                     onClick={() => {
@@ -405,12 +406,36 @@ const IngredientsPage = () => {
 
 
                 {/*Visualización de ingredientes*/}
+                {/*Handles if there are no items*/}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
                 {isGetting ? (
-                    <p className="col-span-full text-center"><Loader2 /></p>
-                ) : (
+                    <div className="col-span-full ml-[44.54%] text-gray-500">
+                        <p className="col-span-ful text-gray-600 -ml-[1%]"> Obteniendo Ingredientes... </p> <br />
+                        {<Loader2 size={60} className="animate-spin ml-[6%] stroke-[#71C1BE]" />}
+                    </div>
+                ) : ingredients.length === 0 ? ( // No results message
+                    <div className="col-span-full flex flex-col items-center text-center text-gray-500">
+                        <p className="mb-4"> No hay Ingredientes disponibles. ¡Crea tu primer Ingrediente!</p>
+
+                        <img
+                            src="/cat_no_ingredients.png"
+                            alt="Sin recetas"
+                            className="w-48 h-auto"
+                        />
+                    </div> 
+                ) : result.length === 0 && searching ?( // No results message
+                    <div className="col-span-full flex flex-col items-center text-center text-gray-500">
+                        <p className="mb-4">No se encontraron coincidencias</p>
+
+                        <img
+                            src="/no_results.png"
+                            alt="Sin resultados"
+                            className="w-20 h-auto"
+                        />
+                    </div>
+                ):
                     // Check if there are search results (result) or fallback to all ingredients
-                    (result.length > 0 ? result : ingredients).map((item) => (
+                (result.length > 0 ? result : ingredients).map((item) => (
                     <div key={item._id} className="relative bg-white rounded-[20px] shadow-md p-4 flex flex-col min-h-[400px]">
                         {/* Botón menú de opciones */}
                         <div className="absolute top-3 right-3">
@@ -485,7 +510,7 @@ const IngredientsPage = () => {
                             </p>
                         </div>
                     </div>
-                    ))
+                    )
                 )}
                  </div>
             </div> 
