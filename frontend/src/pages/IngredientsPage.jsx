@@ -402,7 +402,7 @@ const IngredientsPage = () => {
                         <p className="mb-4"> No hay Ingredientes disponibles. ¡Crea tu primer Ingrediente!</p>
 
                         <img
-                            src="/cat_not_recipes.png"
+                            src="/cat_no_ingredients.png"
                             alt="Sin recetas"
                             className="w-48 h-auto"
                         />
